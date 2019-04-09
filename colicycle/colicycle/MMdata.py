@@ -3,6 +3,8 @@ import re
 import struct
 import numpy as np
 import pandas as pd
+import pudb
+import ipdb
 
 class MMData:
     """Parsing of MicroManager metadata"""
@@ -63,7 +65,9 @@ class MMData:
     
     def get_MM_metadata(self):
         """Return MicroManager metadata string contained in Tag 50839"""
+
         with open(self.folder+'/'+self.get_first_tiff(), "rb") as binary_file:
+            #ipdb.set_trace()
 
             # Seek position and read N bytes
             binary_file.seek(0)  # Go to beginning
@@ -97,7 +101,7 @@ class MMData:
         if self.height is None:
             if self.mm_meta is None:
                 self.get_MM_metadata()
-                
+            #ipdb.set_trace()
             height = int(re.findall('(?:(?<=Height":")|(?<=Height":)|(?<=Height":\{"PropVal":"))(\d+).*', self.mm_meta)[0])
             #height = int(re.findall('(?:((?<=Height":")|(?<=Height":\{"PropVal":")))(\d+).*', self.mm_meta)[0])
             self.height = height
@@ -245,6 +249,7 @@ class MMData:
     def get_channels(self):
         """Return channels of the acquisition"""
         #self.channels = re.findall('(?<=ChNames":"\[)|(?<=ChNames":\[)(.*?)(?=\].*)',self.get_MM_metadata())[0].replace('"','').split(',')
+        #ipdb.set_trace()
         self.channels = re.findall('(?<=ChNames":)["]*\[(.*?)(?=\].*)',self.get_MM_metadata())[0].replace('"','').split(',')
         return self.channels
     
@@ -290,6 +295,4 @@ def toggle_selector(event):
     if event.key in ['A', 'a'] and not toggle_selector.RS.active:
         print(' RectangleSelector activated.')
         toggle_selector.RS.set_active(True)
-
-
     
