@@ -1,0 +1,11 @@
+[I 12:30:38.670 LabApp] The port 9998 is already in use, trying another port.
+[I 12:30:38.671 LabApp] The port 9999 is already in use, trying another port.
+[I 12:30:38.854 LabApp] JupyterLab beta preview extension loaded from /scicore/home/nimwegen/witzg/ColiCycle/venv-coli/lib/python3.5/site-packages/jupyterlab
+[I 12:30:38.855 LabApp] JupyterLab application directory is /scicore/home/nimwegen/witzg/ColiCycle/venv-coli/share/jupyter/lab
+[I 12:30:38.868 LabApp] Serving notebooks from local directory: /scicore/home/nimwegen/witzg/ColiCycle/colicycle
+[I 12:30:38.868 LabApp] 0 active kernels
+[I 12:30:38.868 LabApp] The Jupyter Notebook is running at:
+[I 12:30:38.868 LabApp] http://0.0.0.0:10000/
+[I 12:30:38.868 LabApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[I 12:31:40.251 LabApp] Interrupted...
+[I 12:31:40.252 LabApp] Shutting down 0 kernels
