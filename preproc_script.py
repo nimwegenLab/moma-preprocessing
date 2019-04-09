@@ -15,11 +15,19 @@ from colicycle.MMdata import MMData
 import colicycle.preprocessing as pre
 import colicycle.imreg as imreg
 
-
 data_folder = sys.argv[1]
 folder_to_save = sys.argv[2]
 positions = [int(sys.argv[3])]
 maxframe = int(sys.argv[4])
+
+print("Input folder:")
+print(data_folder)
+print("Output folder:")
+print(folder_to_save)
+print("Positions:")
+print(str(positions[0]))
+print("Max frames:")
+print(str(maxframe))
 
 dataset = MMData(data_folder)
 base_name = dataset.get_first_tiff().split('.')[0]
@@ -180,3 +188,4 @@ for indp in positions:
 
 end1 = time.time()
 print(end1 - start1)
+
