@@ -4,8 +4,9 @@ rm -rf $DIR/venv-testenv/
 
 ml purge
 ml Python/3.5.2-goolf-1.7.20
-virtualenv venv-testenv
-source venv-testenv/bin/activate
-cd colicycle
+virtualenv $DIR/venv-testenv
+source $DIR/venv-testenv/bin/activate
+
+cd $DIR/colicycle
 pip install .
 
