@@ -22,9 +22,13 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
     #positions = [int(sys.argv[3])]
     #maxframe = int(sys.argv[4])
 
+    #create a micro-manager image object
     dataset = MMData(data_folder)
+
+    #recover the basic experiment name
     base_name = dataset.get_first_tiff().split('.')[0]
 
+    #define places to save the output
     folder_analyzed = os.path.normpath(folder_to_save)+'/'+base_name
 
     kymo_folder = folder_analyzed+'/Kymographs/'
@@ -35,15 +39,15 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
     if not os.path.exists(GL_folder):
         os.makedirs(GL_folder)
 
+    #define basic parameters
     colors = dataset.get_channels()
     phase_channel_index = 0
-
     half_width = 50
-
 
     #define metadata for imagej
     metadata = {'channels':len(colors),'slices':1,'frames':maxframe,'hyperstack':True,'loop':False}
 
+    # start measurement of processing time
     start1 = time.time()
     for indp in positions:
 
@@ -178,6 +182,6 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
                     skimage.external.tifffile.imsave(filename,kymo[:,:,c,gl].astype(np.uint16),append = 'force',imagej = True, metadata = metadataK)
 
 
-
+    # finalize measurement of processing time
     end1 = time.time()
     print(end1 - start1)
