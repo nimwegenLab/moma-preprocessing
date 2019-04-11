@@ -68,6 +68,7 @@ $CMD_STR \n"
   echo $SCRIPT
   
   printf "$CMD_SCRIPT" > $SCRIPT
+  chmod +x $SCRIPT
 
   [ -f "$S_OUT" ] && rm $S_OUT # delete if exists
   [ -f "$S_ERR" ] && rm $S_ERR
@@ -80,7 +81,6 @@ $CMD_STR \n"
   echo CMD_SBATCH:
   echo $CMD_SBATCH
   
-  chmod +x $CMD_SBATCH
   $CMD_SBATCH >> $LOG
 done
 echo "Preprocessing queued... (use squeue to check the current status)"
