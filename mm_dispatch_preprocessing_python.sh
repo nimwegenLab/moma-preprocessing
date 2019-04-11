@@ -3,7 +3,7 @@
 #
 
 
-mm_dispatch_preprocessing(){
+mm_dispatch_preprocessing_python(){
 # load required module
 #module load MMPreproc
 
@@ -29,13 +29,13 @@ for (( I=0; I<N; I++ )); do
   mkdir -p $PREPROC_DIR # -p: no error if existing, make parent directories as needed
   mkdir -p $PREPROC_DIR/logs
 #   CMD="/scicore/home/nimwegen/GROUP/MM_Analysis/mm_pre_bc2.sh $RAW_FILE $PREPROC_DIR $ROTATION $CHANNELS_ORDER"
-  CMD_STR="$MMPRE_HOME/mm_pre_slurm.sh \
+  CMD_STR="python $MMPRE_HOME/call_preproc_fun.py \
   -i \"$RAW_PATH\" \
   -o $PREPROC_DIR"
   if [ -n "$POS_NAME" ]; then CMD_STR="$CMD_STR -p $POS_NAME"; fi # append optional argument
   if ! (( $ROTATION == 0 )); then CMD_STR="$CMD_STR -r $ROTATION"; fi # append optional argument
   if [ -n "$CAMERA_ROI_PATH" ]; then CMD_STR="$CMD_STR -j $CAMERA_ROI_PATH"; fi # append optional argument
-  if [ -n "$CROP_ROI_PATH" ]; then CMD_STR="$CMD_STR -k $CROP_ROI_PATH"; fi # append optional argument
+#  if [ -n "$CROP_ROI_PATH" ]; then CMD_STR="$CMD_STR -k $CROP_ROI_PATH"; fi # append optional argument
   if [ -n "$DARK_PATH" ]; then CMD_STR="$CMD_STR -d $DARK_PATH"; fi # append optional argument
   if [ -n "$GAIN_PATH" ]; then CMD_STR="$CMD_STR -g $GAIN_PATH"; fi # append optional argument
   if [ -n "$HOTPIXS_PATH" ]; then CMD_STR="$CMD_STR -h $HOTPIXS_PATH"; fi # append optional argument
@@ -55,8 +55,12 @@ for (( I=0; I<N; I++ )); do
 #SBATCH --export=MODULEPATH=$MODULEPATH \n\
 #SBATCH -o $S_OUT \n\
 #SBATCH -e $S_ERR \n\n\
+ml purge\n\
+ml Python/3.5.2-goolf-1.7.20\n\
+source $MMPRE_HOME/venv-testenv/bin/activate\n\n\
 $CMD_STR \n"
   CMD_SBATCH="sbatch $SCRIPT"
+#  CMD_SBATCH=$SCRIPT
 
   echo CMD_SCIPT:
   echo $CMD_SCRIPT
@@ -64,7 +68,8 @@ $CMD_STR \n"
   echo $SCRIPT
   
   printf "$CMD_SCRIPT" > $SCRIPT
-  
+  printf "BP1" &> 1
+
   [ -f "$S_OUT" ] && rm $S_OUT # delete if exists
   [ -f "$S_ERR" ] && rm $S_ERR
   printf "$CMD_SBATCH \n" > $LOG
@@ -72,6 +77,11 @@ $CMD_STR \n"
   echo LOG:
   echo $LOG
 
+  echo ""
+  echo CMD_SBATCH:
+  echo $CMD_SBATCH
+  
+  chmod +x $CMD_SBATCH
   $CMD_SBATCH >> $LOG
 done
 echo "Preprocessing queued... (use squeue to check the current status)"
