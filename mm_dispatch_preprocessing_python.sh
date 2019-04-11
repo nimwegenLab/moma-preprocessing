@@ -68,7 +68,6 @@ $CMD_STR \n"
   echo $SCRIPT
   
   printf "$CMD_SCRIPT" > $SCRIPT
-  printf "BP1" &> 1
 
   [ -f "$S_OUT" ] && rm $S_OUT # delete if exists
   [ -f "$S_ERR" ] && rm $S_ERR
