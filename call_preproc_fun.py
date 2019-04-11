@@ -4,10 +4,11 @@
 This script corresponds to the script mm_pre_slurm.sh, which is used for the original Java MMPreproc implementation.
 '''
 
-import sys
-print("Python version:")
-print(sys.version)
+#import sys
+#print("Python version:")
+#print(sys.version)
 
+import re
 import argparse
 from preproc_fun import preproc_fun
 
@@ -32,7 +33,9 @@ print(args.positions)
 print(args.rotations)
 print(args.timeframemaximum)
 
-# here we need to convert the string 'Pos0' to just '[0]', which we then pass to preproc_fun
+# parse position argument; IMPORTANT: this only works for a single position argument
+res = re.match('Pos[0]*(\d+)', args.positions)
+posval = int(res.group(1))
+posval = [posval];
 
-#preproc_fun(args.input,args.output,args.positions,args.timeframemaximum)
-preproc_fun(args.input,args.output,[0],args.timeframemaximum)
+preproc_fun(args.input,args.output,posval,args.timeframemaximum)
