@@ -1,2 +1,7 @@
-. .. .git .preproc_script.py.swp .test_script.sh.swp
+.*
+*.swp
 venv-testenv/
+*.pyc
+__pycache__/
+output/
+output.log
