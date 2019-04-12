@@ -2,14 +2,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 
 export MMPRE_HOME=$DIR # this will have to be removed at some point; should be set by the 'module load command'
-
-# Install updated colicycle python code; for this we need to load the python environment
-ml purge
-ml Python/3.5.2-goolf-1.7.20
-source venv-testenv/bin/activate
-cd mmpreprocesspy
-pip install . --upgrade
-cd -
+export PYTHON_ENVIRONMENT_PATH=$DIR/venv-testenv
 
 # Create output folder
 mkdir -p $DIR/output

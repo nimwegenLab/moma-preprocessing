@@ -57,7 +57,7 @@ for (( I=0; I<N; I++ )); do
 #SBATCH -e $S_ERR \n\n\
 ml purge\n\
 ml Python/3.5.2-goolf-1.7.20\n\
-source $MMPRE_HOME/venv-testenv/bin/activate\n\n\
+source $PYTHON_ENVIRONMENT_PATH/bin/activate\n\n\
 $CMD_STR \n"
   CMD_SBATCH="sbatch $SCRIPT"
 #  CMD_SBATCH=$SCRIPT
