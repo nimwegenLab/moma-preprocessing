@@ -59,8 +59,8 @@ ml purge\n\
 ml Python/3.5.2-goolf-1.7.20\n\
 source $MMPRE_HOME/venv-testenv/bin/activate\n\n\
 $CMD_STR \n"
-#  CMD_SBATCH="sbatch $SCRIPT"
-  CMD_SBATCH=$SCRIPT
+  CMD_SBATCH="sbatch $SCRIPT"
+#  CMD_SBATCH=$SCRIPT
 
   echo CMD_SCIPT:
   echo $CMD_SCRIPT
