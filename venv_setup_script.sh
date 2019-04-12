@@ -6,7 +6,7 @@ ml purge
 ml Python/3.5.2-goolf-1.7.20
 
 if [[ ! -d "$DIR/venv-testenv"  ]]; then
-  printf "Venv not found. Setting up from scratch."
+  printf "Venv not found. Setting up from scratch ...\n"
   virtualenv $DIR/venv-testenv
   source $DIR/venv-testenv/bin/activate
 
@@ -17,7 +17,7 @@ if [[ ! -d "$DIR/venv-testenv"  ]]; then
   cd $DIR/mmpreprocesspy
   pip install .
 else
-  printf "Venv exists. Only updating mmpreprocesspy ..."
+  printf "Venv exists. Only updating mmpreprocesspy ...\n"
   source $DIR/venv-testenv/bin/activate
   cd $DIR/mmpreprocesspy
   pip install . --upgrade
