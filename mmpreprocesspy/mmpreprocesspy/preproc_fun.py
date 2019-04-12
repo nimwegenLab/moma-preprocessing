@@ -13,8 +13,6 @@ from skimage.feature import match_template
 from mmpreprocesspy.MMdata import MMData
 
 import mmpreprocesspy.preprocessing as pre
-import mmpreprocesspy.imreg as imreg
-
 
 def preproc_fun(data_folder, folder_to_save,positions,maxframe):
     #create a micro-manager image object
