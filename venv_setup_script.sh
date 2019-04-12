@@ -19,7 +19,7 @@ if [[ ! -d "$DIR/venv-testenv"  ]]; then
 else
   printf "Venv exists. Only updating mmpreprocesspy ..."
   source $DIR/venv-testenv/bin/activate
-  cd mmpreprocesspy
+  cd $DIR/mmpreprocesspy
   pip install . --upgrade
   cd -
 fi
