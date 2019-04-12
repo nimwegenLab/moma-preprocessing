@@ -17,11 +17,6 @@ import colicycle.imreg as imreg
 
 
 def preproc_fun(data_folder, folder_to_save,positions,maxframe):
-    #data_folder = sys.argv[1]
-    #folder_to_save = sys.argv[2]
-    #positions = [int(sys.argv[3])]
-    #maxframe = int(sys.argv[4])
-
     #create a micro-manager image object
     dataset = MMData(data_folder)
 
