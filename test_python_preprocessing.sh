@@ -7,7 +7,7 @@ export MMPRE_HOME=$DIR # this will have to be removed at some point; should be s
 ml purge
 ml Python/3.5.2-goolf-1.7.20
 source venv-testenv/bin/activate
-cd colicycle
+cd mmpreprocesspy
 pip install . --upgrade
 cd -
 

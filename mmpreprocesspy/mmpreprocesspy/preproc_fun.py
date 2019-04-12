@@ -10,10 +10,10 @@ import skimage.measure
 import skimage.filters
 from skimage.feature import match_template
 
-from colicycle.MMdata import MMData
+from mmpreprocesspy.MMdata import MMData
 
-import colicycle.preprocessing as pre
-import colicycle.imreg as imreg
+import mmpreprocesspy.preprocessing as pre
+import mmpreprocesspy.imreg as imreg
 
 
 def preproc_fun(data_folder, folder_to_save,positions,maxframe):
