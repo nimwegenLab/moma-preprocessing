@@ -10,7 +10,7 @@ This script corresponds to the script mm_pre_slurm.sh, which is used for the ori
 
 import re
 import argparse
-from colicycle.preproc_fun import preproc_fun
+from mmpreprocesspy.preproc_fun import preproc_fun
 
 parser = argparse.ArgumentParser()
 
