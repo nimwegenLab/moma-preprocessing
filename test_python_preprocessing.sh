@@ -2,7 +2,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 
 export MMPRE_HOME=$DIR # this will have to be removed at some point; should be set by the 'module load command'
-export PYTHON_ENVIRONMENT_PATH=$DIR/venv-testenv
+export MM_PYTHON_ENVIRONMENT_PATH=$DIR/venv-testenv
 
 # Create output folder
 mkdir -p $DIR/output
