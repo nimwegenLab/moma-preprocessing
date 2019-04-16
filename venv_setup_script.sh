@@ -2,6 +2,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #rm -rf $DIR/venv-testenv/
 
+PACKAGE_PATH=$DIR/mmpreprocesspy
+
 ml purge
 ml Python/3.5.2-goolf-1.7.20
 
@@ -15,11 +17,10 @@ if [[ ! -d "$DIR/venv-testenv"  ]]; then
   pip install exifread
 
   cd $DIR/mmpreprocesspy
-  pip install .
+  pip install --editable $PACKAGE_PATH
 else
   printf "Venv exists. Only updating mmpreprocesspy ...\n"
   source $DIR/venv-testenv/bin/activate
-  cd $DIR/mmpreprocesspy
-  pip install . --upgrade
-  cd -
+  pip install --editable $PACKAGE_PATH --upgrade
 fi
+

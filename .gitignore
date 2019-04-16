@@ -5,3 +5,4 @@ venv-testenv/
 __pycache__/
 output/
 output.log
+mmpreprocesspy/mmpreprocesspy.egg-info/
