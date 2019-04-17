@@ -1,26 +1,32 @@
+#!/usr/bin/env bash
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #rm -rf $DIR/venv-testenv/
 
-PACKAGE_PATH=$DIR/mmpreprocesspy
+PREPROC_PACKAGE_PATH=$DIR/mmpreprocesspy
 
-ml purge
-ml Python/3.5.2-goolf-1.7.20
+if [[ ! -z "$(command -v module)" ]]; then # are we running on SciCore?
+  module load purge
+  module load Python/3.5.2-goolf-1.7.20
+else
+  echo "Running without LMOD ..."
+  # needs ubuntu packages: python3.5, python3.5-venv
+fi
 
 if [[ ! -d "$DIR/venv-testenv"  ]]; then
   printf "Venv not found. Setting up from scratch ...\n"
-  virtualenv $DIR/venv-testenv
-  source $DIR/venv-testenv/bin/activate
+  virtualenv --python=python3.5 $DIR/venv-testenv
+  source "$DIR/venv-testenv/bin/activate"
 
-  pip install ipdb
-  pip install pudb
-  pip install exifread
+  python3.5 -m pip install ipdb
+  python3.5 -m pip install pudb
+  python3.5 -m pip install exifread
 
-  cd $DIR/mmpreprocesspy
-  pip install --editable $PACKAGE_PATH
+  pip install --editable $PREPROC_PACKAGE_PATH
 else
   printf "Venv exists. Only updating mmpreprocesspy ...\n"
-  source $DIR/venv-testenv/bin/activate
-  pip install --editable $PACKAGE_PATH --upgrade
+  source "$DIR/venv-testenv/bin/activate"
+  pip install --editable $PREPROC_PACKAGE_PATH --upgrade
 fi
 
