@@ -1,18 +1,19 @@
 import numpy as np
 import skimage.transform
 from skimage.filters import threshold_otsu
-
+import matplotlib.pyplot as plt
+from scipy.signal import savgol_filter
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
 def split_channels_init(image):
     # find the boundary region containing channels by finding columns with repetitive pattern
-    mincol, maxcol = pattern_limits(image, 0.9)
+    mincol, maxcol = pattern_limits(image, use_smoothing=True)
     # find rotation angle
     angle = find_rotation(image[:, mincol:maxcol])
 
     # recalculate channel region boundary on rotated image
     image_rot = skimage.transform.rotate(image, angle, cval=0)
-    mincol, maxcol = pattern_limits(image_rot, 0.8)
+    mincol, maxcol = pattern_limits(image_rot, use_smoothing=True)
 
     channel_centers = find_channels(image_rot, mincol, maxcol)
     return image_rot, angle, mincol, maxcol, channel_centers
@@ -34,7 +35,7 @@ def find_rotation(image):
     return angle
 
 
-def pattern_limits(image, threshold_factor=None):
+def pattern_limits(image, threshold_factor=None, use_smoothing=False):
     fourier_ratio = []
     for i in range(image.shape[1]):
         fourier_col = np.fft.fftshift(np.abs(np.fft.fft(image[:, i])))
@@ -46,11 +47,28 @@ def pattern_limits(image, threshold_factor=None):
         fourier_ratio.append(fourier_sort[-2] / fourier_sort[-1])
     fourier_ratio = np.array(fourier_ratio)
 
-    if threshold_factor is None:
-        threshold_factor = threshold_otsu(fourier_ratio)
+    if use_smoothing:
+        fourier_ratio = savgol_filter(fourier_ratio, 31, 3)  # window size 51, polynomial order 3
 
-    mincol = np.argwhere(fourier_ratio > threshold_factor * fourier_ratio.max())[0][0]
-    maxcol = np.argwhere(fourier_ratio > threshold_factor * fourier_ratio.max())[-1][0]
+    if threshold_factor is None:
+        threshold = threshold_otsu(fourier_ratio) # use Otsu method to determine threshold value
+    else:
+        threshold = threshold_factor * fourier_ratio.max()
+
+
+    # yhat = savgol_filter(fourier_ratio, 31, 3)  # window size 31, polynomial order 3
+    # plt.plot(fourier_ratio)
+    # plt.plot(yhat)
+    # plt.show()
+    #
+    #
+    # plt.hist(yhat)
+    # plt.show()
+    # threshold_factor = threshold_otsu(yhat)
+    # print(threshold_factor)
+
+    mincol = np.argwhere(fourier_ratio > threshold)[0][0]
+    maxcol = np.argwhere(fourier_ratio > threshold)[-1][0]
 
     return mincol, maxcol
 
