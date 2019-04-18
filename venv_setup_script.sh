@@ -14,19 +14,15 @@ else
   # needs ubuntu packages: python3.5, python3.5-venv
 fi
 
-if [[ ! -d "$DIR/venv-testenv"  ]]; then
-  printf "Venv not found. Setting up from scratch ...\n"
-  virtualenv --python=python3.5 $DIR/venv-testenv
-  source "$DIR/venv-testenv/bin/activate"
+printf "Venv not found. Setting up from scratch ...\n"
+virtualenv --python=python3.5 $DIR/venv-testenv
+source "$DIR/venv-testenv/bin/activate"
 
-  python3.5 -m pip install ipdb
-  python3.5 -m pip install pudb
-  python3.5 -m pip install exifread
+python3.5 -m pip install ipdb
+python3.5 -m pip install pudb
+python3.5 -m pip install exifread
+python3.5 -m pip install pillow
 
-  pip install --editable $PREPROC_PACKAGE_PATH
-else
-  printf "Venv exists. Only updating mmpreprocesspy ...\n"
-  source "$DIR/venv-testenv/bin/activate"
-  pip install --editable $PREPROC_PACKAGE_PATH --upgrade
-fi
+pip install --editable $PREPROC_PACKAGE_PATH
 
+deactivate
