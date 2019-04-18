@@ -14,15 +14,14 @@ else
   # needs ubuntu packages: python3.5, python3.5-venv
 fi
 
-printf "Venv not found. Setting up from scratch ...\n"
 virtualenv --python=python3.5 $DIR/venv-testenv
 source "$DIR/venv-testenv/bin/activate"
 
-python3.5 -m pip install ipdb
-python3.5 -m pip install pudb
-python3.5 -m pip install exifread
-python3.5 -m pip install pillow
-
+pip install ipdb
+pip install pudb
+pip install exifread
+pip install pillow
+pip install scipy
 pip install --editable $PREPROC_PACKAGE_PATH
 
 deactivate
