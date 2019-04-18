@@ -7,7 +7,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 PREPROC_PACKAGE_PATH=$DIR/mmpreprocesspy
 
 if [[ ! -z "$(command -v module)" ]]; then # are we running on SciCore?
-  module load purge
+  module purge
   module load Python/3.5.2-goolf-1.7.20
 else
   echo "Running without LMOD ..."
