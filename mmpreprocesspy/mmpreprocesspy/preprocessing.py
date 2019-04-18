@@ -1,21 +1,18 @@
 import numpy as np
 import skimage.transform
+from skimage.filters import threshold_otsu
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
 def split_channels_init(image):
     # find the boundary region containing channels by finding columns with repetitive pattern
-    fourier_ratio = pattern_limits(image)
-    mincol = np.argwhere(fourier_ratio > 0.9 * fourier_ratio.max())[0][0]
-    maxcol = np.argwhere(fourier_ratio > 0.9 * fourier_ratio.max())[-1][0]
+    mincol, maxcol = pattern_limits(image, 0.9)
     # find rotation angle
     angle = find_rotation(image[:, mincol:maxcol])
 
     # recalculate channel region boundary on rotated image
     image_rot = skimage.transform.rotate(image, angle, cval=0)
-    fourier_ratio = pattern_limits(image_rot)
-    mincol = np.argwhere(fourier_ratio > 0.8 * fourier_ratio.max())[0][0]
-    maxcol = np.argwhere(fourier_ratio > 0.8 * fourier_ratio.max())[-1][0]
+    mincol, maxcol = pattern_limits(image_rot, 0.8)
 
     channel_centers = find_channels(image_rot, mincol, maxcol)
     return image_rot, angle, mincol, maxcol, channel_centers
@@ -37,7 +34,7 @@ def find_rotation(image):
     return angle
 
 
-def pattern_limits(image):
+def pattern_limits(image, threshold_factor=None):
     fourier_ratio = []
     for i in range(image.shape[1]):
         fourier_col = np.fft.fftshift(np.abs(np.fft.fft(image[:, i])))
@@ -48,8 +45,14 @@ def pattern_limits(image):
         fourier_sort = np.sort(fourier_col)
         fourier_ratio.append(fourier_sort[-2] / fourier_sort[-1])
     fourier_ratio = np.array(fourier_ratio)
-    return fourier_ratio
 
+    if threshold_factor is None:
+        threshold_factor = threshold_otsu(fourier_ratio)
+
+    mincol = np.argwhere(fourier_ratio > threshold_factor * fourier_ratio.max())[0][0]
+    maxcol = np.argwhere(fourier_ratio > threshold_factor * fourier_ratio.max())[-1][0]
+
+    return mincol, maxcol
 
 def find_channels(image, mincol, maxcol, window=30):
     # find channels as peak of intensity in a projection
