@@ -13,8 +13,8 @@ class TestPreprocessing(TestCase):
         image_base = Image.open(image_path)
         image_array = np.array(image_base)
         image_rot, angle, mincol, maxcol, channel_centers = preprocessing.split_channels_init(image_array)
-        print(mincol)
-        print(maxcol)
+        self.assertEqual(359, mincol)
+        self.assertEqual(675, maxcol)
 
     def test_split_channels_init_dataset_04(self):
         from PIL import Image
@@ -27,8 +27,8 @@ class TestPreprocessing(TestCase):
         image_base = Image.open(image_path)
         image_array = np.array(image_base)
         image_rot, angle, mincol, maxcol, channel_centers = preprocessing.split_channels_init(image_array)
-        print(mincol)
-        print(maxcol)
+        self.assertEqual(380, mincol)
+        self.assertEqual(693, maxcol)
 
     # @staticmethod
     # def show_image(image): # this method is currently broken
