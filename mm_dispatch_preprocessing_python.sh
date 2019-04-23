@@ -1,4 +1,6 @@
-# 
+#!/usr/bin/env bash
+
+#
 # Script dispatches the preprocessing of the dataset.
 #
 
