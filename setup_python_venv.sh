@@ -23,5 +23,6 @@ pip install exifread
 pip install pillow
 pip install scipy
 pip install --editable $PREPROC_PACKAGE_PATH
+pip install opencv-contrib-python
 
 deactivate
