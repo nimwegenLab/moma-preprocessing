@@ -4,22 +4,57 @@ from skimage.filters import threshold_otsu
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
 
+
 # find rotation, channel boundaries and positions for first image that is then used as reference
 def split_channels_init(image):
+    main_channel_angle = find_main_channel_orientation(image)
+    if main_channel_angle != 0:
+        image = skimage.transform.rotate(image, -main_channel_angle, resize=True)  # rotate image angle back to 0, if needed
+
     # find the boundary region containing channels by finding columns with repetitive pattern
     mincol, maxcol = pattern_limits(image, use_smoothing=True)
     # find rotation angle
     angle = find_rotation(image[:, mincol:maxcol])
+    main_channel_angle += angle
 
     # recalculate channel region boundary on rotated image
     image_rot = skimage.transform.rotate(image, angle, cval=0)
     mincol, maxcol = pattern_limits(image_rot, use_smoothing=True)
 
     channel_centers = find_channels(image_rot, mincol, maxcol)
-    return image_rot, angle, mincol, maxcol, channel_centers
+    return image_rot, main_channel_angle, mincol, maxcol, channel_centers
+
+
+def find_main_channel_orientation(image):
+    """ Find the orientation of the main channel.
+    It distinguishes between 0 and 90 degrees, where '0' is in vertical direction
+    and '90' is horizontal.
+
+    :param image:
+    :return:
+    """
+    fourier_ratio = calculate_fourier_ratio(image)
+
+    rotated_image = skimage.transform.rotate(image, 90, cval=0)
+    fourier_ratio_rotated = calculate_fourier_ratio(rotated_image)
+
+    diff = np.max(fourier_ratio)-np.min(fourier_ratio)
+    diff_rotated = np.max(fourier_ratio_rotated)-np.min(fourier_ratio_rotated)
+
+    if diff > diff_rotated:
+        return 0
+    else:
+        return 90
 
 
 def find_rotation(image):
+    """ Find the rotation of the image region containing the GLs.
+    The rotation is determined using the 2D spectrum and find the direction along this spectrum, where the sum
+    of the spectrum is maximal.
+
+    :param image:
+    :return: Returns the angle of the GL ROI-region
+    """
     tofft = image
     tofft = np.pad(tofft, ((0, 0), (tofft.shape[0] - tofft.shape[1], 0)), mode='constant', constant_values=0)
 
@@ -42,10 +77,9 @@ def pattern_limits(image, threshold_factor=None, use_smoothing=False):
         fourier_ratio = savgol_filter(fourier_ratio, 31, 3)  # window size 51, polynomial order 3
 
     if threshold_factor is None:
-        threshold = threshold_otsu(fourier_ratio) # use Otsu method to determine threshold value
+        threshold = threshold_otsu(fourier_ratio)  # use Otsu method to determine threshold value
     else:
         threshold = threshold_factor * fourier_ratio.max()
-
 
     # yhat = savgol_filter(fourier_ratio, 31, 3)  # window size 31, polynomial order 3
     # plt.plot(fourier_ratio)
@@ -65,6 +99,9 @@ def pattern_limits(image, threshold_factor=None, use_smoothing=False):
 
 
 def calculate_fourier_ratio(image):
+    """Calculates the ratio between highest and second-highest value of the absolute FFT of 'image'
+    along the vertical dimension.
+    """
     fourier_ratio = []
     for i in range(image.shape[1]):
         fourier_col = np.fft.fftshift(np.abs(np.fft.fft(image[:, i])))
