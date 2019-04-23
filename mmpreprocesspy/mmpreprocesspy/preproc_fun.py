@@ -42,7 +42,7 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
 
     # start measurement of processing time
     start1 = time.time()
-    for indp in positions:
+    for indp in positions:  # MM: Currently proproc_fun.py in only run for a single position; so this loop is not needed
 
         current_saveto_folder = folder_to_save+'/'+base_name+'/GrowthLanes/'+base_name+'_Pos'+str(indp)
 
@@ -87,9 +87,9 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
 
 
         #calculate channel spacing 
-        fourier_ch = np.abs(np.fft.fft(np.sum(image_base[:,mincol:maxcol],axis=1)))
-        fourier_sort = np.sort(fourier_ch)
-        channel_spacing = image_base.shape[0]/np.where(fourier_ch==fourier_sort[-2])[0][0]
+        # fourier_ch = np.abs(np.fft.fft(np.sum(image_base[:,mincol:maxcol],axis=1)))
+        # fourier_sort = np.sort(fourier_ch)
+        # channel_spacing = image_base.shape[0]/np.where(fourier_ch==fourier_sort[-2])[0][0]
 
         frame_counter = np.zeros(len(channel_centers))
         #go through time-lapse and cut out channels
@@ -150,6 +150,7 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
 
                     filename = current_saveto_folder+'/'+pos_gl_name+'/'+pos_gl_name+'.tif'
 
+                    # MM-2019-04-23: Here we get the GL ROI and store it to the GL stack.
                     for i in range(len(colors)):
                         imtosave = image_stack[:,:,i][int(c)-half_width:int(c)+half_width+1,mincol-30:maxcol+30]
                         imtosave_flip = np.flipud(imtosave.T)
@@ -177,4 +178,4 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
 
     # finalize measurement of processing time
     end1 = time.time()
-    print(end1 - start1)
+    print("Processing time [s]:" + end1 - start1)
