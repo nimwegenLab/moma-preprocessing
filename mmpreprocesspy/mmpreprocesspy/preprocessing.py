@@ -36,16 +36,7 @@ def find_rotation(image):
 
 
 def pattern_limits(image, threshold_factor=None, use_smoothing=False):
-    fourier_ratio = []
-    for i in range(image.shape[1]):
-        fourier_col = np.fft.fftshift(np.abs(np.fft.fft(image[:, i])))
-        fourier_col[np.argmax(fourier_col) - 20:np.argmax(fourier_col)] = 0
-        fourier_col[np.argmax(fourier_col) + 1:np.argmax(fourier_col) + 20] = 0
-
-        # fourier_col = np.fft.fftshift(np.abs(np.fft.fft(skimage.transform.rotate(image,-5,cval=0)[:,1000])))
-        fourier_sort = np.sort(fourier_col)
-        fourier_ratio.append(fourier_sort[-2] / fourier_sort[-1])
-    fourier_ratio = np.array(fourier_ratio)
+    fourier_ratio = calculate_fourier_ratio(image)
 
     if use_smoothing:
         fourier_ratio = savgol_filter(fourier_ratio, 31, 3)  # window size 51, polynomial order 3
@@ -71,6 +62,21 @@ def pattern_limits(image, threshold_factor=None, use_smoothing=False):
     maxcol = np.argwhere(fourier_ratio > threshold)[-1][0]
 
     return mincol, maxcol
+
+
+def calculate_fourier_ratio(image):
+    fourier_ratio = []
+    for i in range(image.shape[1]):
+        fourier_col = np.fft.fftshift(np.abs(np.fft.fft(image[:, i])))
+        fourier_col[np.argmax(fourier_col) - 20:np.argmax(fourier_col)] = 0
+        fourier_col[np.argmax(fourier_col) + 1:np.argmax(fourier_col) + 20] = 0
+
+        # fourier_col = np.fft.fftshift(np.abs(np.fft.fft(skimage.transform.rotate(image,-5,cval=0)[:,1000])))
+        fourier_sort = np.sort(fourier_col)
+        fourier_ratio.append(fourier_sort[-2] / fourier_sort[-1])
+    fourier_ratio = np.array(fourier_ratio)
+    return fourier_ratio
+
 
 def find_channels(image, mincol, maxcol, window=30):
     # find channels as peak of intensity in a projection
