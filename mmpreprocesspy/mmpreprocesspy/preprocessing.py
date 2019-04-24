@@ -3,6 +3,7 @@ import skimage.transform
 from skimage.filters import threshold_otsu
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
+from mmpreprocesspy.GrowthlaneRoi import GrowthlaneRoi
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
@@ -23,6 +24,26 @@ def split_channels_init(image):
 
     channel_centers = find_channels(image_rot, mincol, maxcol)
     return image_rot, main_channel_angle, mincol, maxcol, channel_centers
+
+
+def get_growthlane_regions(channel_centers, mincol, maxcol):
+    rois = []
+    for center in channel_centers:
+        tmp = GrowthlaneRoi()
+        tmp.roi = get_roi(center, mincol, maxcol)
+        rois.append(tmp)
+    return rois
+
+
+def get_roi(center, mincol, maxcol):
+    channel_width = 100  # TODO-MM-2019-04-23: This will need to be determined dynamically or made configurable.
+    half_width = channel_width/2
+
+    x = center - half_width
+    y = mincol
+    width = maxcol - mincol
+    height = channel_width
+    return (x, y), (width, height)
 
 
 def find_main_channel_orientation(image):
