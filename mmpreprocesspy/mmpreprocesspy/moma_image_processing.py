@@ -1,7 +1,7 @@
 from mmpreprocesspy import preprocessing
-from mmpreprocesspy.GrowthlaneRoi import GrowthlaneRoi
 from PIL import Image
 import numpy as np
+from mmpreprocesspy.preprocessing import get_growthlane_regions
 
 
 class MomaImageProcessor(object):
@@ -14,6 +14,7 @@ class MomaImageProcessor(object):
         self.mincol = None
         self.maxcol = None
         self.channel_centers = None
+        self.growthlane_rois = None
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -24,5 +25,6 @@ class MomaImageProcessor(object):
         self.image = np.array(image_base)
 
     def process_image(self):
-        self.rotated_image, self.main_channel_angle, self.mincol, self.maxcol, channel_centers = preprocessing.split_channels_init(
+        self.rotated_image, self.main_channel_angle, self.mincol, self.maxcol, self.channel_centers = preprocessing.split_channels_init(
             self.image)
+        self.growthlane_rois = get_growthlane_regions(self.channel_centers, self.mincol, self.maxcol)
