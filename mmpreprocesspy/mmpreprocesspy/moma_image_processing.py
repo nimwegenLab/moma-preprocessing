@@ -26,21 +26,3 @@ class MomaImageProcessor(object):
     def process_image(self):
         self.rotated_image, self.main_channel_angle, self.mincol, self.maxcol, channel_centers = preprocessing.split_channels_init(
             self.image)
-
-    def get_growthlane_regions(self, channel_centers, mincol, maxcol):
-        rois = []
-        for center in channel_centers:
-            tmp = GrowthlaneRoi()
-            tmp.roi = self.get_roi(center, mincol, maxcol)
-            rois.append(tmp)
-        return rois
-
-    def get_roi(self, center, mincol, maxcol):
-        channel_width = 100  # TODO-MM-2019-04-23: This will need to be determined dynamically or made configurable.
-        half_width = channel_width / 2
-
-        x = center - half_width
-        y = mincol
-        width = maxcol - mincol
-        height = channel_width
-        return (x, y), (width, height)
