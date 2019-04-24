@@ -179,3 +179,24 @@ def get_roi(center, mincol, maxcol):
     width = maxcol - mincol
     height = channel_width
     return (m, n), (width, height)
+
+def get_image_registration_template(image, mincol):
+    # find regions with large local derivatives in BOTH directions, which should be "number-regions".
+    # keep the one the most in the middle
+    # take a sub-region around that point as a template on which to do template matching
+    large_feature = skimage.filters.gaussian(
+        np.abs(skimage.filters.scharr_h(image) * skimage.filters.scharr_v(image)), sigma=5)
+    mask = np.zeros(image.shape)
+    mask[large_feature > 0.5 * np.max(large_feature)] = 1
+    mask_lab = skimage.measure.label(mask)
+    mask_reg = skimage.measure.regionprops(mask_lab)
+    middle_num_pos = mask_reg[
+        np.argmin([np.linalg.norm(np.array(x.centroid) - np.array(image.shape) / 2) for x in mask_reg])].centroid
+    mid_row = np.int(middle_num_pos[0])
+
+    hor_space = int(mincol) + 100
+    hor_mid = int(hor_space / 2)
+    hor_width = int(0.3 * hor_space)
+
+    template = image[mid_row - 100:mid_row + 100, 0:hor_space]
+    return template, mid_row, hor_mid, hor_width

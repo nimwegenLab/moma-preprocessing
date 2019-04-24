@@ -62,25 +62,25 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
         main_channel_angle = imageProcessor.main_channel_angle
         channel_centers = imageProcessor.channel_centers
 
-        #find rotation and channels
+        # #find rotation and channels
         # image_rot, main_channel_angle, mincol, maxcol, channel_centers = pre.split_channels_init(image_base)
 
-        #find regions with large local derivatives in BOTH directions, which should be "number-regions".
-        #keep the one the most in the middle
-        #take a sub-region around that point as a template on which to do template matching
-        large_feature = skimage.filters.gaussian(np.abs(skimage.filters.scharr_h(image_base)*skimage.filters.scharr_v(image_base)),sigma=5)
-        mask = np.zeros(image_base.shape)
-        mask[large_feature>0.5*np.max(large_feature)]=1
-        mask_lab = skimage.measure.label(mask)
-        mask_reg = skimage.measure.regionprops(mask_lab)
-        middle_num_pos = mask_reg[np.argmin([np.linalg.norm(np.array(x.centroid)-np.array(image_base.shape)/2) for x in mask_reg])].centroid
-        mid_row = np.int(middle_num_pos[0])
-
-        hor_space = int(mincol)+100
-        hor_mid = int(hor_space/2)
-        hor_width = int(0.3*hor_space)
-
-        templ = image_base[mid_row-100:mid_row+100,0:hor_space]
+        # #find regions with large local derivatives in BOTH directions, which should be "number-regions".
+        # #keep the one the most in the middle
+        # #take a sub-region around that point as a template on which to do template matching
+        # large_feature = skimage.filters.gaussian(np.abs(skimage.filters.scharr_h(image_base)*skimage.filters.scharr_v(image_base)),sigma=5)
+        # mask = np.zeros(image_base.shape)
+        # mask[large_feature>0.5*np.max(large_feature)]=1
+        # mask_lab = skimage.measure.label(mask)
+        # mask_reg = skimage.measure.regionprops(mask_lab)
+        # middle_num_pos = mask_reg[np.argmin([np.linalg.norm(np.array(x.centroid)-np.array(image_base.shape)/2) for x in mask_reg])].centroid
+        # mid_row = np.int(middle_num_pos[0])
+        #
+        # hor_space = int(mincol)+100
+        # hor_mid = int(hor_space/2)
+        # hor_width = int(0.3*hor_space)
+        #
+        # templ = image_base[mid_row-100:mid_row+100,0:hor_space]
 
         #create empty kymographs to fill
         kymo = np.zeros((maxcol-mincol+60,maxframe, len(colors), len(channel_centers)))
@@ -114,17 +114,19 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
             '''
 
             #do template matching of the "number-region"
-            tomatch = image[mid_row-50:mid_row+50,hor_mid-hor_width:hor_mid+hor_width]
+            imageProcessor.determine_image_shift(image)
 
-            result = match_template(templ, tomatch, pad_input=True)
-            ij = np.unravel_index(np.argmax(result), result.shape)
-            t1, t0 = ij[::-1]
-            t0 = int(t0-templ.shape[0]/2)
-            t1 = int(t1-templ.shape[1]/2)
-            image = np.roll(image,(t0,t1),axis=(0,1))
+            # result = match_template(templ, tomatch, pad_input=True)
+            # ij = np.unravel_index(np.argmax(result), result.shape)
+            # t1, t0 = ij[::-1]
+            # t0 = int(t0-templ.shape[0]/2)
+            # t1 = int(t1-templ.shape[1]/2)
+            # image = np.roll(image,(t0,t1),axis=(0,1))
+            #
+            # #rotate image
+            # image_rot = skimage.transform.rotate(image,main_channel_angle,cval=0)
 
-            #rotate image
-            image_rot = skimage.transform.rotate(image,main_channel_angle,cval=0)
+            image_rot = imageProcessor.get_registered_image(image)
 
             #find channels in new image
             channels = pre.find_channels(image_rot, mincol, maxcol)
@@ -133,9 +135,9 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
             image_stack = np.zeros((image_base.shape[0],image_base.shape[1],len(colors)))
             for i in range(len(colors)):
                 image = dataset.get_image_fast(channel=i,frame=t,position=indp)
-                image = np.roll(image,(t0,t1),axis=(0,1))
-                image_rot = skimage.transform.rotate(image, main_channel_angle,cval=0)
-                image_stack[:,:,i] = image_rot
+                # image = np.roll(image,(t0,t1),axis=(0,1))
+                # image_rot = skimage.transform.rotate(image, main_channel_angle,cval=0)
+                image_stack[:,:,i] = imageProcessor.get_registered_image(image)
 
             #go through all channels, check if there's a corresponding one in the new image. If yes go through all colors,
             #cut out channel, and append to tif stack. Completel also the kymograph for each color.
