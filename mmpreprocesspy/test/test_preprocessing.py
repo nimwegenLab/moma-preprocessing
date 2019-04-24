@@ -58,6 +58,12 @@ class TestPreprocessing(TestCase):
 
         self.assertEqual(90, angle)
 
+    def test_create_growthlane_objects(self):
+        from mmpreprocesspy import preprocessing
+
+        regions = preprocessing.get_growthlane_regions([1, 2], 20, 20)
+
+
 
 def read_tiff_to_nparray(image_path):
     """Reads tiff-image and returns it as a numpy-array."""

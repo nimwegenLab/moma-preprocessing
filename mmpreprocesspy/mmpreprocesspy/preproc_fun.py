@@ -91,7 +91,7 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
         # fourier_sort = np.sort(fourier_ch)
         # channel_spacing = image_base.shape[0]/np.where(fourier_ch==fourier_sort[-2])[0][0]
 
-        frame_counter = np.zeros(len(channel_centers))
+        frame_counter = np.zeros(len(channel_centers))  # stores per growthlane, the number of processed images
         #go through time-lapse and cut out channels
         for t in range(maxframe):
 
@@ -140,7 +140,7 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
             #cut out channel, and append to tif stack. Completel also the kymograph for each color.
             for c in channels:
                 if (np.min(c-channel_centers)<5)&(int(c)-half_width>0)&(int(c)+half_width+1<image.shape[0]):
-                    gl = np.argmin(np.abs(c-channel_centers))
+                    gl = np.argmin(np.abs(c-channel_centers)) # index of the growthlane
                     frame_counter[gl]+=1
                     gl_str='0'+str(gl) if gl<10 else str(gl)
                     pos_gl_name = dataset.get_first_tiff().split('.')[0]+'_Pos'+str(indp)+'_GL'+gl_str
@@ -178,4 +178,4 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
 
     # finalize measurement of processing time
     end1 = time.time()
-    print("Processing time [s]:" + end1 - start1)
+    print("Processing time [s]:" + str(end1 - start1))
