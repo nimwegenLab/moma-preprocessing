@@ -8,6 +8,7 @@ import skimage.external.tifffile
 import skimage.transform
 import skimage.measure
 import skimage.filters
+from mmpreprocesspy.moma_image_processing import MomaImageProcessor
 from skimage.feature import match_template
 
 from mmpreprocesspy.MMdata import MMData
@@ -52,17 +53,17 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
         #load first phase image
         image_base = dataset.get_image_fast(channel=phase_channel_index,frame=0,position=indp)
 
-        #find rotation and channels
-        image_rot, angle, mincol, maxcol, channel_centers = pre.split_channels_init(image_base)
+        # Process first image to find ROIs, etc.
+        imageProcessor = MomaImageProcessor()
+        imageProcessor.load_numpy_image_array(image_base)
+        imageProcessor.process_image()
+        mincol = imageProcessor.mincol
+        maxcol = imageProcessor.maxcol
+        main_channel_angle = imageProcessor.main_channel_angle
+        channel_centers = imageProcessor.channel_centers
 
-        '''#find region of numbers as high variance region
-        numbers_var = np.var(image_base[:,0:mincol-50],axis = 1)
-        window = 100
-        peaks = np.array([x for x in np.arange(window,len(numbers_var)-window) 
-                          if np.all(numbers_var[x]>numbers_var[x-window:x])&np.all(numbers_var[x]>numbers_var[x+1:x+window])])
-        peaks = peaks[numbers_var[peaks]>100*np.min(numbers_var)]
-        highvar = peaks[np.argmin(peaks-image_base.shape[0]/2)]
-        templ = image_base[highvar-100:highvar+100,int(mincol/2)-100:int(mincol/2)+100]'''
+        #find rotation and channels
+        # image_rot, main_channel_angle, mincol, maxcol, channel_centers = pre.split_channels_init(image_base)
 
         #find regions with large local derivatives in BOTH directions, which should be "number-regions".
         #keep the one the most in the middle
@@ -123,7 +124,7 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
             image = np.roll(image,(t0,t1),axis=(0,1))
 
             #rotate image
-            image_rot = skimage.transform.rotate(image,angle,cval=0)
+            image_rot = skimage.transform.rotate(image,main_channel_angle,cval=0)
 
             #find channels in new image
             channels = pre.find_channels(image_rot, mincol, maxcol)
@@ -133,7 +134,7 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
             for i in range(len(colors)):
                 image = dataset.get_image_fast(channel=i,frame=t,position=indp)
                 image = np.roll(image,(t0,t1),axis=(0,1))
-                image_rot = skimage.transform.rotate(image,angle,cval=0)
+                image_rot = skimage.transform.rotate(image, main_channel_angle,cval=0)
                 image_stack[:,:,i] = image_rot
 
             #go through all channels, check if there's a corresponding one in the new image. If yes go through all colors,
