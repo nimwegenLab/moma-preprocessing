@@ -4,7 +4,7 @@ from mmpreprocesspy.GrowthlaneRoi import GrowthlaneRoi
 from skimage.filters import threshold_otsu
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
-
+import cv2 as cv
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
 def split_channels_init(image):
@@ -200,3 +200,10 @@ def get_image_registration_template(image, mincol):
 
     template = image[mid_row - 100:mid_row + 100, 0:hor_space]
     return template, mid_row, hor_mid, hor_width
+
+def get_transformation_matrix(horizontal_shift, vertical_shift, rotation_angle, rotation_center):
+    M_translation = np.float32([[1, 0, horizontal_shift], [0, 1, vertical_shift]])
+    M_rotation = cv.getRotationMatrix2D(rotation_center, rotation_angle, 1)
+    return M_rotation
+
+

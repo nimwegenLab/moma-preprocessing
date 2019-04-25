@@ -1,6 +1,7 @@
 from unittest import TestCase
 import skimage.transform
 import matplotlib.pyplot as plt
+import mmpreprocesspy.dev_auxiliary_functions as dev_aux
 
 
 class TestPreprocessing(TestCase):
@@ -33,6 +34,25 @@ class TestPreprocessing(TestCase):
         regions = preprocessing.get_growthlane_regions([1, 2], 20, 20)
         pass
 
+    def test_get_transformation_matrix(self):
+        from mmpreprocesspy import preprocessing
+        import cv2 as cv
+
+        image_array = read_tiff_to_nparray(
+            self.test_data_base_path + '/04_20180531_gluIPTG5uM_lac_1/first_images/Pos0/04_img_000000000_ DIA Ph3 (GFP)_000.tif')
+
+        horizontal_shift = 50
+        vertical_shift = 100
+        rotation_angle = -45
+        rotation_center = (0, 0)
+        # rotation_center = (image_array.shape[1]/2, image_array.shape[0]/2)
+
+
+        matrix = preprocessing.get_transformation_matrix(horizontal_shift, vertical_shift, rotation_angle, rotation_center)
+
+        image_array = cv.warpAffine(image_array, matrix, (image_array.shape[1], image_array.shape[0]))
+
+        dev_aux.show_image(image_array)
 
 
 def read_tiff_to_nparray(image_path):

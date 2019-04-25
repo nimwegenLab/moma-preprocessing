@@ -4,6 +4,13 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
 
+def show_image(image):
+    """ Draw the growthlane ROIs onto the image for control purposes. """
+    fig, ax = plt.subplots(1)
+    ax.imshow(image)
+
+    plt.show()
+
 def show_image_with_rois(image, growthlaneRoiList):
     """ Draw the growthlane ROIs onto the image for control purposes. """
     normalizedImg = None
@@ -11,8 +18,6 @@ def show_image_with_rois(image, growthlaneRoiList):
     im = np.array(normalizedImg, dtype=np.uint8)
 
     fig, ax = plt.subplots(1)
-    height = im.shape[0]
-    ax.set_ylim(height, 0)
     ax.imshow(im)
 
     for growthlane in growthlaneRoiList:
