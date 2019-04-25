@@ -28,7 +28,7 @@ class MomaImageProcessor(object):
     def read_image(self, image_path):
         """Reads tiff-image and returns it as a numpy-array."""
         image_base = Image.open(image_path)
-        self.image = np.array(image_base)
+        self.image = np.array(image_base, dtype=np.uint16)
 
     def process_image(self):
         self.rotated_image, self.main_channel_angle, self.mincol, self.maxcol, self.channel_centers = preprocessing.split_channels_init(

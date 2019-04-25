@@ -42,7 +42,7 @@ def read_tiff_to_nparray(image_path):
     import numpy as np
 
     image_base = Image.open(image_path)
-    return np.array(image_base)
+    return np.array(image_base, dtype=np.uint16)
 
 
     # @staticmethod
