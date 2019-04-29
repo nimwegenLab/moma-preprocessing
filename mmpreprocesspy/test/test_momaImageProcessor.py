@@ -1,5 +1,4 @@
 from unittest import TestCase
-
 from mmpreprocesspy.dev_auxiliary_functions import show_image_with_rois
 
 
@@ -69,6 +68,7 @@ class TestMomaImageProcessor(TestCase):
         gl_rois = sut.growthlane_rois
 
         show_image_with_rois(sut.rotated_image, gl_rois)
+
 
 def read_tiff_to_nparray(image_path):
     """Reads tiff-image and returns it as a numpy-array."""
