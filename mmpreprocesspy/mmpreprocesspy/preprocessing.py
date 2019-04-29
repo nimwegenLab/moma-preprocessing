@@ -1,6 +1,7 @@
 import numpy as np
 import skimage.transform
 from mmpreprocesspy.GrowthlaneRoi import GrowthlaneRoi
+from mmpreprocesspy.roi import Roi
 from skimage.filters import threshold_otsu
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
@@ -177,12 +178,11 @@ def get_growthlane_regions(channel_centers, mincol, maxcol):
 def get_roi(center, mincol, maxcol):
     channel_width = 100  # TODO-MM-2019-04-23: This will need to be determined dynamically or made configurable.
     half_width = channel_width / 2
-
-    m = center - half_width
-    n = mincol
-    width = maxcol - mincol
-    height = channel_width
-    return (m, n), (m + height, n + width)
+    m1 = center - half_width
+    m2 = center + half_width
+    n1 = mincol
+    n2 = maxcol
+    return Roi(m1, n1, m2, n2)
 
 
 def get_image_registration_template(image, mincol):

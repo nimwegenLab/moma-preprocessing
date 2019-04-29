@@ -22,13 +22,7 @@ def show_image_with_rois(image, growthlaneRoiList):
 
     for growthlane in growthlaneRoiList:
         roi = growthlane.roi
-        y = m1 = roi[0][0]
-        x = n1 = roi[0][1]
-        m2 = roi[1][0]
-        n2 = roi[1][1]
-        width = n2 - n1
-        height = m2 - m1
-        rect = patches.Rectangle((x, y), width, height, linewidth=1, edgecolor='r', facecolor='none')
+        rect = patches.Rectangle((roi.n1, roi.m1), roi.width, roi.height, linewidth=1, edgecolor='r', facecolor='none')
         ax.add_patch(rect)
 
     plt.show()
