@@ -2,6 +2,16 @@ from unittest import TestCase
 
 
 class TestRoi(TestCase):
+    def test__height__returns_correct_value(self):
+        from mmpreprocesspy.roi import Roi
+        sut = Roi(1, 1, 100, 100)
+        self.assertEqual(99, sut.height)
+
+    def test__width__returns_correct_value(self):
+        from mmpreprocesspy.roi import Roi
+        sut = Roi(1, 1, 100, 100)
+        self.assertEqual(99, sut.width)
+
     def test__is_subset_of__for__simple_superset__returns__True(self):
         from mmpreprocesspy.roi import Roi
         superset = Roi(1, 1, 100, 100)

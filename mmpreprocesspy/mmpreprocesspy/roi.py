@@ -1,5 +1,6 @@
 
 class Roi(object):
+    """Defines a ROI in an image."""
     def __init__(self, m1, n1, m2, n2):
         if m1 > m2:
             raise ValueError("Invalid ROI bounds: m1 > m2")
@@ -24,3 +25,11 @@ class Roi(object):
             return True
         else:
             return False
+
+    @property
+    def width(self):
+        return self.n2 - self.n1
+
+    @property
+    def height(self):
+        return self.m2 - self.m1
