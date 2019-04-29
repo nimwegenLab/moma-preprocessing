@@ -14,3 +14,13 @@ class Roi(object):
         self.m2 = m2
         self.n2 = n2
 
+    def is_subset_of(self, other_roi):
+        """ Returns true if this ROI is a subset of 'other_roi'. False otherwise.
+
+        :param other_roi:
+        :return:
+        """
+        if self.m1 >= other_roi.m1 and self.n1 >= other_roi.n1 and self.m2 <= other_roi.m2 and self.n2 <= other_roi.n2:
+            return True
+        else:
+            return False

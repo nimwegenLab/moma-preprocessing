@@ -2,6 +2,18 @@ from unittest import TestCase
 
 
 class TestRoi(TestCase):
+    def test__is_subset_of__for__simple_superset__returns__True(self):
+        from mmpreprocesspy.roi import Roi
+        superset = Roi(1, 1, 100, 100)
+        sut = Roi(1, 1, 100, 100)
+        self.assertTrue(sut.is_subset_of(superset))
+
+    def test__is_subset_of__for__true_superset__returns__True(self):
+        from mmpreprocesspy.roi import Roi
+        superset = Roi(1, 1, 100, 100)
+        sut = Roi(2, 2, 99, 99)
+        self.assertTrue(sut.is_subset_of(superset))
+
     def test__init__for__equal_n_bounds__raises__ValueError(self):
         from mmpreprocesspy.roi import Roi
         with self.assertRaises(ValueError):
