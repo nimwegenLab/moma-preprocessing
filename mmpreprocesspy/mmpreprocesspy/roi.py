@@ -30,6 +30,14 @@ class Roi(object):
     def width(self):
         return self.n2 - self.n1
 
+    @width.setter
+    def width(self, new_width):
+        self.n2 = self.n1 + new_width
+
     @property
     def height(self):
         return self.m2 - self.m1
+
+    @height.setter
+    def height(self, new_height):
+        self.m2 = self.m1 + new_height
