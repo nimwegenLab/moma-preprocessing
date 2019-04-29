@@ -207,9 +207,10 @@ def get_image_registration_template(image, mincol):
     return template, mid_row, hor_mid, hor_width
 
 
-def get_transformation_matrix(horizontal_shift, vertical_shift, rotation_angle, rotation_center):
-    M_translation = np.float32([[0, 0, horizontal_shift], [0, 0, vertical_shift]])
-    M_rotation = cv.getRotationMatrix2D(rotation_center, rotation_angle, 1)
-    M_trafo = M_rotation + M_translation  # note: this is hacked together from this example: http://planning.cs.uiuc.edu/node99.html
-    # M_trafo = np.vstack((M_trafo, [0, 0, 1]))
-    return M_trafo
+def get_translation_matrix(horizontal_shift, vertical_shift):
+    return np.float32([[1, 0, horizontal_shift], [0, 1, vertical_shift]])
+
+
+def get_rotation_matrix(rotation_angle, rotation_center):
+    return cv.getRotationMatrix2D(rotation_center, rotation_angle, 1)
+

@@ -51,29 +51,29 @@ class MomaImageProcessor(object):
         self.horizontal_shift = int(t1 - self.template.shape[1] / 2)
 
     def get_registered_image(self, image_to_register):
-        registered_image = self._transform_image(image_to_register)
+        # registered_image = self._transform_image(image_to_register)
+        registered_image = self._rotate_image(image_to_register)
+        registered_image = self._translate_image(registered_image)
         return registered_image
 
     def _translate_image(self, image):
-        return np.roll(image, (self.vertical_shift, self.horizontal_shift), axis=(0, 1))  # shift image
+        return cv.warpAffine(image, self.get_translation_matrix(), (image.shape[1], image.shape[0]))
 
     def _rotate_image(self, image):
-        return skimage.transform.rotate(image, self.main_channel_angle, cval=0)  # rotate image
+        return cv.warpAffine(image, self.get_rotation_matrix(), (image.shape[1], image.shape[0]))
 
-    def _transform_image(self, image):
-        M = self.get_transformation_matrix()
-        return cv.warpAffine(image, M, (image.shape[1], image.shape[0]))
-
-    def get_transformation_matrix(self):
+    def get_rotation_matrix(self):
         if self.main_channel_angle is None:
             raise ValueError("self.main_channel_angle must be set before calling self.get_transformation_matrix")
+
+        rotation_center = (self.image.shape[1] / 2 - 0.5, self.image.shape[0] / 2 - 0.5)  # see center-definition here: https://scikit-image.org/docs/dev/api/skimage.transform.html#skimage.transform.rotate
+
+        return preprocessing.get_rotation_matrix(self.main_channel_angle, rotation_center)
+
+    def get_translation_matrix(self):
         if self.vertical_shift is None:
             raise ValueError("self.vertical_shift must be set before calling self.get_transformation_matrix")
         if self.horizontal_shift is None:
             raise ValueError("self.horizontal_shift must be set before calling self.get_transformation_matrix")
 
-        rotation_center = (self.image.shape[1] / 2 - 0.5, self.image.shape[0] / 2 - 0.5)  # see center-definition here: https://scikit-image.org/docs/dev/api/skimage.transform.html#skimage.transform.rotate
-
-        return preprocessing.get_transformation_matrix(self.horizontal_shift, self.vertical_shift, self.main_channel_angle, rotation_center)
-
-        raise NotImplementedError
+        return preprocessing.get_translation_matrix(self.horizontal_shift, self.vertical_shift)
