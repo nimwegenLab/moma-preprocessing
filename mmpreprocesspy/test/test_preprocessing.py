@@ -31,7 +31,7 @@ class TestPreprocessing(TestCase):
     def test_create_growthlane_objects(self):
         from mmpreprocesspy import preprocessing
 
-        regions = preprocessing.get_growthlane_regions([1, 2], 20, 20)
+        regions = preprocessing.get_growthlane_regions([1, 2], 20, 50)
         pass
 
     def test_get_transformation_matrix(self):
@@ -45,7 +45,6 @@ class TestPreprocessing(TestCase):
         vertical_shift = 100
         rotation_angle = -45
         rotation_center = (image_array.shape[1]/2 - 0.5, image_array.shape[0]/2 - 0.5)
-
 
         matrix = preprocessing.get_transformation_matrix(horizontal_shift, vertical_shift, rotation_angle, rotation_center)
 
