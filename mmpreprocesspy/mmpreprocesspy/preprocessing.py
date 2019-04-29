@@ -178,7 +178,7 @@ def get_roi(center, mincol, maxcol):
     n = mincol
     width = maxcol - mincol
     height = channel_width
-    return (m, n), (width, height)
+    return (m, n), (m+height, n+width)
 
 def get_image_registration_template(image, mincol):
     # find regions with large local derivatives in BOTH directions, which should be "number-regions".
