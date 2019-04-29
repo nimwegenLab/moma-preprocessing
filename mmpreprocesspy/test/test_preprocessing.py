@@ -44,8 +44,7 @@ class TestPreprocessing(TestCase):
         horizontal_shift = 50
         vertical_shift = 100
         rotation_angle = -45
-        rotation_center = (0, 0)
-        # rotation_center = (image_array.shape[1]/2, image_array.shape[0]/2)
+        rotation_center = (image_array.shape[1]/2 - 0.5, image_array.shape[0]/2 - 0.5)
 
 
         matrix = preprocessing.get_transformation_matrix(horizontal_shift, vertical_shift, rotation_angle, rotation_center)
