@@ -6,11 +6,13 @@ import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
 import cv2 as cv
 
+
 # find rotation, channel boundaries and positions for first image that is then used as reference
 def split_channels_init(image):
     main_channel_angle = find_main_channel_orientation(image)
     if main_channel_angle != 0:
-        image = skimage.transform.rotate(image, -main_channel_angle, resize=True)  # rotate image angle back to 0, if needed
+        image = skimage.transform.rotate(image, -main_channel_angle,
+                                         resize=True)  # rotate image angle back to 0, if needed
 
     # find the boundary region containing channels by finding columns with repetitive pattern
     mincol, maxcol = pattern_limits(image, use_smoothing=True)
@@ -39,8 +41,8 @@ def find_main_channel_orientation(image):
     rotated_image = skimage.transform.rotate(image, 90, cval=0)
     fourier_ratio_rotated = calculate_fourier_ratio(rotated_image)
 
-    diff = np.max(fourier_ratio)-np.min(fourier_ratio)
-    diff_rotated = np.max(fourier_ratio_rotated)-np.min(fourier_ratio_rotated)
+    diff = np.max(fourier_ratio) - np.min(fourier_ratio)
+    diff_rotated = np.max(fourier_ratio_rotated) - np.min(fourier_ratio_rotated)
 
     if diff > diff_rotated:
         return 0
@@ -162,6 +164,7 @@ def fft_align(im0, im1, pixlim=None):
         t0, t1 = np.unravel_index(np.argmax(ir[0:pixlim, 0:pixlim]), shape)
     return t0, t1
 
+
 def get_growthlane_regions(channel_centers, mincol, maxcol):
     rois = []
     for center in channel_centers:
@@ -169,6 +172,7 @@ def get_growthlane_regions(channel_centers, mincol, maxcol):
         tmp.roi = get_roi(center, mincol, maxcol)
         rois.append(tmp)
     return rois
+
 
 def get_roi(center, mincol, maxcol):
     channel_width = 100  # TODO-MM-2019-04-23: This will need to be determined dynamically or made configurable.
@@ -178,7 +182,8 @@ def get_roi(center, mincol, maxcol):
     n = mincol
     width = maxcol - mincol
     height = channel_width
-    return (m, n), (m+height, n+width)
+    return (m, n), (m + height, n + width)
+
 
 def get_image_registration_template(image, mincol):
     # find regions with large local derivatives in BOTH directions, which should be "number-regions".
@@ -201,11 +206,10 @@ def get_image_registration_template(image, mincol):
     template = image[mid_row - 100:mid_row + 100, 0:hor_space]
     return template, mid_row, hor_mid, hor_width
 
+
 def get_transformation_matrix(horizontal_shift, vertical_shift, rotation_angle, rotation_center):
     M_translation = np.float32([[0, 0, horizontal_shift], [0, 0, vertical_shift]])
     M_rotation = cv.getRotationMatrix2D(rotation_center, rotation_angle, 1)
     M_trafo = M_rotation + M_translation  # note: this is hacked together from this example: http://planning.cs.uiuc.edu/node99.html
     # M_trafo = np.vstack((M_trafo, [0, 0, 1]))
     return M_trafo
-
-
