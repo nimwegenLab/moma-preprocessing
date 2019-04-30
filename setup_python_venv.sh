@@ -23,6 +23,13 @@ pip install exifread
 pip install pillow
 pip install scipy
 pip install --editable $PREPROC_PACKAGE_PATH
-pip install opencv-contrib-python
+
+#if [[ "$HOSTNAME" -eq "ierbert" ]]; then
+echo "Copying OpenCV from the resource folder ..."
+cp -a resources/cv2 venv-testenv/lib/python3.5/site-packages/
+#else
+#  echo "Installing OpenCV using pip ..."
+##  pip install opencv-contrib-python
+#fi
 
 deactivate
