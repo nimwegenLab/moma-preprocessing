@@ -59,6 +59,18 @@ class RotatedRoi(object):
     def translate(self, shift):
         self.center = (self.center[0] + shift[0], self.center[1] + shift[1])
 
+    def is_inside_image(self, image):
+        """ Returns whether this ROI lies with in the given image. """
+        im_height = image.shape[0]
+        im_width = image.shape[1]
+
+        for point in self.points:
+            if not 0 <= point[0] <= im_width:
+                return False
+            if not 0 <= point[1] <= im_height:
+                return False
+        return True
+
     @property
     def points(self):
         rot_rect = (self.center, (self.width, self.height), -self.angle) #  NOTE-MM-2019-05-02: I do not understand why it has to be '-self.angle' instead of self.angle
