@@ -10,10 +10,10 @@ class Roi(object):
             raise ValueError("Invalid ROI bounds: n1 > n2")
         if n1 == n2:
             raise ValueError("Invalid ROI bounds: n1 == n2")
-        self.m1 = m1
-        self.n1 = n1
-        self.m2 = m2
-        self.n2 = n2
+        self.m1 = m1  # vertical starting position in matrix-indices convention
+        self.n1 = n1  # horizontal starting position in matrix-indices convention
+        self.m2 = m2  # vertical end position in matrix-indices convention
+        self.n2 = n2  # horizontal end position in matrix-indices convention
 
     def is_subset_of(self, other_roi):
         """ Returns true if this ROI is a subset of 'other_roi'. False otherwise.
@@ -25,6 +25,12 @@ class Roi(object):
             return True
         else:
             return False
+
+    def shift(self, horizontal_shift, vertical_shift):
+        self.n1 += horizontal_shift
+        self.n2 += horizontal_shift
+        self.m1 += vertical_shift
+        self.m2 += vertical_shift
 
     @property
     def width(self):
