@@ -21,7 +21,7 @@ class TestRoi(TestCase):
         im_center = imdata.shape[1]/2, imdata.shape[0]/2
         roi_size = (400, 100)
 
-        sut = RotatedRoi(im_center, roi_size, -angle)
+        sut = RotatedRoi(im_center, roi_size, angle)
         # aux.show_image_with_rotated_rois(imdata, [sut])
 
         roi_image = sut.get_roi_from_image(imdata)
