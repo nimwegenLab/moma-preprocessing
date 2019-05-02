@@ -51,8 +51,7 @@ class RotatedRoi(object):
         return cropped
 
     def rotate(self, rotation_center, rotation_angle):
-        self.angle = -rotation_angle
-        # M = cv.getRotationMatrix2D(rotation_center, self.angle, 1.0)
+        self.angle = -rotation_angle   # Note: I am not sure, why I need to invert the sign for the angle, but it works this way
         M = cv.getRotationMatrix2D((rotation_center[1],rotation_center[0]), self.angle, 1.0)
         center_coordinate = np.array([self.center[1], self.center[0], 1])
         new_center = M.dot(center_coordinate)

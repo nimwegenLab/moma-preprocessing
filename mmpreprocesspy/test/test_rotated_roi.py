@@ -52,6 +52,10 @@ class TestRoi(TestCase):
 
         # Plot rotated ROI against rotated image
         aux.show_image_with_rotated_rois(imdata_rotated, [sut])
+
+        roi_image = sut.get_roi_from_image(imdata_rotated)
+        aux.show_image(roi_image)
+
         cv2.waitKey()
 
 
