@@ -29,8 +29,6 @@ class TestRoi(TestCase):
 
         cv2.waitKey()
 
-        pass
-
     def test__rotate(self):
         imdata = read_image(
             self.test_data_base_path + '/03_20180604_gluIPTG10uM_lac_lacIoe_1/first_images/Pos0/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
@@ -58,6 +56,14 @@ class TestRoi(TestCase):
 
         cv2.waitKey()
 
+    def test__translate__updates_roi_center_correctly(self):
+        roi_center = 542, 140
+        roi_size = (400, 100)
+        sut = RotatedRoi(roi_center, roi_size, 0)
+        shift_value = (50, 100)
+        sut.translate(shift_value)
+        self.assertEqual(542+50, sut.center[0])
+        self.assertEqual(140 + 100, sut.center[1])
 
 def read_image(image_path):
     """Reads tiff-image and returns it as a numpy-array."""

@@ -55,7 +55,9 @@ class RotatedRoi(object):
         center_coordinate = np.array([self.center[0], self.center[1], 1])
         self.center = M.dot(center_coordinate)
         self.angle = rotation_angle
-        pass
+
+    def translate(self, shift):
+        self.center = (self.center[0] + shift[0], self.center[1] + shift[1])
 
     @property
     def points(self):
