@@ -78,14 +78,14 @@ def pattern_limits(image, threshold_factor=None, use_smoothing=False):
     fourier_ratio = calculate_fourier_ratio(image)
 
     if use_smoothing:
-        fourier_ratio = savgol_filter(fourier_ratio, 31, 3)  # window size 51, polynomial order 3
+        fourier_ratio = savgol_filter(fourier_ratio, 51, 1)  # window size 51, polynomial order 1
 
     if threshold_factor is None:
         threshold = threshold_otsu(fourier_ratio)  # use Otsu method to determine threshold value
     else:
         threshold = threshold_factor * fourier_ratio.max()
 
-    # yhat = savgol_filter(fourier_ratio, 31, 3)  # window size 31, polynomial order 3
+    # yhat = savgol_filter(fourier_ratio, 51, 1)  # window size 31, polynomial order 3
     # plt.plot(fourier_ratio)
     # plt.plot(yhat)
     # plt.show()

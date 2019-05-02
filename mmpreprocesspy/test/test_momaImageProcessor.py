@@ -46,6 +46,18 @@ class TestMomaImageProcessor(TestCase):
         self.assertEqual(693, sut.maxcol)
         self.assertEqual(0, sut.main_channel_angle)
 
+    def test_split_channels_init_dataset_08(self):
+        from mmpreprocesspy.moma_image_processing import MomaImageProcessor
+
+        sut = MomaImageProcessor()
+        sut.read_image(
+            self.test_data_base_path + '/08_20190222_LB_SpentLB_TrisEDTA_LB_1/first_images/Pos0/img_000000000_ DIA Ph3 (Dual)_000.tif')
+        sut.process_image()
+
+        self.assertEqual(380, sut.mincol)
+        self.assertEqual(693, sut.maxcol)
+        self.assertEqual(0, sut.main_channel_angle)
+
     def test_get_growthlane_rois_dataset_3(self):
         from mmpreprocesspy.moma_image_processing import MomaImageProcessor
 
