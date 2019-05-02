@@ -41,11 +41,8 @@ def show_image_with_rotated_rois(image, rotated_rois):
     normalizedImg = cv.normalize(image,  normalizedImg, 0, 255, cv.NORM_MINMAX)
     im = np.array(normalizedImg, dtype=np.uint8)
 
-    # box = cv2.cv.BoxPoints(rect)  # cv2.boxPoints(rect) for OpenCV 3.x
-    # box = np.int0(box)
-    # cv2.drawContours(im, [box], 0, (0, 0, 255), 2)
     for roi in rotated_rois:
-        cv.drawContours(im, [roi.points], 0, (255, 0, 0), 2)
+        roi.draw_to_image(im, True)
 
     cv.namedWindow("image with roi", cv.WINDOW_NORMAL)
     cv.imshow("image with roi", im)

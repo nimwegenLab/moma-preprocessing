@@ -63,6 +63,23 @@ class RotatedRoi(object):
         # cv.waitKey()
         return cropped
 
+    def draw_to_image(self, image, with_bounding_box=False):
+        """
+         Draw the ROI to image.
+        :param image: image to which the ROI will be drawn.
+        :param with_bounding_box: whether to also draw the bounding box of the rotated ROI.
+        :return:
+        """
+
+        if not with_bounding_box:
+            cv.drawContours(image, [self.points], 0, (255, 0, 0), 2)
+        else:
+            x, y, w, h = cv.boundingRect(self.points)
+            bounding_box_roi = RotatedRoi((x+w/2, y+h/2), (w, h), 0)
+            for roi in [self, bounding_box_roi]:
+                cv.drawContours(image, [roi.points], 0, (255, 0, 0), 2)
+        # return image
+
     def rotate(self, rotation_center, rotation_angle):
         M = cv.getRotationMatrix2D(rotation_center, rotation_angle, 1.0)
         center_coordinate = np.array([self.center[0], self.center[1], 1])
