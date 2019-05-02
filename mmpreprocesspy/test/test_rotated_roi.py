@@ -3,8 +3,10 @@ from unittest import TestCase
 import numpy as np
 from PIL import Image
 import mmpreprocesspy.dev_auxiliary_functions as aux
+from mmpreprocesspy.roi import Roi
 from mmpreprocesspy.rotated_roi import RotatedRoi
 import cv2
+
 
 class TestRoi(TestCase):
     test_data_base_path = '/home/micha/Documents/git/MM_Testing'
@@ -24,7 +26,7 @@ class TestRoi(TestCase):
         sut = RotatedRoi(im_center, roi_size, angle)
         # aux.show_image_with_rotated_rois(imdata, [sut])
 
-        roi_image = sut.get_roi_from_image(imdata)
+        roi_image = sut.get_from_image(imdata)
         aux.show_image(roi_image)
 
         cv2.waitKey()
@@ -50,7 +52,7 @@ class TestRoi(TestCase):
         # Plot rotated ROI against rotated image
         aux.show_image_with_rotated_rois(imdata_rotated, [sut])
 
-        roi_image = sut.get_roi_from_image(imdata_rotated)
+        roi_image = sut.get_from_image(imdata_rotated)
         aux.show_image(roi_image)
 
         cv2.waitKey()
@@ -73,7 +75,7 @@ class TestRoi(TestCase):
 
         self.assertTrue(sut.is_inside_image(imdata))
 
-    def test_is_inside_image__for_roi_same_as_image_on_left__returns_true(self):
+    def test__is_inside_image__for_roi_same_as_image_on_left__returns_true(self):
         imdata = read_image(
             self.test_data_base_path + '/03_20180604_gluIPTG10uM_lac_lacIoe_1/first_images/Pos0/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
         roi_center = (imdata.shape[1]/2, imdata.shape[0]/2)
@@ -82,7 +84,7 @@ class TestRoi(TestCase):
 
         self.assertTrue(sut.is_inside_image(imdata))
 
-    def test_is_inside_image__for_roi_outside_image_on_left__returns_false(self):
+    def test__is_inside_image__for_roi_outside_image_on_left__returns_false(self):
         imdata = read_image(
             self.test_data_base_path + '/03_20180604_gluIPTG10uM_lac_lacIoe_1/first_images/Pos0/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
         roi_center = 0, 200
@@ -91,7 +93,7 @@ class TestRoi(TestCase):
 
         self.assertFalse(sut.is_inside_image(imdata))
 
-    def test_is_inside_image__for_roi_outside_image_on_right__returns_false(self):
+    def test__is_inside_image__for_roi_outside_image_on_right__returns_false(self):
         imdata = read_image(
             self.test_data_base_path + '/03_20180604_gluIPTG10uM_lac_lacIoe_1/first_images/Pos0/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
         im_width = imdata.shape[1]
@@ -101,7 +103,7 @@ class TestRoi(TestCase):
 
         self.assertFalse(sut.is_inside_image(imdata))
 
-    def test_is_inside_image__for_roi_outside_image_at_top__returns_false(self):
+    def test__is_inside_image__for_roi_outside_image_at_top__returns_false(self):
         imdata = read_image(
             self.test_data_base_path + '/03_20180604_gluIPTG10uM_lac_lacIoe_1/first_images/Pos0/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
         roi_center = 200, 0
@@ -110,7 +112,7 @@ class TestRoi(TestCase):
 
         self.assertFalse(sut.is_inside_image(imdata))
 
-    def test_is_inside_image__for_roi_outside_image_at_bottom__returns_false(self):
+    def test__is_inside_image__for_roi_outside_image_at_bottom__returns_false(self):
         imdata = read_image(
             self.test_data_base_path + '/03_20180604_gluIPTG10uM_lac_lacIoe_1/first_images/Pos0/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
         im_height = imdata.shape[0]
@@ -119,6 +121,44 @@ class TestRoi(TestCase):
         sut = RotatedRoi(roi_center, roi_size, 0)
 
         self.assertFalse(sut.is_inside_image(imdata))
+
+    def test__create_from_roi__returns_rotated_roi_with_correct_center_coordinate(self):
+        roi = Roi(0, 0, 100, 100)
+
+        sut = RotatedRoi.create_from_roi(roi)
+
+        self.assertEqual(50, sut.center[0])
+        self.assertEqual(50, sut.center[1])
+
+    def test__create_from_roi__returns_rotated_roi_with_correct_width(self):
+        roi = Roi(0, 0, 100, 100)
+
+        sut = RotatedRoi.create_from_roi(roi)
+
+        self.assertEqual(100, sut.width)
+
+    def test__create_from_roi__returns_rotated_roi_with_correct_height(self):
+        roi = Roi(0, 0, 100, 100)
+
+        sut = RotatedRoi.create_from_roi(roi)
+
+        self.assertEqual(100, sut.height)
+
+    def test__create_from_roi__returns_rotated_roi_returns_same_image_as_input_roi(self):
+        from mmpreprocesspy.roi import Roi
+        imdata = read_image(
+            self.test_data_base_path + '/03_20180604_gluIPTG10uM_lac_lacIoe_1/first_images/Pos0/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
+
+        roi = Roi(90, 342, 190, 742)  # size: (width=400, height=100)
+        sut = RotatedRoi.create_from_roi(roi)
+
+        roi_image = sut.get_from_image(imdata)
+
+        self.assertEqual(roi_image.shape[0], 100)
+        self.assertEqual(roi_image.shape[1], 400)
+        aux.show_image(roi_image)
+        cv2.waitKey()
+
 
 
 def read_image(image_path):

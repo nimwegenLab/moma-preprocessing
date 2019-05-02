@@ -2,6 +2,7 @@ import cv2 as cv
 import numpy as np
 import mmpreprocesspy.dev_auxiliary_functions as aux
 
+
 class RotatedRoi(object):
     def __init__(self, center, size, angle):
         """center = (x, y)
@@ -13,7 +14,19 @@ class RotatedRoi(object):
         self.angle = angle
         pass
 
-    def get_roi_from_image(self, image):
+    @staticmethod
+    def create_from_roi(roi):
+        """
+         Create an instance of rotated ROI from non-rotated ROI object.
+        :param roi:
+        :return:
+        """
+        center_y = roi.m1 + roi.height/2
+        center_x = roi.n1 + roi.width/2
+        rotated_roi = RotatedRoi((center_x, center_y), (roi.width, roi.height), 0)
+        return rotated_roi
+
+    def get_from_image(self, image):
         """ Return the cropped and rotated image data of the ROI. """
         if self.angle < -45.0: # REF: https://answers.opencv.org/question/497/extract-a-rotatedrect-area/?answer=518#post-id-518
             self.angle += 90.0

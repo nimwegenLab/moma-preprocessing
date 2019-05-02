@@ -15,6 +15,9 @@ class Roi(object):
         self.m2 = m2  # vertical end position in matrix-indices convention
         self.n2 = n2  # horizontal end position in matrix-indices convention
 
+    def get_from_image(self, image):
+        return image[self.m1:self.m2, self.n1:self.n2]
+
     def is_subset_of(self, other_roi):
         """ Returns true if this ROI is a subset of 'other_roi'. False otherwise.
 

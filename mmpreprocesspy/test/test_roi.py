@@ -1,31 +1,50 @@
 from unittest import TestCase
-import cv2 as cv
+
+import cv2
 import numpy as np
+from PIL import Image
+import mmpreprocesspy.dev_auxiliary_functions as aux
+
 
 class TestRoi(TestCase):
-    def test__pointPolygonTest(self):
-        x = 0
-        y = 0
-        width = 100
-        height = 100
-        angle = 0
-        # rect = ((x, y), (x + width, y + height), angle)
-        x = 50
-        y = 50
-        rect = ((x, y), (width, height), angle)
-        contour = cv.boxPoints(rect)
-        result = cv.pointPolygonTest(contour, (0, 0), measureDist=False)
-        print(result)
+    # def test__pointPolygonTest(self):
+    #     x = 0
+    #     y = 0
+    #     width = 100
+    #     height = 100
+    #     angle = 0
+    #     # rect = ((x, y), (x + width, y + height), angle)
+    #     x = 50
+    #     y = 50
+    #     rect = ((x, y), (width, height), angle)
+    #     contour = cv.boxPoints(rect)
+    #     result = cv.pointPolygonTest(contour, (0, 0), measureDist=False)
+    #     print(result)
+    #
+    # def test__rectangle_rotation(self):
+    #     x = 0
+    #     y = 0
+    #     width = 100
+    #     height = 100
+    #     angle = -45
+    #     rot_rect = ((x, y), (width, height), angle)
+    #     box = cv.boxPoints(rot_rect)
+    #     pass
 
-    def test__rectangle_rotation(self):
-        x = 0
-        y = 0
-        width = 100
-        height = 100
-        angle = -45
-        rot_rect = ((x, y), (width, height), angle)
-        box = cv.boxPoints(rot_rect)
-        pass
+    test_data_base_path = '/home/micha/Documents/git/MM_Testing'
+
+    def test__get_roi_from_image__returns_image_with_correct_size(self):
+        from mmpreprocesspy.roi import Roi
+        imdata = read_image(
+            self.test_data_base_path + '/03_20180604_gluIPTG10uM_lac_lacIoe_1/first_images/Pos0/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
+
+        sut = Roi(90, 342, 190, 742)  # size: (width=400, height=100)
+
+        roi_image = sut.get_from_image(imdata)
+        self.assertEqual(roi_image.shape[0], 100)
+        self.assertEqual(roi_image.shape[1], 400)
+        aux.show_image(roi_image)
+        cv2.waitKey()
 
     def test__shift__for_vertical_shift__updates_bounds_correctly(self):
         from mmpreprocesspy.roi import Roi
@@ -123,3 +142,8 @@ class TestRoi(TestCase):
         sut = Roi(1, 2, 3, 4)
         self.assertEqual(sut.m1, 1)
 
+
+def read_image(image_path):
+    """Reads tiff-image and returns it as a numpy-array."""
+    image_base = Image.open(image_path)
+    return np.array(image_base, dtype=np.uint16)
