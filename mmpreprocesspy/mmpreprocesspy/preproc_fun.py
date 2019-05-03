@@ -1,4 +1,6 @@
 import os, re, time, sys, shutil
+
+import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -10,6 +12,7 @@ import skimage.measure
 import skimage.filters
 from mmpreprocesspy.moma_image_processing import MomaImageProcessor
 from skimage.feature import match_template
+import mmpreprocesspy.dev_auxiliary_functions as aux
 
 from mmpreprocesspy.MMdata import MMData
 
@@ -95,25 +98,33 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
             '''
 
             imageProcessor.determine_image_shift(image)
+            growthlane_rois = imageProcessor.growthlane_rois.copy()
 
-            for gl_roi in imageProcessor.growthlane_rois:
-                gl_roi.roi.translate((imageProcessor.horizontal_shift, imageProcessor.vertical_shift))
+            for gl_roi in growthlane_rois:
+                gl_roi.roi.translate((-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
 
             # image_rot = imageProcessor.get_registered_image(image)
 
             #find channels in new image
             # channels = pre.find_channels(image_rot, mincol, maxcol)
 
+
+            ###############################################
+            # aux.show_image_with_rotated_rois(image, [g.roi for g in growthlane_rois])
+            # cv2.waitKey()
+            # cv2.destroyAllWindows()
+            ###############################################
+
             #load all colors
             image_stack = np.zeros((image_base.shape[0],image_base.shape[1],len(colors)))
             for i in range(len(colors)):
-                image = dataset.get_image_fast(channel=i,frame=t,position=indp)
+                # image = dataset.get_image_fast(channel=i,frame=t,position=indp)
                 # image_stack[:,:,i] = imageProcessor.get_registered_image(image)
+                image_stack[:, :, i] = dataset.get_image_fast(channel=i,frame=t,position=indp)
 
             #go through all channels, check if there's a corresponding one in the new image. If yes go through all colors,
             #cut out channel, and append to tif stack. Completel also the kymograph for each color.
-            for gl_roi in imageProcessor.growthlane_rois:
-                gl_roi.roi.translate((imageProcessor.horizontal_shift, imageProcessor.vertical_shift))
+            for gl_roi in growthlane_rois:
                 if gl_roi.roi.is_inside_image(image):
             # for c in gl_roi:
             #     if (np.min(c-channel_centers)<5)&(int(c)-half_width>0)&(int(c)+half_width+1<image.shape[0]):
@@ -132,6 +143,13 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
                     for i in range(len(colors)):
                         # imtosave = image_stack[:,:,i][int(c)-half_width:int(c)+half_width+1,mincol-30:maxcol+30]
                         imtosave = gl_roi.roi.get_from_image(image_stack[:,:,i])
+
+                        ################################################
+                        if i == 0 and gl_roi.index == 11:
+                            aux.show_image(imtosave, "Image ROI "+str(gl_roi.index))
+                            cv2.waitKey()
+                        ################################################
+
                         imtosave_flip = np.flipud(imtosave.T)
                         skimage.external.tifffile.imsave(filename,imtosave_flip.astype(np.uint16),append = 'force',imagej = True, metadata = metadata)
                         kymo[:,t,i,gl] = np.mean(imtosave, axis = 0)

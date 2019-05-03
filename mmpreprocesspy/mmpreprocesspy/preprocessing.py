@@ -177,7 +177,7 @@ def get_growthlane_regions(channel_centers, mincol, maxcol):
 
 def get_roi(center, mincol, maxcol):
     channel_width = 100  # TODO-MM-2019-04-23: This will need to be determined dynamically or made configurable.
-    half_width = channel_width / 2
+    half_width = int(channel_width / 2)
     m1 = center - half_width
     m2 = center + half_width
     n1 = mincol

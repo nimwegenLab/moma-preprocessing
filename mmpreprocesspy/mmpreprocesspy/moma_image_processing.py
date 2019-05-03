@@ -16,7 +16,7 @@ class MomaImageProcessor(object):
         self.mincol = None
         self.maxcol = None
         self.channel_centers = None
-        self.growthlane_rois = None
+        self.growthlane_rois = []
         self.template = None
         self.hor_mid = None
         self.hor_width = None
