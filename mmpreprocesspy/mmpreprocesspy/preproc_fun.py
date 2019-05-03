@@ -1,5 +1,5 @@
 import os, re, time, sys, shutil
-
+import copy
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -98,7 +98,7 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
             '''
 
             imageProcessor.determine_image_shift(image)
-            growthlane_rois = imageProcessor.growthlane_rois.copy()
+            growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
 
             for gl_roi in growthlane_rois:
                 gl_roi.roi.translate((-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
@@ -145,9 +145,9 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
                         imtosave = gl_roi.roi.get_from_image(image_stack[:,:,i])
 
                         ################################################
-                        if i == 0 and gl_roi.index == 11:
-                            aux.show_image(imtosave, "Image ROI "+str(gl_roi.index))
-                            cv2.waitKey()
+                        # if i == 0 and gl_roi.index == 11:
+                        #     aux.show_image(imtosave, "Image ROI "+str(gl_roi.index))
+                        #     cv2.waitKey()
                         ################################################
 
                         imtosave_flip = np.flipud(imtosave.T)
