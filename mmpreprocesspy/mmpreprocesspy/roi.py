@@ -10,10 +10,10 @@ class Roi(object):
             raise ValueError("Invalid ROI bounds: n1 > n2")
         if n1 == n2:
             raise ValueError("Invalid ROI bounds: n1 == n2")
-        self.m1 = m1  # vertical starting position in matrix-indices convention
-        self.n1 = n1  # horizontal starting position in matrix-indices convention
-        self.m2 = m2  # vertical end position in matrix-indices convention
-        self.n2 = n2  # horizontal end position in matrix-indices convention
+        self.m1 = int(m1)  # vertical starting position in matrix-indices convention
+        self.n1 = int(n1)  # horizontal starting position in matrix-indices convention
+        self.m2 = int(m2)  # vertical end position in matrix-indices convention
+        self.n2 = int(n2)  # horizontal end position in matrix-indices convention
 
     def get_from_image(self, image):
         return image[self.m1:self.m2, self.n1:self.n2]
@@ -29,11 +29,13 @@ class Roi(object):
         else:
             return False
 
-    def shift(self, horizontal_shift, vertical_shift):
-        self.n1 += horizontal_shift
-        self.n2 += horizontal_shift
-        self.m1 += vertical_shift
-        self.m2 += vertical_shift
+    def translate(self, shift_x_y):
+        if not isinstance(shift_x_y[0], int) or not isinstance(shift_x_y[1], int):
+            raise ValueError("shift_x_y must be integer.")
+        self.n1 += shift_x_y[0]
+        self.n2 += shift_x_y[0]
+        self.m1 += shift_x_y[1]
+        self.m2 += shift_x_y[1]
 
     @property
     def width(self):

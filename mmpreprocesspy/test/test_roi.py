@@ -46,20 +46,32 @@ class TestRoi(TestCase):
         aux.show_image(roi_image)
         cv2.waitKey()
 
-    def test__shift__for_vertical_shift__updates_bounds_correctly(self):
+    def test__translate__for_non_integer_y_value__raises_value_error(self):
         from mmpreprocesspy.roi import Roi
         sut = Roi(0, 0, 100, 100)
 
-        sut.shift(0, 100)
+        self.assertRaises(ValueError, sut.translate, (1, 1.0))
+
+    def test__translate__for_non_integer_x_value__raises_value_error(self):
+        from mmpreprocesspy.roi import Roi
+        sut = Roi(0, 0, 100, 100)
+
+        self.assertRaises(ValueError, sut.translate, (1.0, 100))
+
+    def test__translate__for_vertical_shift__updates_bounds_correctly(self):
+        from mmpreprocesspy.roi import Roi
+        sut = Roi(0, 0, 100, 100)
+
+        sut.translate((0, 100))
 
         self.assertEqual(100, sut.m1)
         self.assertEqual(200, sut.m2)
 
-    def test__shift__for_horizontal_shift__updates_bounds_correctly(self):
+    def test__translate__for_horizontal_shift__updates_bounds_correctly(self):
         from mmpreprocesspy.roi import Roi
         sut = Roi(0, 0, 100, 100)
 
-        sut.shift(100, 0)
+        sut.translate((100, 0))
 
         self.assertEqual(100, sut.n1)
         self.assertEqual(200, sut.n2)
