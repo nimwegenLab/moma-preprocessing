@@ -86,8 +86,8 @@ class RotatedRoi(object):
         self.center = M.dot(center_coordinate)
         self.angle = rotation_angle
 
-    def translate(self, shift):
-        self.center = (self.center[0] + shift[0], self.center[1] + shift[1])
+    def translate(self, shift_x_y):
+        self.center = (self.center[0] + shift_x_y[0], self.center[1] + shift_x_y[1])
 
     def is_inside_image(self, image):
         """ Returns whether this ROI lies with in the given image. """

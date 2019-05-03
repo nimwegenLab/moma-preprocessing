@@ -62,7 +62,10 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
         channel_centers = imageProcessor.channel_centers
 
         #create empty kymographs to fill
-        kymo = np.zeros((maxcol-mincol+60,maxframe, len(colors), len(channel_centers)))
+        gl_length = imageProcessor.growthlane_rois[0].length
+        nr_of_rois = len(imageProcessor.growthlane_rois)
+        kymo = np.zeros((gl_length, maxframe, len(colors), nr_of_rois))
+        # kymo = np.zeros((maxcol-mincol+60,maxframe, len(colors), len(channel_centers)))
         metadataK = {'channels':len(colors),'slices':1,'frames':len(channel_centers),'hyperstack':True,'loop':False}
 
         #calculate channel spacing 
@@ -93,22 +96,29 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
 
             imageProcessor.determine_image_shift(image)
 
-            image_rot = imageProcessor.get_registered_image(image)
+            for gl_roi in imageProcessor.growthlane_rois:
+                gl_roi.roi.translate((imageProcessor.horizontal_shift, imageProcessor.vertical_shift))
+
+            # image_rot = imageProcessor.get_registered_image(image)
 
             #find channels in new image
-            channels = pre.find_channels(image_rot, mincol, maxcol)
+            # channels = pre.find_channels(image_rot, mincol, maxcol)
 
             #load all colors
             image_stack = np.zeros((image_base.shape[0],image_base.shape[1],len(colors)))
             for i in range(len(colors)):
                 image = dataset.get_image_fast(channel=i,frame=t,position=indp)
-                image_stack[:,:,i] = imageProcessor.get_registered_image(image)
+                # image_stack[:,:,i] = imageProcessor.get_registered_image(image)
 
             #go through all channels, check if there's a corresponding one in the new image. If yes go through all colors,
             #cut out channel, and append to tif stack. Completel also the kymograph for each color.
-            for c in channels:
-                if (np.min(c-channel_centers)<5)&(int(c)-half_width>0)&(int(c)+half_width+1<image.shape[0]):
-                    gl = np.argmin(np.abs(c-channel_centers)) # index of the growthlane
+            for gl_roi in imageProcessor.growthlane_rois:
+                gl_roi.roi.translate((imageProcessor.horizontal_shift, imageProcessor.vertical_shift))
+                if gl_roi.roi.is_inside_image(image):
+            # for c in gl_roi:
+            #     if (np.min(c-channel_centers)<5)&(int(c)-half_width>0)&(int(c)+half_width+1<image.shape[0]):
+            #         gl = np.argmin(np.abs(c-channel_centers)) # index of the growthlane
+                    gl = gl_roi.index
                     frame_counter[gl]+=1
                     gl_str='0'+str(gl) if gl<10 else str(gl)
                     pos_gl_name = dataset.get_first_tiff().split('.')[0]+'_Pos'+str(indp)+'_GL'+gl_str
@@ -120,7 +130,8 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
 
                     # MM-2019-04-23: Here we get the GL ROI and store it to the GL stack.
                     for i in range(len(colors)):
-                        imtosave = image_stack[:,:,i][int(c)-half_width:int(c)+half_width+1,mincol-30:maxcol+30]
+                        # imtosave = image_stack[:,:,i][int(c)-half_width:int(c)+half_width+1,mincol-30:maxcol+30]
+                        imtosave = gl_roi.roi.get_from_image(image_stack[:,:,i])
                         imtosave_flip = np.flipud(imtosave.T)
                         skimage.external.tifffile.imsave(filename,imtosave_flip.astype(np.uint16),append = 'force',imagej = True, metadata = metadata)
                         kymo[:,t,i,gl] = np.mean(imtosave, axis = 0)

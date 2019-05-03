@@ -2,6 +2,7 @@ import numpy as np
 import skimage.transform
 from mmpreprocesspy.GrowthlaneRoi import GrowthlaneRoi
 from mmpreprocesspy.roi import Roi
+from mmpreprocesspy.rotated_roi import RotatedRoi
 from skimage.filters import threshold_otsu
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
@@ -167,12 +168,11 @@ def fft_align(im0, im1, pixlim=None):
 
 
 def get_growthlane_regions(channel_centers, mincol, maxcol):
-    rois = []
-    for center in channel_centers:
-        tmp = GrowthlaneRoi()
-        tmp.roi = get_roi(center, mincol, maxcol)
-        rois.append(tmp)
-    return rois
+    growthlaneRois = []
+    for index, center in enumerate(channel_centers):
+        roi = get_roi(center, mincol, maxcol)
+        growthlaneRois.append(GrowthlaneRoi(roi, index))
+    return growthlaneRois
 
 
 def get_roi(center, mincol, maxcol):
@@ -182,7 +182,7 @@ def get_roi(center, mincol, maxcol):
     m2 = center + half_width
     n1 = mincol
     n2 = maxcol
-    return Roi(m1, n1, m2, n2)
+    return RotatedRoi.create_from_roi(Roi(m1, n1, m2, n2))
 
 
 def get_image_registration_template(image, mincol):
