@@ -16,10 +16,8 @@ def process_image(image):
         image = skimage.transform.rotate(image, -main_channel_angle,
                                          resize=True)  # rotate image angle back to 0, if needed
 
-    # find the boundary region containing channels by finding columns with repetitive pattern
-    mincol, maxcol = pattern_limits(image, use_smoothing=True)
     # find rotation angle
-    angle = find_rotation(image[:, mincol:maxcol])
+    angle = find_rotation(image)
     main_channel_angle += angle
 
     # recalculate channel region boundary on rotated image
