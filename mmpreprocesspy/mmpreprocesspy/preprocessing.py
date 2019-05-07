@@ -25,13 +25,21 @@ def process_image(image):
     image_rot = skimage.transform.rotate(image, angle, cval=0)
     mincol, maxcol, region_list = pattern_limits(image_rot, use_smoothing=True)
 
-    growthlane_rois = []
-    for gl_region in region_list:
-        channel_centers = find_channels(image_rot, gl_region.start, gl_region.end)
-        rois = get_growthlane_regions(channel_centers, gl_region.start, gl_region.end)
-        growthlane_rois += rois
+    growthlane_rois, channel_centers = get_all_growthlane_rois(image_rot, region_list)
 
     return image_rot, main_channel_angle, mincol, maxcol, channel_centers, growthlane_rois
+
+
+def get_all_growthlane_rois(rotated_image, region_list):
+    """Gets the growthlane ROIs from all growthlane regions that were found in the image."""
+    growthlane_rois = []
+    channel_centers = []
+    for gl_region in region_list:
+        centers = find_channels(rotated_image, gl_region.start, gl_region.end)
+        rois = get_growthlane_regions(centers, gl_region.start, gl_region.end)
+        growthlane_rois += rois
+        channel_centers += centers
+    return growthlane_rois, channel_centers
 
 
 def find_main_channel_orientation(image):
@@ -218,7 +226,7 @@ def find_channels(image, mincol, maxcol, window=30):
         else:
             channel_center.append(np.mean(initchunk))
             initchunk = [chunks[x]]
-    channel_center = np.array(channel_center)
+    channel_center = channel_center
     return channel_center
 
 
