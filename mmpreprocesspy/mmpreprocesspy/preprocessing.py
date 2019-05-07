@@ -26,7 +26,10 @@ def process_image(image):
     mincol, maxcol = pattern_limits(image_rot, use_smoothing=True)
 
     channel_centers = find_channels(image_rot, mincol, maxcol)
-    return image_rot, main_channel_angle, mincol, maxcol, channel_centers
+
+    growthlane_rois = get_growthlane_regions(channel_centers, mincol, maxcol)
+
+    return image_rot, main_channel_angle, mincol, maxcol, channel_centers, growthlane_rois
 
 
 def find_main_channel_orientation(image):
