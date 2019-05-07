@@ -61,6 +61,7 @@ class TestPreprocessing(TestCase):
 
         image_array = cv.warpAffine(image_array, matrix, (image_array.shape[1], image_array.shape[0]))
         dev_aux.show_image(image_array)
+        cv.waitKey()
 
 
 def read_tiff_to_nparray(image_path):

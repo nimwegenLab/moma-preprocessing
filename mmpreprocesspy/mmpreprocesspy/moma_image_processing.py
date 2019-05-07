@@ -36,7 +36,13 @@ class MomaImageProcessor(object):
         self.rotated_image, self.main_channel_angle, self.mincol, self.maxcol, self.channel_centers = preprocessing.split_channels_init(
             self.image)
         self.growthlane_rois = get_growthlane_regions(self.channel_centers, self.mincol, self.maxcol)
+        self.rotate_rois()
         self.get_image_registration_template()
+
+    def rotate_rois(self):
+        rotation_center = (np.int0(self.image.shape[1]/2), np.int0(self.image.shape[0]/2))
+        for growthlane_roi in self.growthlane_rois:
+            growthlane_roi.roi.rotate(rotation_center, -self.main_channel_angle)
 
     def get_image_registration_template(self):
         self.template, self.mid_row, self.hor_mid, self.hor_width = preprocessing.get_image_registration_template(self.image, self.mincol)
