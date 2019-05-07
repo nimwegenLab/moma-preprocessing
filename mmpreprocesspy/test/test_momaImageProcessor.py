@@ -1,5 +1,7 @@
 from unittest import TestCase
-from mmpreprocesspy.dev_auxiliary_functions import show_image_with_rois
+
+import cv2
+from mmpreprocesspy.dev_auxiliary_functions import show_image_with_growthlane_rois
 
 
 class TestMomaImageProcessor(TestCase):
@@ -68,7 +70,8 @@ class TestMomaImageProcessor(TestCase):
 
         gl_rois = sut.growthlane_rois
 
-        show_image_with_rois(sut.rotated_image, gl_rois)
+        show_image_with_growthlane_rois(sut.rotated_image, gl_rois)
+        cv2.waitKey()
 
     def test_get_growthlane_rois_dataset_4(self):
         from mmpreprocesspy.moma_image_processing import MomaImageProcessor
@@ -79,7 +82,32 @@ class TestMomaImageProcessor(TestCase):
         sut.process_image()
         gl_rois = sut.growthlane_rois
 
-        show_image_with_rois(sut.rotated_image, gl_rois)
+        show_image_with_growthlane_rois(sut.rotated_image, gl_rois)
+        cv2.waitKey()
+
+    def test_get_growthlane_rois_dataset_8(self):
+        from mmpreprocesspy.moma_image_processing import MomaImageProcessor
+
+        sut = MomaImageProcessor()
+        sut.read_image(
+            self.test_data_base_path + '/08_20190222_LB_SpentLB_TrisEDTA_LB_1/first_images/Pos0/img_000000000_ DIA Ph3 (Dual)_000.tif')
+        sut.process_image()
+        gl_rois = sut.growthlane_rois
+
+        show_image_with_growthlane_rois(sut.image, gl_rois)
+        cv2.waitKey()
+
+    def test_get_growthlane_rois_dataset_9(self):
+        from mmpreprocesspy.moma_image_processing import MomaImageProcessor
+
+        sut = MomaImageProcessor()
+        sut.read_image(
+            self.test_data_base_path + '/09_20190325_hi1_hi2_med1_rpmB_glu_gly_pl_chr_1/first_images/20190325_hi1_hi2_med1_rpmB_glu_gly_pl_chr_1_MMStack_1.ome-1.tif')
+        sut.process_image()
+        gl_rois = sut.growthlane_rois
+
+        show_image_with_growthlane_rois(sut.rotated_image, gl_rois)
+        cv2.waitKey()
 
 
 def read_tiff_to_nparray(image_path):
