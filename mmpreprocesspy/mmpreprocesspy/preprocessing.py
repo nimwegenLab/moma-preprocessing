@@ -10,7 +10,7 @@ import cv2 as cv
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
-def split_channels_init(image):
+def process_image(image):
     main_channel_angle = find_main_channel_orientation(image)
     if main_channel_angle != 0:
         image = skimage.transform.rotate(image, -main_channel_angle,

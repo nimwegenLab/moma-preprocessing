@@ -33,7 +33,7 @@ class MomaImageProcessor(object):
         self.image = np.array(image_base, dtype=np.uint16)
 
     def process_image(self):
-        self.rotated_image, self.main_channel_angle, self.mincol, self.maxcol, self.channel_centers = preprocessing.split_channels_init(
+        self.rotated_image, self.main_channel_angle, self.mincol, self.maxcol, self.channel_centers = preprocessing.process_image(
             self.image)
         self.growthlane_rois = get_growthlane_regions(self.channel_centers, self.mincol, self.maxcol)
         self.rotate_rois()
