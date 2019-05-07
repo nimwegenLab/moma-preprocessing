@@ -1,13 +1,14 @@
 import numpy as np
 import skimage.transform
 from mmpreprocesspy.GrowthlaneRoi import GrowthlaneRoi
+from mmpreprocesspy.data_region import DataRegion
 from mmpreprocesspy.roi import Roi
 from mmpreprocesspy.rotated_roi import RotatedRoi
 from skimage.filters import threshold_otsu
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
 import cv2 as cv
-
+from scipy.ndimage import filters
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
 def process_image(image):
@@ -74,24 +75,49 @@ def find_rotation(image):
 
 
 def pattern_limits(image, threshold_factor=None, use_smoothing=False):
-    fourier_ratio = calculate_fourier_ratio(image)
+    fourier_ratio_orig = calculate_fourier_ratio(image)
 
     if use_smoothing:
-        fourier_ratio = savgol_filter(fourier_ratio, 51, 1)  # window size 51, polynomial order 1
+        fourier_ratio = savgol_filter(fourier_ratio_orig, 51, 1)  # window size 51, polynomial order 1
+    else:
+        fourier_ratio = fourier_ratio_orig
 
     if threshold_factor is None:
         threshold = threshold_otsu(fourier_ratio)  # use Otsu method to determine threshold value
     else:
         threshold = threshold_factor * fourier_ratio.max()
 
+    region_mask = fourier_ratio > threshold
+    region_list = get_regions_from_mask(region_mask)
+    region_list = filter_date_regions_by_width(region_list, minimum_region_width=100)
+
+    # plt.plot(fourier_ratio_orig)
+    # plt.plot(fourier_ratio)
+    # plt.plot(region_mask * np.max(fourier_ratio))
+    # plt.show()
+
+    # # compare smoothed vs. non-smoothed data
     # yhat = savgol_filter(fourier_ratio, 51, 1)  # window size 31, polynomial order 3
     # plt.plot(fourier_ratio)
     # plt.plot(yhat)
+    # plt.hlines(threshold,0,fourier_ratio.__len__())
     # plt.show()
     #
-    #
-    # plt.hist(yhat)
+    # # look at histogram
+    # plt.hist(yhat,100)
     # plt.show()
+    #
+    # # look at differential values
+    # plt.plot(np.diff(yhat))
+    # plt.show()
+    #
+    # # try box-smoothing assuming, we know the length of the growthlanes
+    # filt_sig = filters.uniform_filter(fourier_ratio_orig, size=400, output=None, mode='reflect', cval=0.0, origin=0)
+    # plt.plot(fourier_ratio_orig)
+    # plt.plot(filt_sig)
+    # plt.show()
+
+
     # threshold_factor = threshold_otsu(yhat)
     # print(threshold_factor)
 
@@ -99,6 +125,46 @@ def pattern_limits(image, threshold_factor=None, use_smoothing=False):
     maxcol = np.argwhere(fourier_ratio > threshold)[-1][0]
 
     return mincol, maxcol
+
+
+def filter_date_regions_by_width(region_list, minimum_region_width):
+    """
+    Filters removes data regions from region_list with width < minimum_region_width.
+
+    :param region_list: list of DataRegion objects, that we want to filter.
+    :param minimum_region_width: minimum width of a region, so that it is not filtered out.
+    :return:
+    """
+    filtered_list = []
+    for region in region_list:
+        if region.width >= minimum_region_width:
+            filtered_list.append(region)
+    return filtered_list
+
+
+def get_regions_from_mask(region_mask):
+    """
+    Get list of the DataRegion objects that were found inside region_mask.
+
+    :param region_mask: the np.array of 0 and 1 in which we want find regions of value == 1.
+    :return: region_list: a list of DataRegion objects.
+    """
+    region_list = []  # list that will hold all regions that were found
+    region = DataRegion()  # object to hold the start and end values of the region
+    inside_region = False  # indicates, if we are currently inside a mask_region with value=1
+    for index, value in enumerate(region_mask):
+        if value == 1 and not inside_region:
+            # entered a region
+            inside_region = True
+            region.start = index
+        if value == 0 and inside_region:
+            # left a region
+            inside_region = False
+            region.end = index
+            region.width = region.end - region.start
+            region_list.append(region)
+            region = DataRegion()
+    return region_list
 
 
 def calculate_fourier_ratio(image):
