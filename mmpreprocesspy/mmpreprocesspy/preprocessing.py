@@ -23,11 +23,13 @@ def process_image(image):
 
     # recalculate channel region boundary on rotated image
     image_rot = skimage.transform.rotate(image, angle, cval=0)
-    mincol, maxcol = pattern_limits(image_rot, use_smoothing=True)
+    mincol, maxcol, region_list = pattern_limits(image_rot, use_smoothing=True)
 
-    channel_centers = find_channels(image_rot, mincol, maxcol)
-
-    growthlane_rois = get_growthlane_regions(channel_centers, mincol, maxcol)
+    growthlane_rois = []
+    for gl_region in region_list:
+        channel_centers = find_channels(image_rot, gl_region.start, gl_region.end)
+        rois = get_growthlane_regions(channel_centers, gl_region.start, gl_region.end)
+        growthlane_rois += rois
 
     return image_rot, main_channel_angle, mincol, maxcol, channel_centers, growthlane_rois
 
@@ -127,7 +129,7 @@ def pattern_limits(image, threshold_factor=None, use_smoothing=False):
     mincol = np.argwhere(fourier_ratio > threshold)[0][0]
     maxcol = np.argwhere(fourier_ratio > threshold)[-1][0]
 
-    return mincol, maxcol
+    return mincol, maxcol, region_list
 
 
 def filter_date_regions_by_width(region_list, minimum_region_width):
