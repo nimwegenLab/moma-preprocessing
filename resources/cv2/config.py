@@ -1,3 +1,3 @@
 BINARIES_PATHS = [
-    os.path.join('/media/data_volume/install_pyopencv_4.1_from_source/second_try/installation/OpenCV-master', 'lib')
+    os.path.join('/home/micha/Documents/opencv4_source_build/attempt_3/installation/OpenCV-4_1', 'lib')
 ] + BINARIES_PATHS
