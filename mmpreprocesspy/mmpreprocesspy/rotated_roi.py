@@ -8,11 +8,39 @@ class RotatedRoi(object):
         """center = (x, y)
            size = (width, height)"""
         self.center = center
-        self.size = size
-        self.width = size[0]
-        self.height = size[1]
+        self._size = size
+        self._width = size[0]
+        self._height = size[1]
         self.angle = angle
         pass
+
+    @property
+    def size(self):
+        return self._size
+
+    @size.setter
+    def size(self, value):
+        self._size = value
+        self._width = value[0]
+        self._height = value[1]
+
+    @property
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self, value):
+        self._height = value
+        self.size = (self.size[0], value)
+
+    @property
+    def width(self):
+        return self._width
+
+    @width.setter
+    def width(self, value):
+        self._width = value
+        self.size = (value, self.size[1])
 
     @staticmethod
     def create_from_roi(roi):

@@ -159,6 +159,67 @@ class TestRoi(TestCase):
         aux.show_image(roi_image)
         cv2.waitKey()
 
+    def test__width_setter__modifies_width_value_correctly(self):
+        roi_center = 100, 100
+        roi_size = (100, 100)
+        sut = RotatedRoi(roi_center, roi_size, 0)
+
+        sut.width += 100
+
+        self.assertEqual(200, sut.width)
+
+    def test__width_setter__modifies_value_of_size_correctly(self):
+        roi_center = 100, 100
+        roi_size = (100, 100)
+        sut = RotatedRoi(roi_center, roi_size, 0)
+        sut.width += 100
+
+        self.assertEqual(200, sut.size[0])
+
+    def test__height_setter__modifies_height_value_correctly(self):
+        roi_center = 100, 100
+        roi_size = (100, 100)
+        sut = RotatedRoi(roi_center, roi_size, 0)
+
+        sut.height += 100
+
+        self.assertEqual(200, sut.height)
+
+    def test__height_setter__modifies_modifies_value_of_size_correctly(self):
+        roi_center = 100, 100
+        roi_size = (100, 100)
+        sut = RotatedRoi(roi_center, roi_size, 0)
+
+        sut.height += 100
+
+        self.assertEqual(200, sut.size[1])
+
+    def test__size_setter__modifies_size_correctly(self):
+        roi_center = 100, 100
+        roi_size = (100, 100)
+        sut = RotatedRoi(roi_center, roi_size, 0)
+
+        sut.size = (200, 200)
+
+        self.assertEqual((200, 200), sut.size)
+
+    def test__size_setter__modifies_width_correctly(self):
+        roi_center = 100, 100
+        roi_size = (100, 100)
+        sut = RotatedRoi(roi_center, roi_size, 0)
+
+        sut.size = (200, 300)
+
+        self.assertEqual(200, sut.width)
+
+    def test__size_setter__modifies_height_correctly(self):
+        roi_center = 100, 100
+        roi_size = (100, 100)
+        sut = RotatedRoi(roi_center, roi_size, 0)
+
+        sut.size = (200, 300)
+
+        self.assertEqual(300, sut.height)
 
 
 def read_image(image_path):
