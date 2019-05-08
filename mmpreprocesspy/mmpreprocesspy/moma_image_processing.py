@@ -2,9 +2,13 @@ import skimage
 from mmpreprocesspy import preprocessing
 from PIL import Image
 import numpy as np
+from mmpreprocesspy.GrowthlaneRoi import GrowthlaneExitLocation
 from mmpreprocesspy.preprocessing import get_growthlane_regions
 from skimage.feature import match_template
 import cv2 as cv
+import mmpreprocesspy.dev_auxiliary_functions as aux
+import matplotlib.pyplot as plt
+
 
 class MomaImageProcessor(object):
     """ MomaImageProcessor encapsulates the processing of a Mothermachine image. """
@@ -23,6 +27,7 @@ class MomaImageProcessor(object):
         self.mid_row = None
         self.vertical_shift = None
         self.horizontal_shift = None
+        self.gl_orientation_search_area = 80  # TODO: this is a MM specific parameter; should be made configurable
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -36,7 +41,43 @@ class MomaImageProcessor(object):
         self.rotated_image, self.main_channel_angle, self.mincol, self.maxcol, self.channel_centers, self.growthlane_rois = preprocessing.process_image(
             self.image)
         self.rotate_rois()
+        self.set_growthlane_orientation(self.gl_orientation_search_area)
         self.get_image_registration_template()
+
+    def set_growthlane_orientation(self, search_area):
+        """
+        Finds the orientation of the growthlane within the ROI.
+        :param growthlane_rois:
+        :param search_area: the area before and after the ROI the will be looked to determine the direction; unit: [px]
+        :return:
+        """
+        gl_indexes_outside_of_image  = []
+        for index, gl_roi in enumerate(self.growthlane_rois):
+            gl_roi.roi.width += 2 * search_area  # extend ROI to include search area before and after
+            if not gl_roi.roi.is_inside_image(self.image):  # if extended ROI is outside image keep index for removal below
+                gl_indexes_outside_of_image.append(index)
+                continue
+            roi_image = gl_roi.roi.get_from_image(self.image)
+            gl_roi.roi.width -= 2 * search_area  # revert ROI extension
+            gl_roi.exit_location = self.determine_location_of_growthlane_exit(roi_image, search_area)
+        [self.growthlane_rois.pop(i) for i in reversed(gl_indexes_outside_of_image)]  # remove GL ROIs outside of the image
+
+    def determine_location_of_growthlane_exit(self, growthlane_roi_image, search_area):
+        """
+        This function determines the location of the growthlane by comparing the value sum of values
+        at the start of the *extend* GL to those at the end.
+        :param growthlane_roi_image: the image of from the extended GL ROI.
+        :param search_area: the value by which the GL was extended in *both* directions.
+        :return:
+        """
+        sum_at_start = np.sum(growthlane_roi_image[:, 0:search_area].flatten(), 0)
+        sum_at_end = np.sum(growthlane_roi_image[:, -search_area:].flatten(), 0)
+        if sum_at_start > sum_at_end:
+            return GrowthlaneExitLocation.AT_LEFT
+        elif sum_at_end > sum_at_start:
+            return GrowthlaneExitLocation.AT_RIGHT
+        else:
+            raise ValueError("Could not determine location of growthlane exit.")
 
     def rotate_rois(self):
         rotation_center = (np.int0(self.image.shape[1]/2), np.int0(self.image.shape[0]/2))

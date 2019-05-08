@@ -124,14 +124,14 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
 
             #go through all channels, check if there's a corresponding one in the new image. If yes go through all colors,
             #cut out channel, and append to tif stack. Completel also the kymograph for each color.
-            for gl_roi in growthlane_rois:
+            for gl_index, gl_roi in enumerate(growthlane_rois):
                 if gl_roi.roi.is_inside_image(image):
             # for c in gl_roi:
             #     if (np.min(c-channel_centers)<5)&(int(c)-half_width>0)&(int(c)+half_width+1<image.shape[0]):
             #         gl = np.argmin(np.abs(c-channel_centers)) # index of the growthlane
-                    gl = gl_roi.index
-                    frame_counter[gl]+=1
-                    gl_str='0'+str(gl) if gl<10 else str(gl)
+            #         gl = gl_roi.index
+                    frame_counter[gl_index]+=1
+                    gl_str='0'+str(gl_index) if gl_index<10 else str(gl_index)
                     pos_gl_name = dataset.get_first_tiff().split('.')[0]+'_Pos'+str(indp)+'_GL'+gl_str
 
                     if not os.path.exists(current_saveto_folder+'/'+pos_gl_name):
@@ -142,7 +142,7 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
                     # MM-2019-04-23: Here we get the GL ROI and store it to the GL stack.
                     for i in range(len(colors)):
                         # imtosave = image_stack[:,:,i][int(c)-half_width:int(c)+half_width+1,mincol-30:maxcol+30]
-                        imtosave = gl_roi.roi.get_from_image(image_stack[:,:,i])
+                        imtosave = gl_roi.get_oriented_roi_image(image_stack[:,:,i])
 
                         ################################################
                         # if i == 0 and gl_roi.index == 11:
@@ -150,9 +150,9 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
                         #     cv2.waitKey()
                         ################################################
 
-                        imtosave_flip = np.flipud(imtosave.T)
-                        skimage.external.tifffile.imsave(filename,imtosave_flip.astype(np.uint16),append = 'force',imagej = True, metadata = metadata)
-                        kymo[:,t,i,gl] = np.mean(imtosave, axis = 0)
+                        # imtosave_flip = np.flipud(imtosave.T)
+                        skimage.external.tifffile.imsave(filename,imtosave.astype(np.uint16),append = 'force',imagej = True, metadata = metadata)
+                        kymo[:,t,i,gl_index] = np.mean(imtosave, axis = 1)
 
         #remove growth lanes that don't have all time points (e.g. because of drift)
         incomplete_GL = np.where(frame_counter<maxframe)[0]
@@ -165,12 +165,12 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
 
         print(incomplete_GL)
         #save kymograph
-        for gl in range(len(channel_centers)):
-            if gl not in incomplete_GL:
+        for gl_index in range(len(channel_centers)):
+            if gl_index not in incomplete_GL:
 
                 for c in range(len(colors)):
-                    filename = kymo_folder+'/'+dataset.get_first_tiff().split('.')[0]+'_Pos'+str(indp)+'_GL'+str(gl)+'_col'+str(c)+'_kymo.tif'
-                    skimage.external.tifffile.imsave(filename,kymo[:,:,c,gl].astype(np.uint16),append = 'force',imagej = True, metadata = metadataK)
+                    filename = kymo_folder+'/'+dataset.get_first_tiff().split('.')[0]+'_Pos'+str(indp)+'_GL'+str(gl_index)+'_col'+str(c)+'_kymo.tif'
+                    skimage.external.tifffile.imsave(filename,kymo[:,:,c,gl_index].astype(np.uint16),append = 'force',imagej = True, metadata = metadataK)
 
 
     # finalize measurement of processing time

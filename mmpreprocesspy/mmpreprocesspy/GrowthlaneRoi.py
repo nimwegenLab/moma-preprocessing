@@ -1,9 +1,21 @@
+from enum import Enum
+import numpy as np
+
 class GrowthlaneRoi(object):
     """ Represents the growth-lane present inside a Mother-machine image. """
 
-    def __init__(self, roi=None, index=None):
+    def __init__(self, roi=None):
         self.roi = roi
-        self.index = index
+        self.exit_location: GrowthlaneExitLocation = None
+
+    def get_oriented_roi_image(self, image):
+        roi_image = self.roi.get_from_image(image)
+        if self.exit_location is GrowthlaneExitLocation.AT_RIGHT:
+            return np.flipud(roi_image.T)
+        if self.exit_location is GrowthlaneExitLocation.AT_LEFT:
+            return roi_image.T
+        else:
+            raise ValueError("Growthlane orientation is not set.")
 
     @property
     def length(self):
@@ -25,3 +37,10 @@ class GrowthlaneRoi(object):
             return self.roi.height
         else:
             return self.roi.width
+
+
+class GrowthlaneExitLocation(Enum):
+    """Enum for passing back the result from determining the location of the growthlane exit."""
+    AT_LEFT = 0
+    AT_RIGHT = 1
+

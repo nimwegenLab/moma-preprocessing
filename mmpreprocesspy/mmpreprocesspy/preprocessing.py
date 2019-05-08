@@ -246,9 +246,9 @@ def fft_align(im0, im1, pixlim=None):
 
 def get_growthlane_regions(channel_centers, mincol, maxcol):
     growthlaneRois = []
-    for index, center in enumerate(channel_centers):
+    for center in channel_centers:
         roi = get_roi(center, mincol, maxcol)
-        growthlaneRois.append(GrowthlaneRoi(roi, index))
+        growthlaneRois.append(GrowthlaneRoi(roi))
     return growthlaneRois
 
 
