@@ -1,22 +1,16 @@
-import os, re, time, sys, shutil
 import copy
-import cv2
+import os
+import shutil
+import time
+
 import numpy as np
-import matplotlib.pyplot as plt
-
-import scipy.optimize
-import scipy.ndimage.interpolation as ndii
 import skimage.external.tifffile
-import skimage.transform
-import skimage.measure
 import skimage.filters
-from mmpreprocesspy.moma_image_processing import MomaImageProcessor
-from skimage.feature import match_template
-import mmpreprocesspy.dev_auxiliary_functions as aux
-
+import skimage.measure
+import skimage.transform
 from mmpreprocesspy.MMdata import MMData
+from mmpreprocesspy.moma_image_processing import MomaImageProcessor
 
-import mmpreprocesspy.preprocessing as pre
 
 def preproc_fun(data_folder, folder_to_save,positions,maxframe):
     #create a micro-manager image object
@@ -39,7 +33,6 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
     #define basic parameters
     colors = dataset.get_channels()
     phase_channel_index = 0
-    half_width = 50
 
     #define metadata for imagej
     metadata = {'channels':len(colors),'slices':1,'frames':maxframe,'hyperstack':True,'loop':False}
@@ -60,21 +53,13 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
         imageProcessor = MomaImageProcessor()
         imageProcessor.load_numpy_image_array(image_base)
         imageProcessor.process_image()
-        mincol = imageProcessor.mincol
-        maxcol = imageProcessor.maxcol
         channel_centers = imageProcessor.channel_centers
 
         #create empty kymographs to fill
         gl_length = imageProcessor.growthlane_rois[0].length
         nr_of_rois = len(imageProcessor.growthlane_rois)
         kymo = np.zeros((gl_length, maxframe, len(colors), nr_of_rois))
-        # kymo = np.zeros((maxcol-mincol+60,maxframe, len(colors), len(channel_centers)))
         metadataK = {'channels':len(colors),'slices':1,'frames':len(channel_centers),'hyperstack':True,'loop':False}
-
-        #calculate channel spacing 
-        # fourier_ch = np.abs(np.fft.fft(np.sum(image_base[:,mincol:maxcol],axis=1)))
-        # fourier_sort = np.sort(fourier_ch)
-        # channel_spacing = image_base.shape[0]/np.where(fourier_ch==fourier_sort[-2])[0][0]
 
         frame_counter = np.zeros(len(channel_centers))  # stores per growthlane, the number of processed images
         #go through time-lapse and cut out channels
@@ -82,8 +67,6 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
 
             if np.mod(t,10)==0:
                 print('time: '+str(t))
-            #load image and align
-            image = dataset.get_image_fast(channel=phase_channel_index,frame=t,position=indp)
 
             '''#register images using FFT. Sometimes fails, probably because of border effect
             mindim = np.int(np.min([int(image.shape[0]/3),mincol-50])/2)
@@ -97,23 +80,12 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
             t1 = t1+t1b
             '''
 
+            image = dataset.get_image_fast(channel=phase_channel_index,frame=t,position=indp)
             imageProcessor.determine_image_shift(image)
             growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
 
             for gl_roi in growthlane_rois:
                 gl_roi.roi.translate((-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
-
-            # image_rot = imageProcessor.get_registered_image(image)
-
-            #find channels in new image
-            # channels = pre.find_channels(image_rot, mincol, maxcol)
-
-
-            ###############################################
-            # aux.show_image_with_rotated_rois(image, [g.roi for g in growthlane_rois])
-            # cv2.waitKey()
-            # cv2.destroyAllWindows()
-            ###############################################
 
             #load all colors
             image_stack = np.zeros((image_base.shape[0],image_base.shape[1],len(colors)))
@@ -126,10 +98,6 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
             #cut out channel, and append to tif stack. Completel also the kymograph for each color.
             for gl_index, gl_roi in enumerate(growthlane_rois):
                 if gl_roi.roi.is_inside_image(image):
-            # for c in gl_roi:
-            #     if (np.min(c-channel_centers)<5)&(int(c)-half_width>0)&(int(c)+half_width+1<image.shape[0]):
-            #         gl = np.argmin(np.abs(c-channel_centers)) # index of the growthlane
-            #         gl = gl_roi.index
                     frame_counter[gl_index]+=1
                     gl_str='0'+str(gl_index) if gl_index<10 else str(gl_index)
                     pos_gl_name = dataset.get_first_tiff().split('.')[0]+'_Pos'+str(indp)+'_GL'+gl_str
@@ -139,18 +107,8 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
 
                     filename = current_saveto_folder+'/'+pos_gl_name+'/'+pos_gl_name+'.tif'
 
-                    # MM-2019-04-23: Here we get the GL ROI and store it to the GL stack.
                     for i in range(len(colors)):
-                        # imtosave = image_stack[:,:,i][int(c)-half_width:int(c)+half_width+1,mincol-30:maxcol+30]
                         imtosave = gl_roi.get_oriented_roi_image(image_stack[:,:,i])
-
-                        ################################################
-                        # if i == 0 and gl_roi.index == 11:
-                        #     aux.show_image(imtosave, "Image ROI "+str(gl_roi.index))
-                        #     cv2.waitKey()
-                        ################################################
-
-                        # imtosave_flip = np.flipud(imtosave.T)
                         skimage.external.tifffile.imsave(filename,imtosave.astype(np.uint16),append = 'force',imagej = True, metadata = metadata)
                         kymo[:,t,i,gl_index] = np.mean(imtosave, axis = 1)
 
@@ -171,7 +129,6 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
                 for c in range(len(colors)):
                     filename = kymo_folder+'/'+dataset.get_first_tiff().split('.')[0]+'_Pos'+str(indp)+'_GL'+str(gl_index)+'_col'+str(c)+'_kymo.tif'
                     skimage.external.tifffile.imsave(filename,kymo[:,:,c,gl_index].astype(np.uint16),append = 'force',imagej = True, metadata = metadataK)
-
 
     # finalize measurement of processing time
     end1 = time.time()
