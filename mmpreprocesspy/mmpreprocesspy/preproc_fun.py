@@ -64,21 +64,8 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
         frame_counter = np.zeros(len(channel_centers))  # stores per growthlane, the number of processed images
         #go through time-lapse and cut out channels
         for t in range(maxframe):
-
             if np.mod(t,10)==0:
-                print('time: '+str(t))
-
-            '''#register images using FFT. Sometimes fails, probably because of border effect
-            mindim = np.int(np.min([int(image.shape[0]/3),mincol-50])/2)
-            t0, t1 = pre.fft_align(image_base[0:int(image.shape[0]/3),0:mincol-50],
-                                       image[0:int(image.shape[0]/3),0:mincol-50],pixlim =mindim)
-            image = np.roll(image,(t0,t1),axis=(0,1))
-            t0b, t1b = pre.fft_align(image_base[0:int(image.shape[0]/3),mincol-50:mincol+200],
-                                       image[0:int(image.shape[0]/3),mincol-50:mincol+200],pixlim=20)
-            image = np.roll(image,(t0b,t1b),axis=(0,1))
-            t0 = t0+t0b
-            t1 = t1+t1b
-            '''
+                print('time: '+str(t))  # print time periodically
 
             image = dataset.get_image_fast(channel=phase_channel_index,frame=t,position=indp)
             imageProcessor.determine_image_shift(image)
@@ -90,8 +77,6 @@ def preproc_fun(data_folder, folder_to_save,positions,maxframe):
             #load all colors
             image_stack = np.zeros((image_base.shape[0],image_base.shape[1],len(colors)))
             for i in range(len(colors)):
-                # image = dataset.get_image_fast(channel=i,frame=t,position=indp)
-                # image_stack[:,:,i] = imageProcessor.get_registered_image(image)
                 image_stack[:, :, i] = dataset.get_image_fast(channel=i,frame=t,position=indp)
 
             #go through all channels, check if there's a corresponding one in the new image. If yes go through all colors,
