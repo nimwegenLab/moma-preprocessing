@@ -1,14 +1,14 @@
+import cv2 as cv
+import mmpreprocesspy.dev_auxiliary_functions as aux
 import numpy as np
 import skimage.transform
 from mmpreprocesspy.GrowthlaneRoi import GrowthlaneRoi
 from mmpreprocesspy.data_region import DataRegion
 from mmpreprocesspy.roi import Roi
 from mmpreprocesspy.rotated_roi import RotatedRoi
+from scipy.signal import savgol_filter
 from skimage.filters import threshold_otsu
 import matplotlib.pyplot as plt
-from scipy.signal import savgol_filter
-import cv2 as cv
-from scipy.ndimage import filters
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
 def process_image(image):
@@ -24,11 +24,41 @@ def process_image(image):
     # recalculate channel region boundary on rotated image
     image_rot = skimage.transform.rotate(image, angle, cval=0)
     mincol, maxcol, region_list = pattern_limits(image_rot, use_smoothing=True)
-
+    refine_regions(image_rot, region_list)
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rot, region_list)
 
     return image_rot, main_channel_angle, mincol, maxcol, channel_centers, growthlane_rois
 
+def refine_regions(rotated_image, region_list):
+    for region in region_list:
+        refine_region(rotated_image, region)
+
+def refine_region(rotated_image, region):
+    """
+    This method extends the channel ROIs start and end-indexes if necessary. It determines the average intensity in the
+    region of the channels (which was determined using the FFT spectrum) and uses this as a threshold intensity. It then
+    shifts the start and end indices of the region in both directions until the corresponding intensity value fall below
+    this threshold.
+    :param rotated_image:
+    :param region:
+    :return:
+    """
+    avg_projected_intensities = np.mean(rotated_image, axis=0)
+    threshold = np.mean(rotated_image[:, region.start:region.end].flatten(), axis=0)
+    np.mean(rotated_image[:, region.start:region.end + 100], axis=0)
+    while avg_projected_intensities[region.start] > threshold:
+        region.start -= 1
+    while avg_projected_intensities[region.end] > threshold:
+        region.end += 1
+
+    # normalizedImg = None
+    # normalizedImg = cv.normalize(rotated_image,  normalizedImg, 0, 255, cv.NORM_MINMAX)
+    # im = np.array(normalizedImg, dtype=np.uint8)
+    # cv.line(im, (region.start, 0), (region.start, im.shape[0]), (255, 0, 0), 5)
+    # cv.line(im, (region.end, 0), (region.end, im.shape[0]), (255, 0, 0), 5)
+    # aux.show_image(im, 'rotated image')
+    # cv.waitKey()
+    # pass
 
 def get_all_growthlane_rois(rotated_image, region_list):
     """Gets the growthlane ROIs from all growthlane regions that were found in the image."""
