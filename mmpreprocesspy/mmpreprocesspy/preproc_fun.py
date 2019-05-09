@@ -19,7 +19,8 @@ def get_gl_tiff_path(result_base_path, base_name, indp, gl_index):
 
 def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index):
     return result_base_path + '/' + 'Pos' + str(indp) + '/GL' + str(
-        gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_Col' + str(color_index) + '_kymo.tiff'
+        gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_Col' + str(
+        color_index) + '_kymo.tiff'
 
 
 def preproc_fun(data_folder, folder_to_save, positions, maxframe):
@@ -98,12 +99,12 @@ def preproc_fun(data_folder, folder_to_save, positions, maxframe):
         # save kymograph
         for gl_index in range(len(channel_centers)):
             if gl_index not in incomplete_GL:
-
                 for color in range(len(colors)):
                     kymo_file_path = get_kymo_tiff_path(folder_to_save, base_name, indp, gl_index, color)
                     if not os.path.exists(os.path.dirname(kymo_file_path)):
                         os.makedirs(os.path.dirname(kymo_file_path))
-                    skimage.external.tifffile.imsave(kymo_file_path, kymographs[gl_index][:, :, color].astype(np.uint16),
+                    skimage.external.tifffile.imsave(kymo_file_path,
+                                                     kymographs[gl_index][:, :, color].astype(np.uint16),
                                                      append='force', imagej=True, metadata=metadataK)
 
     # finalize measurement of processing time
