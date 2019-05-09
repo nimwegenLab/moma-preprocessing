@@ -58,7 +58,7 @@ def preproc_fun(data_folder, folder_to_save, positions, maxframe):
         # create empty kymographs to fill
         gl_length = imageProcessor.growthlane_rois[0].length
         nr_of_rois = len(imageProcessor.growthlane_rois)
-        kymo = np.zeros((gl_length, maxframe, len(colors), nr_of_rois))
+        kymographs = [np.zeros((roi.length, maxframe, len(colors))) for roi in imageProcessor.growthlane_rois]
         metadataK = {'channels': len(colors), 'slices': 1, 'frames': len(channel_centers), 'hyperstack': True,
                      'loop': False}
 
@@ -97,7 +97,7 @@ def preproc_fun(data_folder, folder_to_save, positions, maxframe):
                         imtosave = gl_roi.get_oriented_roi_image(image_stack[:, :, i])
                         skimage.external.tifffile.imsave(filename, imtosave.astype(np.uint16), append='force',
                                                          imagej=True, metadata=metadata)
-                        kymo[:, t, i, gl_index] = np.mean(imtosave, axis=1)
+                        kymographs[gl_index][:, t, i] = np.mean(imtosave, axis=1)
 
         # remove growth lanes that don't have all time points (e.g. because of drift)
         incomplete_GL = np.where(frame_counter < maxframe)[0]
@@ -116,7 +116,7 @@ def preproc_fun(data_folder, folder_to_save, positions, maxframe):
                 for c in range(len(colors)):
                     filename = kymo_folder + '/' + dataset.get_first_tiff().split('.')[0] + '_Pos' + str(
                         indp) + '_GL' + str(gl_index) + '_col' + str(c) + '_kymo.tif'
-                    skimage.external.tifffile.imsave(filename, kymo[:, :, c, gl_index].astype(np.uint16),
+                    skimage.external.tifffile.imsave(filename, kymographs[gl_index][:, :, c].astype(np.uint16),
                                                      append='force', imagej=True, metadata=metadataK)
 
     # finalize measurement of processing time

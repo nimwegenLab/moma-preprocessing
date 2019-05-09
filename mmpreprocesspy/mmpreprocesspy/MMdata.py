@@ -204,11 +204,12 @@ class MMData:
         compress to n"""
         if self.mm_map is None:
             self.get_map_indices()
-        selected = self.mm_map.loc[(self.mm_map['frame'] == frame) & (self.mm_map['position']==position) &
-                                 (self.mm_map['channel']==channel) & (self.mm_map['slice']==plane),
-                                 ['chunk','image_index','offset']].values
-        
-        
+        selected = self.mm_map.loc[(self.mm_map['frame'] == frame) &
+                                   (self.mm_map['position'] == position) &
+                                   (self.mm_map['channel'] == channel) &
+                                   (self.mm_map['slice'] == plane),
+                                   ['chunk', 'image_index', 'offset']].values
+
         with open(self.folder+'/'+selected[0,0], "rb") as binary_file:
 
             ifd_pos = selected[0,2]
