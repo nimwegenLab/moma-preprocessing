@@ -31,3 +31,17 @@ class TestPreproc_fun(TestCase):
             shutil.rmtree(results_directory)
 
         preproc_fun.preproc_fun(data_directory, results_directory, positions, maxframe)
+
+    def test__get_gl_tiff_path(self):
+        from mmpreprocesspy import preproc_fun
+
+        gl_file_path = preproc_fun.get_gl_tiff_path('/path/to/file', 'experiment_name', '1', '5')
+        print(gl_file_path)
+        print(os.path.dirname(gl_file_path))
+
+    def test__get_kymo_tiff_path(self):
+        from mmpreprocesspy import preproc_fun
+
+        kymo_file_path = preproc_fun.get_kymo_tiff_path('/path/to/file', 'experiment_name', '1', '5', '0')
+        print(kymo_file_path)
+        print(os.path.dirname(kymo_file_path))
