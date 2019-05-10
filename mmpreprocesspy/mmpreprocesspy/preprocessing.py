@@ -10,6 +10,7 @@ from scipy.signal import savgol_filter
 from skimage.filters import threshold_otsu
 import matplotlib.pyplot as plt
 
+
 # find rotation, channel boundaries and positions for first image that is then used as reference
 def process_image(image):
     main_channel_angle = find_main_channel_orientation(image)
@@ -35,20 +36,25 @@ def refine_regions(rotated_image, region_list):
 
 def refine_region(rotated_image, region):
     """
-    This method extends the channel ROIs start and end-indexes if necessary. It determines the average intensity in the
-    region of the channels (which was determined using the FFT spectrum) and uses this as a threshold intensity. It then
-    shifts the start and end indices of the region in both directions until the corresponding intensity value fall below
-    this threshold.
+    This method extends start and end-indexes of the channel areas, if necessary. It determines the maximum intensity in
+    direction of the image columns in the channel region, which was determined using the FFT spectrum.
+    The median of these maximum intensities is used as threshold value.
+    It then shifts the start and end indices of the region in both directions until their respective intensity values
+    fall below this threshold (it does this using a lookahead-interval to avoid aborting prematurely).
     :param rotated_image:
     :param region:
     :return:
     """
-    avg_projected_intensities = np.mean(rotated_image, axis=0)
-    threshold = np.mean(rotated_image[:, region.start:region.end].flatten(), axis=0)
-    np.mean(rotated_image[:, region.start:region.end + 100], axis=0)
-    while avg_projected_intensities[region.start] > threshold:
+    look_ahead_length = 50  # the distance that the algorithm will look ahead to see if the threshold is passed
+    projected_max_intensities = np.max(rotated_image, axis=0)
+    sorted_max_intensities = np.sort(projected_max_intensities)
+    threshold = np.median(sorted_max_intensities)
+
+    #  extend region at the channel start using lookahead interval
+    while np.any(projected_max_intensities[region.start-look_ahead_length:region.start] > threshold):
         region.start -= 1
-    while avg_projected_intensities[region.end] > threshold:
+    #  extend region at the channel end using lookahead interval
+    while np.any(projected_max_intensities[region.end:region.end+look_ahead_length] > threshold):
         region.end += 1
 
     # normalizedImg = None
@@ -58,7 +64,15 @@ def refine_region(rotated_image, region):
     # cv.line(im, (region.end, 0), (region.end, im.shape[0]), (255, 0, 0), 5)
     # aux.show_image(im, 'rotated image')
     # cv.waitKey()
-    # pass
+    #
+    # #######################
+    #
+    # plt.hist(projected_max_intensities, 50), plt.show()
+    # plt.plot(projected_max_intensities), plt.hlines(threshold, region.start, region.end), plt.show()
+    # plt.plot(projected_max_intensities[region.start:region.end]), plt.hlines(threshold, region.start, region.end), plt.show()
+    # plt.plot(projected_max_intensities[region.start-look_ahead_length:region.start]), plt.hlines(threshold, region.start, region.end), plt.show()
+    # plt.plot(projected_max_intensities[region.end:region.end+look_ahead_length]), plt.hlines(threshold, region.start, region.end), plt.show()
+
 
 def get_all_growthlane_rois(rotated_image, region_list):
     """Gets the growthlane ROIs from all growthlane regions that were found in the image."""

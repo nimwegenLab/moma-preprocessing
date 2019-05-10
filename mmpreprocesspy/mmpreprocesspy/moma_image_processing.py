@@ -53,12 +53,12 @@ class MomaImageProcessor(object):
         """
         gl_indexes_outside_of_image  = []
         for index, gl_roi in enumerate(self.growthlane_rois):
-            gl_roi.roi.width += 2 * search_area  # extend ROI to include search area before and after
+            # gl_roi.roi.width += 2 * search_area  # extend ROI to include search area before and after
             if not gl_roi.roi.is_inside_image(self.image):  # if extended ROI is outside image keep index for removal below
                 gl_indexes_outside_of_image.append(index)
                 continue
             roi_image = gl_roi.roi.get_from_image(self.image)
-            gl_roi.roi.width -= 2 * search_area  # revert ROI extension
+            # gl_roi.roi.width -= 2 * search_area  # revert ROI extension
             gl_roi.exit_location = self.determine_location_of_growthlane_exit(roi_image, search_area)
         [self.growthlane_rois.pop(i) for i in reversed(gl_indexes_outside_of_image)]  # remove GL ROIs outside of the image
 
