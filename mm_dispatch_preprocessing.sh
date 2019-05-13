@@ -9,6 +9,16 @@ mm_dispatch_preprocessing(){
 
 MMPRE_EXIST=$(module av MMPreproc 2>&1 | grep MMPreproc | wc -l)
 if [ $MMPRE_EXIST -eq 0 ]; then printf "The module MMPreproc cannot be found. Aborting...\n" >&2; exit 1; fi
+
+# Check arguments
+if [ -n "$CAMERA_ROI_PATH" ]; then printf "WARNING: CAMERA_ROI_PATH argument is defined, but not supported. Will be ignored.\n"; fi
+if [ -n "$DARK_PATH" ]; then printf "WARNING: DARK_PATH argument is defined, but not supported. Will be ignored.\n"; fi
+if [ -n "$GAIN_PATH" ]; then printf "WARNING: GAIN_PATH argument is defined, but not supported. Will be ignored.\n"; fi 
+if [ -n "$HOTPIXS_PATH" ]; then printf "WARNING: HOTPIXS_PATH argument is defined, but not supported. Will be ignored.\n"; fi
+if [ -n "$FLATFIELD_PATH" ]; then printf "WARNING: FLATFIELD_PATH argument is defined, but not supported. Will be ignored.\n"; fi
+if [ -n "$CHANNELS_ORDER" ]; then printf "WARNING: CHANNELS_ORDER argument is defined, but not supported. Will be ignored.\n"; fi
+if [ -n "$FIJI_MACRO" ]; then printf "WARNING: FIJI_MACRO argument is defined, but not supported. Will be ignored.\n"; fi
+
 # get array length
 N=${#POS_NAMES[@]}
 
@@ -29,23 +39,22 @@ for (( I=0; I<N; I++ )); do
   
   mkdir -p $PREPROC_DIR # -p: no error if existing, make parent directories as needed
   mkdir -p $PREPROC_DIR/logs
-#   CMD="/scicore/home/nimwegen/GROUP/MM_Analysis/mm_pre_bc2.sh $RAW_FILE $PREPROC_DIR $ROTATION $CHANNELS_ORDER"
-  CMD_STR="python $MMPRE_HOME/call_preproc_fun.py \
+  
+  CMD_STR="python \"$MMPRE_HOME/call_preproc_fun.py\" \
   -i \"$RAW_PATH\" \
-  -o $PREPROC_DIR"
+  -o \"$PREPROC_DIR\""
   if [ -n "$POS_NAME" ]; then CMD_STR="$CMD_STR -p $POS_NAME"; fi # append optional argument
   if ! (( $ROTATION == 0 )); then CMD_STR="$CMD_STR -r $ROTATION"; fi # append optional argument
-  if [ -n "$CAMERA_ROI_PATH" ]; then CMD_STR="$CMD_STR -j $CAMERA_ROI_PATH"; fi # append optional argument
-#  if [ -n "$CROP_ROI_PATH" ]; then CMD_STR="$CMD_STR -k $CROP_ROI_PATH"; fi # append optional argument
-  if [ -n "$DARK_PATH" ]; then CMD_STR="$CMD_STR -d $DARK_PATH"; fi # append optional argument
-  if [ -n "$GAIN_PATH" ]; then CMD_STR="$CMD_STR -g $GAIN_PATH"; fi # append optional argument
-  if [ -n "$HOTPIXS_PATH" ]; then CMD_STR="$CMD_STR -h $HOTPIXS_PATH"; fi # append optional argument
-  if [ -n "$FLATFIELD_PATH" ]; then CMD_STR="$CMD_STR -ff $FLATFIELD_PATH"; fi # append optional argument
-  if [ -n "$CHANNELS_ORDER" ]; then CMD_STR="$CMD_STR -c $CHANNELS_ORDER"; fi # append optional argument
-  if [ -n "$FIJI_MACRO" ]; then CMD_STR="$CMD_STR -m $FIJI_MACRO"; fi # append optional argument
+#  if [ -n "$CAMERA_ROI_PATH" ]; then CMD_STR="$CMD_STR -j $CAMERA_ROI_PATH"; fi # append optional argument
+#  if [ -n "$DARK_PATH" ]; then CMD_STR="$CMD_STR -d $DARK_PATH"; fi # append optional argument
+#  if [ -n "$GAIN_PATH" ]; then CMD_STR="$CMD_STR -g $GAIN_PATH"; fi # append optional argument
+#  if [ -n "$HOTPIXS_PATH" ]; then CMD_STR="$CMD_STR -h $HOTPIXS_PATH"; fi # append optional argument
+#  if [ -n "$FLATFIELD_PATH" ]; then CMD_STR="$CMD_STR -ff $FLATFIELD_PATH"; fi # append optional argument
+#  if [ -n "$CHANNELS_ORDER" ]; then CMD_STR="$CMD_STR -c $CHANNELS_ORDER"; fi # append optional argument
+#  if [ -n "$FIJI_MACRO" ]; then CMD_STR="$CMD_STR -m $FIJI_MACRO"; fi # append optional argument
   if [ -n "$TMIN" ]; then CMD_STR="$CMD_STR -tmin $TMIN"; fi # append optional argument
   if [ -n "$TMAX" ]; then CMD_STR="$CMD_STR -tmax $TMAX"; fi # append optional argument
-  
+ 
   # use single quote to prevent variable evaluation
   CMD_SCRIPT="#!/bin/bash \n\n\
 #SBATCH -t 1-00:00:00 \n\
