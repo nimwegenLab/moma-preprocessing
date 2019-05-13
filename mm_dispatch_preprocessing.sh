@@ -6,27 +6,26 @@
 
 
 mm_dispatch_preprocessing(){
-# load required module
-#module load MMPreproc
 
 MMPRE_EXIST=$(module av MMPreproc 2>&1 | grep MMPreproc | wc -l)
 if [ $MMPRE_EXIST -eq 0 ]; then printf "The module MMPreproc cannot be found. Aborting...\n" >&2; exit 1; fi
 # get array length
 N=${#POS_NAMES[@]}
 
+PREPROC_DIR=$(dirname $PREPROC_DIR_TPL)
+BASENAME=$(basename "$PREPROC_DIR")
+
 # start one job per position
 # using a job array is not convenient since it requires to pass indices and flip flags arrays as arguments
 for (( I=0; I<N; I++ )); do
   POS_NAME=${POS_NAMES[$I]}
-  PREPROC_DIR=$(printf $PREPROC_DIR_TPL $POS_NAME)
   CROP_ROI_PATH=$(printf $CROP_ROI_PATH_TPL $POS_NAME)
   ROTATION=${ROTATIONS[$I]}
 
-  BASENAME=$(basename "$PREPROC_DIR")
-  SCRIPT=$PREPROC_DIR/logs/slurm_${BASENAME}.sh           # path to custom bash script
-  LOG=$PREPROC_DIR/logs/slurm_${BASENAME}.log             # path to redirect stdout (qsub command and job ID)
-  S_OUT=$PREPROC_DIR/logs/slurm_${BASENAME}_out.log  # path to redirect qsub stdout
-  S_ERR=$PREPROC_DIR/logs/slurm_${BASENAME}_err.log  # path to redirect qsub stderr
+  SCRIPT=$PREPROC_DIR/logs/slurm_${POS_NAME}.sh           # path to custom bash script
+  LOG=$PREPROC_DIR/logs/slurm_${POS_NAME}.log             # path to redirect stdout (qsub command and job ID)
+  S_OUT=$PREPROC_DIR/logs/slurm_${POS_NAME}_out.log  # path to redirect qsub stdout
+  S_ERR=$PREPROC_DIR/logs/slurm_${POS_NAME}_err.log  # path to redirect qsub stderr
   
   mkdir -p $PREPROC_DIR # -p: no error if existing, make parent directories as needed
   mkdir -p $PREPROC_DIR/logs
@@ -64,11 +63,6 @@ $CMD_STR \n"
   CMD_SBATCH="sbatch $SCRIPT"
 #  CMD_SBATCH=$SCRIPT
 
-  echo CMD_SCIPT:
-  echo $CMD_SCRIPT
-  echo SCRIPT:
-  echo $SCRIPT
-  
   printf "$CMD_SCRIPT" > $SCRIPT
   chmod +x $SCRIPT
 
@@ -76,15 +70,9 @@ $CMD_STR \n"
   [ -f "$S_ERR" ] && rm $S_ERR
   printf "$CMD_SBATCH \n" > $LOG
   
-  echo LOG:
-  echo $LOG
-
-  echo ""
-  echo CMD_SBATCH:
-  echo $CMD_SBATCH
-  
   $CMD_SBATCH >> $LOG
 done
 echo "Preprocessing queued... (use squeue to check the current status)"
 wait
+
 }
