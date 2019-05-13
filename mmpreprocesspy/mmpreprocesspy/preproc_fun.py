@@ -13,11 +13,13 @@ from mmpreprocesspy.moma_image_processing import MomaImageProcessor
 
 
 def get_gl_tiff_path(result_base_path, base_name, indp, gl_index):
+    gl_index += 1  # we do this to comply with legacy indexing of growthlanes, which starts at 1
     return result_base_path + '/' + 'Pos' + str(indp) + '/GL' + str(
         gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '.tiff'
 
 
 def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index):
+    gl_index += 1  # we do this to comply with legacy indexing of growthlanes, which starts at 1
     return result_base_path + '/' + 'Pos' + str(indp) + '/GL' + str(
         gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_Col' + str(
         color_index) + '_kymo.tiff'
