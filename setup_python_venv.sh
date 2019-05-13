@@ -26,6 +26,7 @@ python3 -m venv $DIR/venv-testenv
 #virtualenv --python=python3.6 $DIR/venv-testenv
 source "$DIR/venv-testenv/bin/activate"
 
+pip install --upgrade pip
 pip install wheel
 pip install ipdb
 pip install pudb
@@ -38,10 +39,9 @@ pip install --editable $PREPROC_PACKAGE_PATH
 if [[ "$runningOnScicore" = false  ]]; then
   echo "Copying OpenCV from the resource folder ..."
   cp -a resources/cv2 venv-testenv/lib/python3.7/site-packages/
+else
+  echo "Installing OpenCV using pip ..."
+  pip install opencv-contrib-python
 fi
-#else
-#  echo "Installing OpenCV using pip ..."
-##  pip install opencv-contrib-python
-#fi
 
 deactivate
