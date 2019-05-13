@@ -5,7 +5,7 @@
 #
 
 
-mm_dispatch_preprocessing_python(){
+mm_dispatch_preprocessing(){
 # load required module
 #module load MMPreproc
 
