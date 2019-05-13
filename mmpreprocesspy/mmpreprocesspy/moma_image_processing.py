@@ -3,7 +3,7 @@ from mmpreprocesspy import preprocessing
 from PIL import Image
 import numpy as np
 from mmpreprocesspy.GrowthlaneRoi import GrowthlaneExitLocation
-from mmpreprocesspy.preprocessing import get_growthlane_regions
+from mmpreprocesspy.preprocessing import get_growthlane_rois
 from skimage.feature import match_template
 import cv2 as cv
 import mmpreprocesspy.dev_auxiliary_functions as aux

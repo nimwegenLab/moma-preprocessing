@@ -80,11 +80,18 @@ def get_all_growthlane_rois(rotated_image, region_list):
     channel_centers = []
     for gl_region in region_list:
         centers = find_channels(rotated_image, gl_region.start, gl_region.end)
-        rois = get_growthlane_regions(centers, gl_region.start, gl_region.end)
+        rois = get_growthlane_rois(centers, gl_region.start, gl_region.end)
         growthlane_rois += rois
         channel_centers += centers
     return growthlane_rois, channel_centers
 
+def get_mean_distance_between_growthlanes(channel_centers):
+    """
+    Get the mean distance between two adjacent growth-lanes.
+    :param channel_centers:
+    :return:
+    """
+    return np.int0(np.mean(np.diff(channel_centers)))
 
 def find_main_channel_orientation(image):
     """ Find the orientation of the main channel.
@@ -288,21 +295,36 @@ def fft_align(im0, im1, pixlim=None):
     return t0, t1
 
 
-def get_growthlane_regions(channel_centers, mincol, maxcol):
+def get_growthlane_rois(channel_centers, mincol, maxcol):
+    """
+    Returns ROIs for individual GLs at the positions of `channel_centers`.
+    :param channel_centers:
+    :param mincol:
+    :param maxcol:
+    :return:
+    """
     growthlaneRois = []
+    distance_between_channels = get_mean_distance_between_growthlanes(channel_centers)
     for center in channel_centers:
-        roi = get_roi(center, mincol, maxcol)
+        roi = get_roi(center, distance_between_channels, mincol, maxcol)
         growthlaneRois.append(GrowthlaneRoi(roi))
     return growthlaneRois
 
 
-def get_roi(center, mincol, maxcol):
-    channel_width = 100  # TODO-MM-2019-04-23: This will need to be determined dynamically or made configurable.
-    half_width = int(channel_width / 2)
-    m1 = center - half_width
-    m2 = center + half_width
-    n1 = mincol
-    n2 = maxcol
+def get_roi(vertical_center_index, height, start_index, stop_index):
+    """
+    Create a rotated ROI from provided center, width, start- and stop-index
+    :param vertical_center_index:
+    :param height:
+    :param start_index:
+    :param stop_index:
+    :return:
+    """
+    roi_half_width = int(height / 2)
+    m1 = vertical_center_index - roi_half_width
+    m2 = vertical_center_index + roi_half_width
+    n1 = start_index
+    n2 = stop_index
     return RotatedRoi.create_from_roi(Roi(m1, n1, m2, n2))
 
 
