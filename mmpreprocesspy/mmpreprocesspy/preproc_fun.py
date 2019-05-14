@@ -25,9 +25,16 @@ def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index)
         color_index) + '_kymo.tiff'
 
 
-def preproc_fun(data_folder, folder_to_save, positions, maxframe):
+def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None):
     # create a micro-manager image object
     dataset = MMData(data_folder)
+
+    # get default values for non-specified optional parameters
+    if maxframe is None:
+        maxframe = dataset.get_max_frame()
+    if positions is None:
+        nr_of_positions_in_data = dataset.get_position_names()[0].__len__()
+        positions = range(0, nr_of_positions_in_data)
 
     # recover the basic experiment name
     base_name = dataset.get_first_tiff().split('.')[0]
