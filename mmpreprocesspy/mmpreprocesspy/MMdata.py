@@ -199,7 +199,7 @@ class MMData:
         return image
     
     
-    def get_image_fast(self, frame=0,channel=0,plane=0,position=0, compress = 1):
+    def get_image_fast(self, frame=0,channel=0,plane=0,position=0):
         """Return image at a given frame, channel, plane, position. One can skip every n'th pixel by setting 
         compress to n"""
         if self.mm_map is None:

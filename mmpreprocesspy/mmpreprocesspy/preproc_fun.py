@@ -25,9 +25,21 @@ def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index)
         color_index) + '_kymo.tiff'
 
 
-def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None):
+def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flatfield_directory=None):
     # create a micro-manager image object
     dataset = MMData(data_folder)
+
+    # load flatfield data
+    if flatfield_directory is not None:
+        # flatfield = MMData(flatfield_directory)
+        # initialize image preprocessor: we could try to overwrite dataset, from which we use these methods:
+        # Better yet: split up dataset as dataset_info and dataset_data_provider; we can the only override the latter, which only provides 'get_image_fast'
+        # get_first_tiff
+        # get_channels
+        # get_image_fast
+        # get_max_frame
+        # get_position_names
+        pass
 
     # get default values for non-specified optional parameters
     if maxframe is None:
