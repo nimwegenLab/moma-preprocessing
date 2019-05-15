@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
 
-class PreprocessedImageProvider(object):
+class ImagePreprocessor(object):
     def __init__(self, mm_dataset, flatfield_dataset, dark_noise=None, gaussian_sigma=None):
         self.mm_dataset = mm_dataset
         self.flatfield_dataset = flatfield_dataset

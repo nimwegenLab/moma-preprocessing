@@ -3,7 +3,7 @@ from unittest import TestCase
 import cv2
 import numpy as np
 from mmpreprocesspy.MMdata import MMData
-from mmpreprocesspy.image_preprocessing import PreprocessedImageProvider
+from mmpreprocesspy.image_preprocessing import ImagePreprocessor
 
 import mmpreprocesspy.dev_auxiliary_functions as aux
 
@@ -19,7 +19,7 @@ class TestImagePreprocessor(TestCase):
         dataset = MMData(data_directory)
         flatfield = MMData(flatfield_directory)
 
-        preprocessor = PreprocessedImageProvider(dataset, flatfield, dark_noise, gaussian_sigma)
+        preprocessor = ImagePreprocessor(dataset, flatfield, dark_noise, gaussian_sigma)
         preprocessor.initialize()
 
         nr_of_colors = len(dataset.get_channels())

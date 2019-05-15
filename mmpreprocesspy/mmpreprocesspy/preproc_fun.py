@@ -9,6 +9,7 @@ import skimage.filters
 import skimage.measure
 import skimage.transform
 from mmpreprocesspy.MMdata import MMData
+from mmpreprocesspy.image_preprocessing import ImagePreprocessor
 from mmpreprocesspy.moma_image_processing import MomaImageProcessor
 
 
@@ -25,21 +26,25 @@ def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index)
         color_index) + '_kymo.tiff'
 
 
-def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flatfield_directory=None):
+def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flatfield_directory=None, dark_noise=None, gaussian_sigma=None):
     # create a micro-manager image object
     dataset = MMData(data_folder)
 
-    # load flatfield data
+    # define basic parameters
+    colors = dataset.get_channels()
+    phase_channel_index = 0
+
+    # load and use flatfield data, if provided
+    preprocessor = None
     if flatfield_directory is not None:
-        # flatfield = MMData(flatfield_directory)
-        # initialize image preprocessor: we could try to overwrite dataset, from which we use these methods:
-        # Better yet: split up dataset as dataset_info and dataset_data_provider; we can the only override the latter, which only provides 'get_image_fast'
-        # get_first_tiff
-        # get_channels
-        # get_image_fast
-        # get_max_frame
-        # get_position_names
-        pass
+        flatfield = MMData(flatfield_directory)
+        preprocessor = ImagePreprocessor(dataset, flatfield, dark_noise, gaussian_sigma)
+        preprocessor.initialize()
+        # since we are correcting the images: correct the number and naming of the available colors
+        colors_orig = colors.copy()
+        colors[1:] = [name+'_corrected' for name in colors[1:]]
+        colors = colors + colors_orig[1:]
+
 
     # get default values for non-specified optional parameters
     if maxframe is None:
@@ -50,10 +55,6 @@ def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flat
 
     # recover the basic experiment name
     base_name = dataset.get_first_tiff().split('.')[0]
-
-    # define basic parameters
-    colors = dataset.get_channels()
-    phase_channel_index = 0
 
     # define metadata for imagej
     metadata = {'channels': len(colors), 'slices': 1, 'frames': maxframe, 'hyperstack': True, 'loop': False}
@@ -90,6 +91,12 @@ def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flat
 
             color_image_stack = dataset.get_image_stack(frame=t, position=indp)
 
+            # correct images and append corrected and non-corrected images
+            if preprocessor is not None:
+                corrected_color_image_stack = preprocessor.process_image_stack(color_image_stack)
+                color_image_stack = np.append(corrected_color_image_stack,
+                                              color_image_stack[:, :, 1:], 2)
+
             # go through all channels, check if there's a corresponding one in the new image. If yes go through all
             #  colors,cut out channel, and append to tif stack. Append also to the Kymograph for each color.
             for gl_index, gl_roi in enumerate(growthlane_rois):
@@ -100,7 +107,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flat
                     if not os.path.exists(os.path.dirname(gl_file_path)):
                         os.makedirs(os.path.dirname(gl_file_path))
 
-                    save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path)
+                    save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path, preprocessor)
                     kymographs = append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t)
 
         # remove growth lanes that don't have all time points (e.g. because of drift)
@@ -127,7 +134,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flat
     print("Processing time [s]:" + str(end1 - start1))
 
 
-def save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path):
+def save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path, preprocessor):
     nr_of_colors = color_image_stack.shape[2]
     for color in range(nr_of_colors):
         imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
