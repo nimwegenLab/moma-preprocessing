@@ -100,11 +100,8 @@ def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flat
                     if not os.path.exists(os.path.dirname(gl_file_path)):
                         os.makedirs(os.path.dirname(gl_file_path))
 
-                    for color in range(len(colors)):
-                        imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
-                        skimage.external.tifffile.imsave(gl_file_path, imtosave.astype(np.uint16), append='force',
-                                                         imagej=True, metadata=metadata)
-                        kymographs[gl_index][:, t, color] = np.mean(imtosave, axis=1)
+                    save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path)
+                    kymographs = append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t)
 
         # remove growth lanes that don't have all time points (e.g. because of drift)
         incomplete_GL = np.where(frame_counter < maxframe)[0]
@@ -128,3 +125,19 @@ def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flat
     # finalize measurement of processing time
     end1 = time.time()
     print("Processing time [s]:" + str(end1 - start1))
+
+
+def save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path):
+    nr_of_colors = color_image_stack.shape[2]
+    for color in range(nr_of_colors):
+        imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
+        skimage.external.tifffile.imsave(gl_file_path, imtosave.astype(np.uint16), append='force',
+                                         imagej=True, metadata=metadata)
+
+
+def append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t):
+    nr_of_colors = color_image_stack.shape[2]
+    for color in range(nr_of_colors):
+        imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
+        kymographs[gl_index][:, t, color] = np.mean(imtosave, axis=1)
+    return kymographs
