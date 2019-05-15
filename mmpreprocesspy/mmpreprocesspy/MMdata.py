@@ -1,10 +1,10 @@
 import os
 import re
 import struct
+
 import numpy as np
 import pandas as pd
-import pudb
-import ipdb
+
 
 class MMData:
     """Parsing of MicroManager metadata"""
@@ -197,8 +197,15 @@ class MMData:
             image = np.reshape(im_bytes,newshape=[self.height,self.width])
 
         return image
-    
-    
+
+    def get_image_stack(self, frame=0, plane=0, position=0):
+        """load all colors and return them as image stack"""
+        nr_of_colors = len(self.channels)
+        image_stack = np.zeros((self.height, self.width, nr_of_colors))
+        for color in range(nr_of_colors):
+            image_stack[:, :, color] = self.get_image_fast(channel=color, frame=frame, plane=plane, position=position)
+        return image_stack
+
     def get_image_fast(self, frame=0,channel=0,plane=0,position=0):
         """Return image at a given frame, channel, plane, position. One can skip every n'th pixel by setting 
         compress to n"""

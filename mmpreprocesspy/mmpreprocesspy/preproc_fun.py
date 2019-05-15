@@ -88,10 +88,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flat
             for gl_roi in growthlane_rois:
                 gl_roi.roi.translate((-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
 
-            # load all colors
-            image_stack = np.zeros((image_base.shape[0], image_base.shape[1], len(colors)))
-            for color in range(len(colors)):
-                image_stack[:, :, color] = dataset.get_image_fast(channel=color, frame=t, position=indp)
+            color_image_stack = dataset.get_image_stack(frame=t, position=indp)
 
             # go through all channels, check if there's a corresponding one in the new image. If yes go through all
             #  colors,cut out channel, and append to tif stack. Append also to the Kymograph for each color.
@@ -104,7 +101,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flat
                         os.makedirs(os.path.dirname(gl_file_path))
 
                     for color in range(len(colors)):
-                        imtosave = gl_roi.get_oriented_roi_image(image_stack[:, :, color])
+                        imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
                         skimage.external.tifffile.imsave(gl_file_path, imtosave.astype(np.uint16), append='force',
                                                          imagej=True, metadata=metadata)
                         kymographs[gl_index][:, t, color] = np.mean(imtosave, axis=1)
