@@ -15,7 +15,6 @@ if [ -n "$CAMERA_ROI_PATH" ]; then printf "WARNING: CAMERA_ROI_PATH argument is 
 if [ -n "$DARK_PATH" ]; then printf "WARNING: DARK_PATH argument is defined, but not supported. Will be ignored.\n"; fi
 if [ -n "$GAIN_PATH" ]; then printf "WARNING: GAIN_PATH argument is defined, but not supported. Will be ignored.\n"; fi 
 if [ -n "$HOTPIXS_PATH" ]; then printf "WARNING: HOTPIXS_PATH argument is defined, but not supported. Will be ignored.\n"; fi
-if [ -n "$FLATFIELD_PATH" ]; then printf "WARNING: FLATFIELD_PATH argument is defined, but not supported. Will be ignored.\n"; fi
 if [ -n "$CHANNELS_ORDER" ]; then printf "WARNING: CHANNELS_ORDER argument is defined, but not supported. Will be ignored.\n"; fi
 if [ -n "$FIJI_MACRO" ]; then printf "WARNING: FIJI_MACRO argument is defined, but not supported. Will be ignored.\n"; fi
 
@@ -49,7 +48,7 @@ for (( I=0; I<N; I++ )); do
 #  if [ -n "$DARK_PATH" ]; then CMD_STR="$CMD_STR -d $DARK_PATH"; fi # append optional argument
 #  if [ -n "$GAIN_PATH" ]; then CMD_STR="$CMD_STR -g $GAIN_PATH"; fi # append optional argument
 #  if [ -n "$HOTPIXS_PATH" ]; then CMD_STR="$CMD_STR -h $HOTPIXS_PATH"; fi # append optional argument
-#  if [ -n "$FLATFIELD_PATH" ]; then CMD_STR="$CMD_STR -ff $FLATFIELD_PATH"; fi # append optional argument
+  if [ -n "$FLATFIELD_PATH" ]; then CMD_STR="$CMD_STR -ff $FLATFIELD_PATH"; fi # append optional argument
 #  if [ -n "$CHANNELS_ORDER" ]; then CMD_STR="$CMD_STR -c $CHANNELS_ORDER"; fi # append optional argument
 #  if [ -n "$FIJI_MACRO" ]; then CMD_STR="$CMD_STR -m $FIJI_MACRO"; fi # append optional argument
   if [ -n "$TMIN" ]; then CMD_STR="$CMD_STR -tmin $TMIN"; fi # append optional argument
