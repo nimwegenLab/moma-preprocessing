@@ -1,5 +1,5 @@
 import cv2 as cv
-import mmpreprocesspy.dev_auxiliary_functions as aux
+# import mmpreprocesspy.dev_auxiliary_functions as aux
 import numpy as np
 import skimage.transform
 from mmpreprocesspy.GrowthlaneRoi import GrowthlaneRoi
@@ -8,7 +8,7 @@ from mmpreprocesspy.roi import Roi
 from mmpreprocesspy.rotated_roi import RotatedRoi
 from scipy.signal import savgol_filter
 from skimage.filters import threshold_otsu
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
