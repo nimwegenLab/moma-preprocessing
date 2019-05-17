@@ -51,10 +51,10 @@ print("Position:")
 print(args.positions)
 print("Rotations:")
 print(args.rotations)
-print("Start frame (tmax):")
-print(args.timeframemaximum)
-print("End frame (tmin):")
+print("Start frame (tmin):")
 print(args.timeframeminimum)
+print("End frame (tmax):")
+print(args.timeframemaximum)
 
 # parse position argument; IMPORTANT: this only works for a single position argument
 res = re.match('Pos[0]*(\d+)', args.positions)
