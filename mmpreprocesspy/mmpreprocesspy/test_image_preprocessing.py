@@ -31,3 +31,34 @@ class TestImagePreprocessor(TestCase):
 
         aux.show_image(processed_stack[:,:,1])
         cv2.waitKey()
+
+    # def test__flat_field_correction_works_correctly(self):
+    # NOTE-2019-05-17: this is test for checking, if the flatfield works correctly. This was done using the same flatfield dataset
+    # as flatfield and dataset to correct. It showed that the code works correctly. However we need to comment out this code,
+    # because the class ImagePreprocessor expects that the input dataset that is to be corrected has one more color-channel
+    # than the flatflield (which hold the fluorescence data). This causes this test to fail, when using the same dataset as
+    # as flatfield and data to correct.
+    #
+    #     data_directory = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/flatfield'
+    #     flatfield_directory = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/flatfield'
+    #
+    #     dark_noise = 100
+    #     gaussian_sigma = 10
+    #
+    #     dataset = MMData(data_directory)
+    #     flatfield = MMData(flatfield_directory)
+    #
+    #     preprocessor = ImagePreprocessor(dataset, flatfield, dark_noise, gaussian_sigma)
+    #     preprocessor.initialize()
+    #
+    #     nr_of_colors = len(dataset.get_channels())
+    #     image_stack = np.zeros((dataset.height, dataset.width, nr_of_colors))
+    #     for color in range(nr_of_colors):
+    #         image_stack[:, :, color] = dataset.get_image_fast(channel=color, frame=0, position=0)
+    #     # image_stack[:, :, 1] = dataset.get_image_fast(channel=color, frame=0, position=0)
+    #
+    #     image_stack_bkp = image_stack.copy()
+    #     processed_stack = preprocessor.process_image_stack(image_stack)
+    #
+    #     aux.show_image(processed_stack[:,:,1])
+    #     cv2.waitKey()
