@@ -23,6 +23,8 @@ parser.add_argument("-p", "--positions", type=str,
                     help="positions of the images")
 parser.add_argument("-r", "--rotations", type=str,
                     help="rotations of the images")
+parser.add_argument("-tmin", "--timeframeminimum", type=int,
+                    help="minimum time frame after which the data is processed")
 parser.add_argument("-tmax", "--timeframemaximum", type=int,
                     help="maximum time frame upto which the data is processed")
 parser.add_argument("-ff", "--flatfieldpath", type=str,
@@ -41,20 +43,22 @@ print("Input path:")
 print(args.input)
 print("Output path:")
 print(args.output)
-print("Position:")
-print(args.positions)
-print("Rotations:")
-print(args.rotations)
-print("Max frame:")
-print(args.timeframemaximum)
 print("Flatfield path:")
 print(args.flatfieldpath)
 print("Log-file path:")
 print(args.logfile)
+print("Position:")
+print(args.positions)
+print("Rotations:")
+print(args.rotations)
+print("Start frame (tmax):")
+print(args.timeframemaximum)
+print("End frame (tmin):")
+print(args.timeframeminimum)
 
 # parse position argument; IMPORTANT: this only works for a single position argument
 res = re.match('Pos[0]*(\d+)', args.positions)
 posval = int(res.group(1))
 posval = [posval];
 
-preproc_fun(args.input, args.output, posval, args.timeframemaximum, args.flatfieldpath)
+preproc_fun(args.input, args.output, posval, args.timeframeminimum, args.timeframemaximum, args.flatfieldpath)

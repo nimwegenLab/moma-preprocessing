@@ -26,7 +26,7 @@ def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index)
         color_index) + '_kymo.tiff'
 
 
-def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flatfield_directory=None, dark_noise=None, gaussian_sigma=None):
+def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxframe=None, flatfield_directory=None, dark_noise=None, gaussian_sigma=None):
     print("This is test-output to see if logging works ...")
     # create a micro-manager image object
     dataset = MMData(data_folder)
@@ -48,8 +48,10 @@ def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flat
 
 
     # get default values for non-specified optional parameters
+    if minframe is None:
+        minframe = 0
     if maxframe is None:
-        maxframe = dataset.get_max_frame()
+        maxframe = dataset.get_max_frame() + 1  # +1 needed, because range(0,N) goes from 0 to N-1 (see below)
     if positions is None:
         nr_of_positions_in_data = dataset.get_position_names()[0].__len__()
         positions = range(0, nr_of_positions_in_data)
@@ -79,9 +81,9 @@ def preproc_fun(data_folder, folder_to_save, positions=None, maxframe=None, flat
 
         frame_counter = np.zeros(len(channel_centers))  # stores per growthlane, the number of processed images
         # go through time-lapse and cut out channels
-        for t in range(maxframe):
+        for t in range(minframe, maxframe):
             if np.mod(t, 10) == 0:
-                print('time: ' + str(t))  # print time periodically
+                print('working on frame: ' + str(t))  # output frame number
 
             image = dataset.get_image_fast(channel=phase_channel_index, frame=t, position=indp)
             imageProcessor.determine_image_shift(image)
