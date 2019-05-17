@@ -7,7 +7,7 @@ from mmpreprocesspy.preprocessing import get_growthlane_rois
 from skimage.feature import match_template
 import cv2 as cv
 import mmpreprocesspy.dev_auxiliary_functions as aux
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 class MomaImageProcessor(object):
