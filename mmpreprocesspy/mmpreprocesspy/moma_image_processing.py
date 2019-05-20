@@ -8,7 +8,7 @@ from skimage.feature import match_template
 import cv2 as cv
 import mmpreprocesspy.dev_auxiliary_functions as aux
 # import matplotlib.pyplot as plt
-
+from pystackreg import StackReg
 
 class MomaImageProcessor(object):
     """ MomaImageProcessor encapsulates the processing of a Mothermachine image. """
@@ -28,6 +28,8 @@ class MomaImageProcessor(object):
         self.vertical_shift = None
         self.horizontal_shift = None
         self.gl_orientation_search_area = 80  # TODO: this is a MM specific parameter; should be made configurable
+        self._image_for_registration = None
+        self._sr = StackReg(StackReg.TRANSLATION)
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -85,16 +87,13 @@ class MomaImageProcessor(object):
             growthlane_roi.roi.rotate(rotation_center, -self.main_channel_angle)
 
     def get_image_registration_template(self):
-        self.template, self.mid_row, self.hor_mid, self.hor_width = preprocessing.get_image_registration_template(self.image, self.mincol)
+        self._image_for_registration = self.image.copy()
 
     def determine_image_shift(self, image):
-        image_number_region = image[self.mid_row - 50:self.mid_row + 50, self.hor_mid - self.hor_width:self.hor_mid + self.hor_width]
-
-        result = match_template(self.template, image_number_region, pad_input=True)
-        ij = np.unravel_index(np.argmax(result), result.shape)
-        t1, t0 = ij[::-1]
-        self.vertical_shift = int(t0 - self.template.shape[0] / 2)
-        self.horizontal_shift = int(t1 - self.template.shape[1] / 2)
+        self._sr.register(self._image_for_registration, image)
+        translation_matrix = self._sr.get_matrix()
+        self.horizontal_shift = -translation_matrix[0][2]
+        self.vertical_shift = -translation_matrix[1][2]
 
     def get_registered_image(self, image_to_register):
         # registered_image = self._transform_image(image_to_register)

@@ -34,6 +34,7 @@ pip install exifread
 pip install pillow
 pip install scipy
 pip install --editable $PREPROC_PACKAGE_PATH
+pip install pystackreg
 
 #if [[ "$HOSTNAME" -eq "ierbert" ]]; then
 if [[ "$runningOnScicore" = false  ]]; then

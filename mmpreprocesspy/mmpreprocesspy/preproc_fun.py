@@ -27,7 +27,6 @@ def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index)
 
 
 def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxframe=None, flatfield_directory=None, dark_noise=None, gaussian_sigma=None):
-    print("This is test-output to see if logging works ...")
     # create a micro-manager image object
     dataset = MMData(data_folder)
 
