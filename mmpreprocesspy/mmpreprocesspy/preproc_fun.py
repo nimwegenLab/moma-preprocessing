@@ -56,17 +56,19 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         nr_of_positions_in_data = dataset.get_position_names()[0].__len__()
         positions = range(0, nr_of_positions_in_data)
 
+    nrOfFrames = maxframe - minframe
+
     # recover the basic experiment name
     base_name = dataset.get_first_tiff().split('.')[0]
 
     # define metadata for imagej
-    metadata = {'channels': len(colors), 'slices': 1, 'frames': maxframe, 'hyperstack': True, 'loop': False}
+    metadata = {'channels': len(colors), 'slices': 1, 'frames': nrOfFrames, 'hyperstack': True, 'loop': False}
 
     # start measurement of processing time
     start1 = time.time()
     for indp in positions:  # MM: Currently proproc_fun.py in only run for a single position; so this loop is not needed
         # load first phase image
-        image_base = dataset.get_image_fast(channel=phase_channel_index, frame=0, position=indp)
+        image_base = dataset.get_image_fast(channel=phase_channel_index, frame=minframe, position=indp)
 
         # Process first image to find ROIs, etc.
         imageProcessor = MomaImageProcessor()
@@ -75,7 +77,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         channel_centers = imageProcessor.channel_centers
 
         # create empty kymographs to fill
-        kymographs = [np.zeros((roi.length, maxframe, len(colors))) for roi in imageProcessor.growthlane_rois]
+        kymographs = [np.zeros((roi.length, nrOfFrames, len(colors))) for roi in imageProcessor.growthlane_rois]
         metadataK = {'channels': len(colors), 'slices': 1, 'frames': len(channel_centers), 'hyperstack': True,
                      'loop': False}
 
@@ -88,6 +90,8 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
             image = dataset.get_image_fast(channel=phase_channel_index, frame=t, position=indp)
             imageProcessor.determine_image_shift(image)
             growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
+
+            print("Shift frame "+str(t)+": "+str(imageProcessor.horizontal_shift)+", "+str(imageProcessor.vertical_shift))
 
             for gl_roi in growthlane_rois:
                 gl_roi.roi.translate((-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
@@ -111,16 +115,15 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
                         os.makedirs(os.path.dirname(gl_file_path))
 
                     save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path, preprocessor)
-                    kymographs = append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t)
+                    kymographs = append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t, minframe)
 
         # remove growth lanes that don't have all time points (e.g. because of drift)
-        incomplete_GL = np.where(frame_counter < maxframe)[0]
+        incomplete_GL = np.where(frame_counter < nrOfFrames)[0]
         for inc in incomplete_GL:
             gl_result_folder = os.path.dirname(get_gl_tiff_path(folder_to_save, base_name, indp, inc))
             if os.path.exists(gl_result_folder):
                 shutil.rmtree(gl_result_folder)
 
-        print(incomplete_GL)
         # save kymograph
         for gl_index in range(len(channel_centers)):
             if gl_index not in incomplete_GL:
@@ -133,6 +136,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
                                                      append='force', imagej=True, metadata=metadataK)
 
     # finalize measurement of processing time
+    print("Out of bounds ROIs: " + str(incomplete_GL))
     end1 = time.time()
     print("Processing time [s]:" + str(end1 - start1))
 
@@ -145,9 +149,10 @@ def save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path, preprocessor)
                                          imagej=True, metadata=metadata)
 
 
-def append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t):
+def append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t, minframe):
+    kymo_index = t - minframe
     nr_of_colors = color_image_stack.shape[2]
     for color in range(nr_of_colors):
         imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
-        kymographs[gl_index][:, t, color] = np.mean(imtosave, axis=1)
+        kymographs[gl_index][:, kymo_index, color] = np.mean(imtosave, axis=1)
     return kymographs
