@@ -122,3 +122,18 @@ class MomaImageProcessor(object):
             raise ValueError("self.horizontal_shift must be set before calling self.get_transformation_matrix")
 
         return preprocessing.get_translation_matrix(self.horizontal_shift, self.vertical_shift)
+
+    def store_gl_index_image(self, path):
+        """ Draw the growthlane ROIs and indices onto the image and save it. """
+        font = cv.FONT_HERSHEY_SIMPLEX
+        rotated_rois = [x.roi for x in self.growthlane_rois]
+        # show_image_with_rotated_rois(image, rotated_rois)
+        # normalizedImg = None
+        normalized_image = cv.normalize(self.image, None, 0, 255, cv.NORM_MINMAX)
+        final_image = np.array(normalized_image, dtype=np.uint8)
+
+        for gl_index, roi in enumerate(rotated_rois):
+            roi.draw_to_image(final_image, False)
+            cv.putText(final_image, str(gl_index + 1), (np.int0(roi.center[0]), np.int0(roi.center[1])), font, 1, (255, 255, 255), 2, cv.LINE_AA)
+
+        cv.imwrite(path, final_image)

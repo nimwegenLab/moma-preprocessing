@@ -13,6 +13,10 @@ from mmpreprocesspy.image_preprocessing import ImagePreprocessor
 from mmpreprocesspy.moma_image_processing import MomaImageProcessor
 
 
+def get_gl_index_tiff_path(result_base_path, indp):
+    return result_base_path + '/' + 'Pos' + str(indp) + '_GL_index.tiff'
+
+
 def get_gl_tiff_path(result_base_path, base_name, indp, gl_index):
     gl_index += 1  # we do this to comply with legacy indexing of growthlanes, which starts at 1
     return result_base_path + '/' + 'Pos' + str(indp) + '/GL' + str(
@@ -74,6 +78,12 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         imageProcessor.load_numpy_image_array(image_base)
         imageProcessor.process_image()
         channel_centers = imageProcessor.channel_centers
+
+        # store GL index image
+        if not os.path.exists(os.path.dirname(folder_to_save)):
+            os.makedirs(os.path.dirname(folder_to_save))
+        path = get_gl_index_tiff_path(folder_to_save, indp)
+        imageProcessor.store_gl_index_image(path)
 
         # create empty kymographs to fill
         kymographs = [np.zeros((roi.length, nrOfFrames, len(colors))) for roi in imageProcessor.growthlane_rois]

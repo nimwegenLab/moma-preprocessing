@@ -37,7 +37,7 @@ class TestPreproc_fun(TestCase):
 
         data_directory = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement'
         flatfield_directory = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/flatfield'
-        directory_to_save = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/result'
+        directory_to_save = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack'
         positions = [0]
         minframe = None
         maxframe = 8
