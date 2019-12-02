@@ -9,7 +9,7 @@ import cv2
 
 
 class TestRoi(TestCase):
-    test_data_base_path = '/home/micha/Documents/git/MM_Testing'
+    test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
     def test__get_roi_from_image(self):
         imdata = read_image(

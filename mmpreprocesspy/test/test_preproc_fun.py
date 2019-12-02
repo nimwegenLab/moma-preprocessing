@@ -4,11 +4,13 @@ from unittest import TestCase
 
 
 class TestPreproc_fun(TestCase):
+    test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
+
     def test__dataset_04(self):
         from mmpreprocesspy import preproc_fun
 
-        data_directory = '/home/micha/Documents/git/MM_Testing/04_20180531_gluIPTG5uM_lac_1/MMStack'
-        directory_to_save = '/home/micha/Documents/git/MM_Testing/04_20180531_gluIPTG5uM_lac_1/MMStack'
+        data_directory = self.test_data_base_path + '/04_20180531_gluIPTG5uM_lac_1/MMStack'
+        directory_to_save = data_directory
         positions = [0]
         maxframe = 10
 
@@ -21,8 +23,8 @@ class TestPreproc_fun(TestCase):
     def test__dataset_08(self):
         from mmpreprocesspy import preproc_fun
 
-        data_directory = '/home/micha/Documents/git/MM_Testing/08_20190222_LB_SpentLB_TrisEDTA_LB_1/MMStack'
-        directory_to_save = '/home/micha/Documents/git/MM_Testing/08_20190222_LB_SpentLB_TrisEDTA_LB_1/MMStack'
+        data_directory = self.test_data_base_path + '/08_20190222_LB_SpentLB_TrisEDTA_LB_1/MMStack'
+        directory_to_save = data_directory
         positions = [0]
         maxframe = 10
 
@@ -35,9 +37,9 @@ class TestPreproc_fun(TestCase):
     def test__dataset_10(self):
         from mmpreprocesspy import preproc_fun
 
-        data_directory = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement'
-        flatfield_directory = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/flatfield'
-        directory_to_save = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack'
+        data_directory = self.test_data_base_path + '/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement'
+        flatfield_directory = self.test_data_base_path + '/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/flatfield'
+        directory_to_save = self.test_data_base_path + '/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack'
         positions = [0]
         minframe = None
         maxframe = 8
@@ -57,9 +59,9 @@ class TestPreproc_fun(TestCase):
 
         from mmpreprocesspy import preproc_fun
 
-        data_directory = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement'
-        flatfield_directory = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/flatfield'
-        directory_to_save = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/result'
+        data_directory = self.test_data_base_path + '/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement'
+        flatfield_directory = self.test_data_base_path + '/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/flatfield'
+        directory_to_save = self.test_data_base_path + '/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/result'
         positions = [0]
         minframe = 590
         maxframe = 610

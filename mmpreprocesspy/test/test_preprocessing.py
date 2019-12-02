@@ -5,7 +5,7 @@ import mmpreprocesspy.dev_auxiliary_functions as dev_aux
 
 
 class TestPreprocessing(TestCase):
-    test_data_base_path = '/home/micha/Documents/git/MM_Testing'
+    test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
     def test_find_main_channel_orientation__returns_angle_0__for_main_channel_in_vertical_direction(self):
         from mmpreprocesspy import preprocessing

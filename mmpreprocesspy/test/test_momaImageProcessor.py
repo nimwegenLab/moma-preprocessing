@@ -6,7 +6,7 @@ import mmpreprocesspy.dev_auxiliary_functions as aux
 
 
 class TestMomaImageProcessor(TestCase):
-    test_data_base_path = '/home/micha/Documents/git/MM_Testing'
+    test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
     def test_process_image_dataset_03(self):
         from mmpreprocesspy.moma_image_processing import MomaImageProcessor
