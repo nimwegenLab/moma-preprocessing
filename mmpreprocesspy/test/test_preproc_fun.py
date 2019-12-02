@@ -6,6 +6,20 @@ from unittest import TestCase
 class TestPreproc_fun(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
+    def test__dataset_11(self):
+        from mmpreprocesspy import preproc_fun
+
+        data_directory = self.test_data_base_path + '/11_20190910_glc_spcm_1/MMStack'
+        directory_to_save = data_directory
+        positions = [0]
+        maxframe = 5
+
+        results_directory = directory_to_save + '/result/'
+        if os.path.isdir(results_directory):
+            shutil.rmtree(results_directory)
+
+        preproc_fun.preproc_fun(data_directory, results_directory, positions=positions, maxframe=maxframe)
+
     def test__dataset_04(self):
         from mmpreprocesspy import preproc_fun
 
