@@ -270,21 +270,21 @@ def find_channels_in_region(channel_region_image):
     # define a threshold between inter-channel and peak intensity.
     # For each chunk of rows corresponding to a channel, calculate a mean position as mid-channel
 
-    channel_proj = np.sum(channel_region_image, axis=1)
-    inter_channel_val = np.mean(np.sort(channel_proj)[0:100])
+    projected_image_intensity = np.sum(channel_region_image, axis=1)
+    inter_channel_val = np.mean(np.sort(projected_image_intensity)[0:100])
 
     window = 30
-    peaks = np.array([x for x in np.arange(window, len(channel_proj) - window)
-                      if np.all(channel_proj[x] > channel_proj[x - window:x]) & np.all(
-            channel_proj[x] > channel_proj[x + 1:x + window])])
+    peaks = np.array([x for x in np.arange(window, len(projected_image_intensity) - window)
+                      if np.all(projected_image_intensity[x] > projected_image_intensity[x - window:x]) & np.all(
+            projected_image_intensity[x] > projected_image_intensity[x + 1:x + window])])
 
-    peaks = peaks[channel_proj[peaks] > 1.5 * inter_channel_val]
+    peaks = peaks[projected_image_intensity[peaks] > 1.5 * inter_channel_val]
 
-    channel_val = np.mean(channel_proj[peaks])
+    channel_val = np.mean(projected_image_intensity[peaks])
     # mid_range = 0.5*(inter_channel_val+channel_val)
     mid_range = inter_channel_val + 0.3 * (channel_val - inter_channel_val)
 
-    chunks = np.concatenate(np.argwhere(channel_proj > mid_range))
+    chunks = np.concatenate(np.argwhere(projected_image_intensity > mid_range))
 
     channel_center = []
     initchunk = [chunks[0]]
