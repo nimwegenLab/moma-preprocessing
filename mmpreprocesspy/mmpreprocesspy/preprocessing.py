@@ -90,20 +90,31 @@ def refine_region(rotated_image, region):
     # plt.plot(projected_max_intensities[region.end:region.end+look_ahead_length]), plt.hlines(threshold, region.start, region.end), plt.show()
 
 
-def find_channels_in_region_new(channel_region_image):
+def get_channel_periodicity(channel_region_image):
     projected_image_intensity = np.sum(channel_region_image, axis=1)
     projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
-    # fourier_col = np.fft.fftshift(np.abs(np.fft.fft(projected_image_intensity)))
     intensity_ft = np.fft.fft(projected_image_intensity_zero_mean)
     max_ind = np.argmax(np.abs(intensity_ft))
     fft_length = intensity_ft.shape[0]
-    # plt.plot(projected_image_intensity)
-    # plt.plot(np.log(np.abs(intensity_ft)))
-    # plt.show()
+    periodicity = fft_length/max_ind
+    return periodicity
+
+def get_channel_shift(channel_region_image):
+    projected_image_intensity = np.sum(channel_region_image, axis=1)
+    projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
+    intensity_ft = np.fft.fft(projected_image_intensity_zero_mean)
+    max_ind = np.argmax(np.abs(intensity_ft))
+    fft_length = intensity_ft.shape[0]
     value = intensity_ft[max_ind]
     phase = np.angle(value)
     periodicity = fft_length/max_ind
     shift = periodicity * phase/(2*np.pi)
+    return shift
+
+def find_channels_in_region_new(channel_region_image):
+    periodicity = get_channel_periodicity(channel_region_image)
+    shift = get_channel_shift(channel_region_image)
+    fft_length = channel_region_image.shape[0]
     return get_channel_positions(periodicity, shift, fft_length)
 
 def get_channel_positions(periodicity, shift, fft_size):
