@@ -1,4 +1,4 @@
-import cv2 as cv
+import cv2
 # import mmpreprocesspy.dev_auxiliary_functions as aux
 import numpy as np
 import skimage.transform
@@ -95,7 +95,7 @@ def get_all_growthlane_rois(rotated_image, region_list):
     growthlane_rois = []
     channel_centers = []
     for gl_region in region_list:
-        centers = find_channels(rotated_image, gl_region.start, gl_region.end)
+        centers = find_channels_in_region(rotated_image[:, gl_region.start:gl_region.end])
         rois = get_growthlane_rois(centers, gl_region.start, gl_region.end)
         growthlane_rois += rois
         channel_centers += centers
@@ -265,12 +265,12 @@ def calculate_fourier_ratio(image):
     return fourier_ratio
 
 
-def find_channels(image, mincol, maxcol, window=30):
+def find_channels_in_region(channel_region_image):
     # find channels as peak of intensity in a projection
     # define a threshold between inter-channel and peak intensity.
     # For each chunk of rows corresponding to a channel, calculate a mean position as mid-channel
 
-    channel_proj = np.sum(image[:, mincol:maxcol], axis=1)
+    channel_proj = np.sum(channel_region_image, axis=1)
     inter_channel_val = np.mean(np.sort(channel_proj)[0:100])
 
     window = 30
@@ -350,5 +350,5 @@ def get_translation_matrix(horizontal_shift, vertical_shift):
 
 
 def get_rotation_matrix(rotation_angle, rotation_center):
-    return cv.getRotationMatrix2D(rotation_center, rotation_angle, 1)
+    return cv2.getRotationMatrix2D(rotation_center, rotation_angle, 1)
 
