@@ -8,7 +8,7 @@ from mmpreprocesspy.roi import Roi
 from mmpreprocesspy.rotated_roi import RotatedRoi
 from scipy.signal import savgol_filter
 from skimage.filters import threshold_otsu
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
@@ -90,12 +90,34 @@ def refine_region(rotated_image, region):
     # plt.plot(projected_max_intensities[region.end:region.end+look_ahead_length]), plt.hlines(threshold, region.start, region.end), plt.show()
 
 
+def find_channels_in_region_new(channel_region_image):
+    projected_image_intensity = np.sum(channel_region_image, axis=1)
+    projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
+    # fourier_col = np.fft.fftshift(np.abs(np.fft.fft(projected_image_intensity)))
+    intensity_ft = np.fft.fft(projected_image_intensity_zero_mean)
+    max_ind = np.argmax(np.abs(intensity_ft))
+    fft_length = intensity_ft.shape[0]
+    # plt.plot(projected_image_intensity)
+    # plt.plot(np.log(np.abs(intensity_ft)))
+    # plt.show()
+    value = intensity_ft[max_ind]
+    phase = np.angle(value)
+    periodicity = fft_length/max_ind
+    shift = periodicity * phase/(2*np.pi)
+    return get_channel_positions(periodicity, shift, fft_length)
+
+def get_channel_positions(periodicity, shift, fft_size):
+    starting_value = shift
+    return list(np.arange(starting_value, fft_size, periodicity))
+
 def get_all_growthlane_rois(rotated_image, region_list):
     """Gets the growthlane ROIs from all growthlane regions that were found in the image."""
     growthlane_rois = []
     channel_centers = []
     for gl_region in region_list:
-        centers = find_channels_in_region(rotated_image[:, gl_region.start:gl_region.end])
+        channel_region_image = rotated_image[:, gl_region.start:gl_region.end]
+        # centers = find_channels_in_region_new(channel_region_image)
+        centers = find_channels_in_region(channel_region_image)
         rois = get_growthlane_rois(centers, gl_region.start, gl_region.end)
         growthlane_rois += rois
         channel_centers += centers

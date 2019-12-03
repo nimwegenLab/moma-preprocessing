@@ -1,11 +1,22 @@
 from unittest import TestCase
 import skimage.transform
+from skimage.io import imread
 import matplotlib.pyplot as plt
 import mmpreprocesspy.dev_auxiliary_functions as dev_aux
 
 
 class TestPreprocessing(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
+
+    def test__find_channels_in_region_new(self):
+        from mmpreprocesspy import preprocessing
+
+        image = imread("./resources/rotated_channel_region.tiff")
+        centers = preprocessing.find_channels_in_region_new(image)
+        image_with_channel_indicators = get_image_with_lines(image, centers)
+
+        plt.imshow(image_with_channel_indicators, cmap="gray")
+        plt.show()
 
     def test_find_main_channel_orientation__returns_angle_0__for_main_channel_in_vertical_direction(self):
         from mmpreprocesspy import preprocessing
@@ -79,4 +90,10 @@ def read_tiff_to_nparray(image_path):
     #     image.mode = 'I'
     #     im2 = image.point(lambda i: i * (1. / 256)).convert('L')
     #     im2.show()
+
+def get_image_with_lines(channel_region_image, channel_positions):
+    new_image = channel_region_image.copy()
+    for pos in channel_positions:
+        new_image[int(pos):int(pos)+4, :] = 2
+    return new_image
 
