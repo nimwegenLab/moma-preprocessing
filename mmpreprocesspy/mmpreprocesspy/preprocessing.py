@@ -6,7 +6,7 @@ from mmpreprocesspy.GrowthlaneRoi import GrowthlaneRoi
 from mmpreprocesspy.data_region import DataRegion
 from mmpreprocesspy.roi import Roi
 from mmpreprocesspy.rotated_roi import RotatedRoi
-from scipy.signal import savgol_filter
+from scipy.signal import savgol_filter, find_peaks
 from skimage.filters import threshold_otsu
 import matplotlib.pyplot as plt
 
@@ -93,10 +93,13 @@ def refine_region(rotated_image, region):
 def get_channel_periodicity(channel_region_image):
     projected_image_intensity = np.sum(channel_region_image, axis=1)
     projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
-    intensity_ft = np.fft.fft(projected_image_intensity_zero_mean)
-    max_ind = np.argmax(np.abs(intensity_ft))
-    fft_length = intensity_ft.shape[0]
-    periodicity = fft_length/max_ind
+    cross_corr = np.correlate(projected_image_intensity_zero_mean, projected_image_intensity_zero_mean, 'same')
+
+    peak_inds = find_peaks(cross_corr, distance=10)[0]
+    peak_vals = cross_corr[peak_inds]
+
+    peak_inds_sorted = [x for _, x in sorted(zip(peak_vals, peak_inds), key=lambda pair: pair[0])]
+    periodicity = np.mean(np.diff(sorted(peak_inds_sorted[-6:])))
     return periodicity
 
 def get_channel_shift(channel_region_image):
