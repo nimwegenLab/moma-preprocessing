@@ -31,6 +31,8 @@ parser.add_argument("-ff", "--flatfieldpath", type=str,
                     help="path to the folder containing the flatfield OME-Tiff stack")
 parser.add_argument("-log", "--logfile", type=str,
                     help="path to log-file")
+parser.add_argument("-glt", "--growthlanelengththreshold", type=int,
+                    help="minimum length to be considered as a growth-lane")
 args = parser.parse_args()
 
 # overwrite sys.stdout and sys.stderr for logging
@@ -55,10 +57,12 @@ print("Start frame (tmin):")
 print(args.timeframeminimum)
 print("End frame (tmax):")
 print(args.timeframemaximum)
+print("Growthlane length threshold (glt):")
+print(args.growthlanelengththreshold)
 
 # parse position argument; IMPORTANT: this only works for a single position argument
 res = re.match('Pos[0]*(\d+)', args.positions)
 posval = int(res.group(1))
 posval = [posval];
 
-preproc_fun(args.input, args.output, posval, args.timeframeminimum, args.timeframemaximum, args.flatfieldpath)
+preproc_fun(args.input, args.output, posval, args.timeframeminimum, args.timeframemaximum, args.flatfieldpath, args.growthlanelengththreshold)

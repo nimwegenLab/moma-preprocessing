@@ -53,6 +53,7 @@ for (( I=0; I<N; I++ )); do
 #  if [ -n "$FIJI_MACRO" ]; then CMD_STR="$CMD_STR -m $FIJI_MACRO"; fi # append optional argument
   if [ -n "$TMIN" ]; then CMD_STR="$CMD_STR -tmin $TMIN"; fi # append optional argument
   if [ -n "$TMAX" ]; then CMD_STR="$CMD_STR -tmax $TMAX"; fi # append optional argument
+  if [ -n "$GLT" ]; then CMD_STR="$CMD_STR -glt $GLT"; fi # append optional argument
   CMD_STR="$CMD_STR -log $LOG"
 
   # use single quote to prevent variable evaluation

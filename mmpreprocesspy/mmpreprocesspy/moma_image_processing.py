@@ -30,6 +30,7 @@ class MomaImageProcessor(object):
         self.gl_orientation_search_area = 80  # TODO: this is a MM specific parameter; should be made configurable
         self._image_for_registration = None
         self._sr = StackReg(StackReg.TRANSLATION)
+        self.growthlane_length_threshold = 0
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -41,7 +42,7 @@ class MomaImageProcessor(object):
 
     def process_image(self):
         self.rotated_image, self.main_channel_angle, self.mincol, self.maxcol, self.channel_centers, self.growthlane_rois = preprocessing.process_image(
-            self.image)
+            self.image, self.growthlane_length_threshold)
         self.rotate_rois()
         self.set_growthlane_orientation(self.gl_orientation_search_area)
         self.get_image_registration_template()

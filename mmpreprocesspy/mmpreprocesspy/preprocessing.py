@@ -12,7 +12,7 @@ from skimage.filters import threshold_otsu
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
-def process_image(image):
+def process_image(image, growthlane_length_threshold=0):
     main_channel_angle = find_main_channel_orientation(image)
     if main_channel_angle != 0:
         image = skimage.transform.rotate(image, -main_channel_angle,
@@ -26,9 +26,25 @@ def process_image(image):
     image_rot = skimage.transform.rotate(image, angle, cval=0)
     mincol, maxcol, region_list = pattern_limits(image_rot, use_smoothing=True)
     refine_regions(image_rot, region_list)
+    region_list = filter_regions(region_list, minimum_required_growthlane_length=growthlane_length_threshold)
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rot, region_list)
 
     return image_rot, main_channel_angle, mincol, maxcol, channel_centers, growthlane_rois
+
+
+def filter_regions(region_list, minimum_required_growthlane_length):
+    """
+    Filter the regions using
+    :param region_list:
+    :return:
+    """
+    new_region_list = []
+    for region in region_list:
+        if region.end - region.start > minimum_required_growthlane_length:
+            new_region_list.append(region)
+    return new_region_list
+
+
 
 def refine_regions(rotated_image, region_list):
     for region in region_list:

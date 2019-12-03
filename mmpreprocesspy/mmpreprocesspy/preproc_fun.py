@@ -30,7 +30,7 @@ def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index)
         color_index) + '_kymo.tiff'
 
 
-def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxframe=None, flatfield_directory=None, dark_noise=None, gaussian_sigma=None):
+def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxframe=None, flatfield_directory=None, dark_noise=None, gaussian_sigma=None, growthlane_length_threshold=0):
     # create a micro-manager image object
     dataset = MMData(data_folder)
 
@@ -76,6 +76,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         # Process first image to find ROIs, etc.
         imageProcessor = MomaImageProcessor()
         imageProcessor.load_numpy_image_array(image_base)
+        imageProcessor.growthlane_length_threshold = growthlane_length_threshold
         imageProcessor.process_image()
         channel_centers = imageProcessor.channel_centers
 
