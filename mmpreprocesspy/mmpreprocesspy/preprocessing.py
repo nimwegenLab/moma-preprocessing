@@ -145,12 +145,13 @@ def find_rotation(image):
     f0 = np.fft.fftshift(np.abs(np.fft.fft2(tofft)))
     allproj = []
 
-    for i in np.arange(-10, 10, 1):
+    angles = list(np.arange(-10, 10, 0.1))
+    for i in angles:
         basicim = skimage.transform.rotate(f0, i, cval=0)
 
         allproj.append(np.max(np.sum(basicim, axis=0)))
 
-    angle = np.arange(-10, 10, 1)[np.argmax(allproj)]
+    angle = angles[np.argmax(allproj)]
     return angle
 
 
