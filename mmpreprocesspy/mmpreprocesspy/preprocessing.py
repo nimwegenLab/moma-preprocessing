@@ -321,9 +321,9 @@ def get_growthlane_rois(channel_centers, mincol, maxcol):
     :return:
     """
     growthlaneRois = []
-    distance_between_channels = get_mean_distance_between_growthlanes(channel_centers)
+    roi_height = get_mean_distance_between_growthlanes(channel_centers)
     for center in channel_centers:
-        roi = get_roi(center, distance_between_channels, mincol, maxcol)
+        roi = get_roi(center, roi_height, mincol, maxcol)
         growthlaneRois.append(GrowthlaneRoi(roi))
     return growthlaneRois
 
