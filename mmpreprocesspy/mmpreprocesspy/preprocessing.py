@@ -7,7 +7,7 @@ from mmpreprocesspy.data_region import DataRegion
 from mmpreprocesspy.roi import Roi
 from mmpreprocesspy.rotated_roi import RotatedRoi
 from scipy.signal import savgol_filter, find_peaks
-from skimage.filters import threshold_otsu
+from skimage.filters import threshold_otsu, gaussian
 import matplotlib.pyplot as plt
 
 
@@ -105,24 +105,36 @@ def get_channel_periodicity(channel_region_image):
 def get_channel_shift(channel_region_image):
     projected_image_intensity = np.sum(channel_region_image, axis=1)
     projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
+    projected_image_intensity_zero_mean = gaussian(projected_image_intensity_zero_mean, 10, mode='mirror')
     intensity_ft = np.fft.fft(projected_image_intensity_zero_mean)
     max_ind = np.argmax(np.abs(intensity_ft))
     fft_length = intensity_ft.shape[0]
     value = intensity_ft[max_ind]
     phase = np.angle(value)
+    if phase < 0: phase += np.pi
     periodicity = fft_length/max_ind
-    shift = periodicity * phase/(2*np.pi)
+    shift = periodicity * phase/(2* np.pi)
+
+    plt.plot(projected_image_intensity_zero_mean)
+    plt.show()
+    plt.plot(np.abs(intensity_ft))
+    plt.show()
+    plt.plot(np.angle(intensity_ft))
+    plt.show()
+
     return shift
 
 def find_channels_in_region_new(channel_region_image):
     periodicity = get_channel_periodicity(channel_region_image)
     shift = get_channel_shift(channel_region_image)
     fft_length = channel_region_image.shape[0]
-    return get_channel_positions(periodicity, shift, fft_length)
+    channel_positions = get_channel_positions(periodicity, shift, fft_length)
+    print(channel_positions)
+    return channel_positions
 
 def get_channel_positions(periodicity, shift, fft_size):
     starting_value = shift
-    return list(np.arange(starting_value, fft_size, periodicity))
+    return list(np.arange(starting_value, fft_size, periodicity).astype(np.int))
 
 def get_all_growthlane_rois(rotated_image, region_list):
     """Gets the growthlane ROIs from all growthlane regions that were found in the image."""
@@ -130,8 +142,8 @@ def get_all_growthlane_rois(rotated_image, region_list):
     channel_centers = []
     for gl_region in region_list:
         channel_region_image = rotated_image[:, gl_region.start:gl_region.end]
-        # centers = find_channels_in_region_new(channel_region_image)
-        centers = find_channels_in_region(channel_region_image)
+        centers = find_channels_in_region_new(channel_region_image)
+        # centers = find_channels_in_region(channel_region_image)
         rois = get_growthlane_rois(centers, gl_region.start, gl_region.end)
         growthlane_rois += rois
         channel_centers += centers
