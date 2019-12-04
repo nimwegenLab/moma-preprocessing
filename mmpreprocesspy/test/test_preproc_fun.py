@@ -32,7 +32,7 @@ class TestPreproc_fun(TestCase):
         if os.path.isdir(results_directory):
             shutil.rmtree(results_directory)
 
-        preproc_fun.preproc_fun(data_directory, results_directory, positions, maxframe)
+        preproc_fun.preproc_fun(data_directory, results_directory, positions=positions, maxframe=maxframe)
 
     def test__dataset_08(self):
         from mmpreprocesspy import preproc_fun
@@ -46,7 +46,7 @@ class TestPreproc_fun(TestCase):
         if os.path.isdir(results_directory):
             shutil.rmtree(results_directory)
 
-        preproc_fun.preproc_fun(data_directory, results_directory, positions, maxframe)
+        preproc_fun.preproc_fun(data_directory, results_directory, positions=positions, maxframe=maxframe)
 
     def test__dataset_10(self):
         from mmpreprocesspy import preproc_fun
