@@ -42,6 +42,19 @@ class TestPreprocessing(TestCase):
         plt.imshow(image_with_channel_indicators, cmap="gray")
         plt.show()
 
+    def test__find_channels_in_region_new_2(self):
+        from mmpreprocesspy import preprocessing
+
+        image = imread("./resources/rotated_channel_region.tiff")
+
+        image = shift(image, [0, 1250])
+
+        centers = preprocessing.find_channels_in_region_new(image)
+        image_with_channel_indicators = get_image_with_lines(image, centers)
+
+        plt.imshow(image_with_channel_indicators, cmap="gray")
+        plt.show()
+
     def test_find_main_channel_orientation__returns_angle_0__for_main_channel_in_vertical_direction(self):
         from mmpreprocesspy import preprocessing
 

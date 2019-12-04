@@ -102,25 +102,26 @@ def get_channel_periodicity(channel_region_image):
     periodicity = np.mean(np.diff(sorted(peak_inds_sorted[-6:])))
     return periodicity
 
+def get_index_of_maximum_closest_to_position(fnc, position):
+    peak_inds = find_peaks(fnc, distance=10)[0]
+    peak_vals = fnc[peak_inds]
+    # keep only positive maxima
+    peak_inds = peak_inds[peak_vals > 0]
+    return peak_inds[np.argmin(np.abs(peak_inds-position))]
+
 def get_channel_shift(channel_region_image):
     projected_image_intensity = np.sum(channel_region_image, axis=1)
     projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
     projected_image_intensity_zero_mean = gaussian(projected_image_intensity_zero_mean, 10, mode='mirror')
-    intensity_ft = np.fft.fft(projected_image_intensity_zero_mean)
-    max_ind = np.argmax(np.abs(intensity_ft))
-    fft_length = intensity_ft.shape[0]
-    value = intensity_ft[max_ind]
-    phase = np.angle(value)
-    if phase < 0: phase += np.pi
-    periodicity = fft_length/max_ind
-    shift = periodicity * phase/(2* np.pi)
+    cross_corr = np.correlate(projected_image_intensity_zero_mean, projected_image_intensity_zero_mean, 'same')
 
-    plt.plot(projected_image_intensity_zero_mean)
-    plt.show()
-    plt.plot(np.abs(intensity_ft))
-    plt.show()
-    plt.plot(np.angle(intensity_ft))
-    plt.show()
+    cross_corr2 = np.correlate(cross_corr, projected_image_intensity_zero_mean, 'same')
+    N = projected_image_intensity.shape[0]
+    center_index = N/2
+    index = get_index_of_maximum_closest_to_position(cross_corr2, center_index)
+    shift = index - center_index
+    # if shift < 0:
+    #     shift += periodicity
 
     return shift
 
