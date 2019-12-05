@@ -7,8 +7,7 @@ from mmpreprocesspy.data_region import DataRegion
 from mmpreprocesspy.roi import Roi
 from mmpreprocesspy.rotated_roi import RotatedRoi
 from scipy.signal import savgol_filter, find_peaks
-from skimage.filters import threshold_otsu, gaussian
-import matplotlib.pyplot as plt
+from skimage.filters import threshold_otsu
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
@@ -35,6 +34,7 @@ def process_image(image, growthlane_length_threshold=0):
 def filter_regions(region_list, minimum_required_growthlane_length):
     """
     Filter the regions using
+
     :param region_list:
     :return:
     """
@@ -45,10 +45,10 @@ def filter_regions(region_list, minimum_required_growthlane_length):
     return new_region_list
 
 
-
 def refine_regions(rotated_image, region_list):
     for region in region_list:
         refine_region(rotated_image, region)
+
 
 def refine_region(rotated_image, region):
     """
@@ -68,11 +68,12 @@ def refine_region(rotated_image, region):
     threshold = np.median(sorted_max_intensities)
 
     #  extend region at the channel start using lookahead interval
-    while np.any(projected_max_intensities[region.start-look_ahead_length:region.start] > threshold):
+    while np.any(projected_max_intensities[region.start - look_ahead_length:region.start] > threshold):
         region.start -= 1
     #  extend region at the channel end using lookahead interval
-    while np.any(projected_max_intensities[region.end:region.end+look_ahead_length] > threshold):
+    while np.any(projected_max_intensities[region.end:region.end + look_ahead_length] > threshold):
         region.end += 1
+
 
 def get_growthlane_periodicity(growthlane_region_image):
     '''
@@ -108,7 +109,8 @@ def get_index_of_intensity_maximum_closest_to_position(intensity_profile, positi
     peak_inds = find_peaks(intensity_profile, distance=10)[0]
     peak_vals = intensity_profile[peak_inds]
     peak_inds = peak_inds[peak_vals > 0]  # keep only positive maxima, because they correspond to the growthlane centers
-    return peak_inds[np.argmin(np.abs(peak_inds-position))]
+    return peak_inds[np.argmin(np.abs(peak_inds - position))]
+
 
 def get_position_of_first_growthlane(growthlane_region_image, periodicity):
     """
@@ -120,12 +122,15 @@ def get_position_of_first_growthlane(growthlane_region_image, periodicity):
    """
     projected_image_intensity = np.sum(growthlane_region_image, axis=1)
     projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
-    acf_of_intensity_profile = np.correlate(projected_image_intensity_zero_mean, projected_image_intensity_zero_mean, 'same')
-    ccf_of_acf_with_intensity_profile = np.correlate(projected_image_intensity_zero_mean, acf_of_intensity_profile, 'same')
-    center_index = np.round(projected_image_intensity.shape[0]/2)
+    acf_of_intensity_profile = np.correlate(projected_image_intensity_zero_mean, projected_image_intensity_zero_mean,
+                                            'same')
+    ccf_of_acf_with_intensity_profile = np.correlate(projected_image_intensity_zero_mean, acf_of_intensity_profile,
+                                                     'same')
+    center_index = np.round(projected_image_intensity.shape[0] / 2)
     index = get_index_of_intensity_maximum_closest_to_position(ccf_of_acf_with_intensity_profile, center_index)
-    shift = index - periodicity * np.floor(index/periodicity)  # get growthlane position closest to the image origin
+    shift = index - periodicity * np.floor(index / periodicity)  # get growthlane position closest to the image origin
     return shift
+
 
 def get_gl_center_positions_in_growthlane_region(growthlane_region_image):
     """
@@ -142,6 +147,7 @@ def get_gl_center_positions_in_growthlane_region(growthlane_region_image):
     channel_positions = list(np.arange(first_gl_position, fft_length, periodicity).astype(np.int))
     return channel_positions
 
+
 def get_all_growthlane_rois(rotated_image, region_list):
     """Gets the growthlane ROIs from all growthlane regions that were found in the image."""
     growthlane_rois = []
@@ -154,6 +160,7 @@ def get_all_growthlane_rois(rotated_image, region_list):
         channel_centers += centers
     return growthlane_rois, channel_centers
 
+
 def get_mean_distance_between_growthlanes(channel_centers):
     """
     Get the mean distance between two adjacent growth-lanes.
@@ -162,6 +169,7 @@ def get_mean_distance_between_growthlanes(channel_centers):
     :return:
     """
     return np.int0(np.mean(np.diff(channel_centers)))
+
 
 def find_main_channel_orientation(image):
     """ Find the orientation of the main channel.
@@ -251,7 +259,6 @@ def pattern_limits(image, threshold_factor=None, use_smoothing=False):
     # plt.plot(fourier_ratio_orig)
     # plt.plot(filt_sig)
     # plt.show()
-
 
     # threshold_factor = threshold_otsu(yhat)
     # print(threshold_factor)
@@ -372,4 +379,3 @@ def get_translation_matrix(horizontal_shift, vertical_shift):
 
 def get_rotation_matrix(rotation_angle, rotation_center):
     return cv2.getRotationMatrix2D(rotation_center, rotation_angle, 1)
-
