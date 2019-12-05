@@ -234,39 +234,10 @@ def pattern_limits(image, threshold_factor=None, use_smoothing=False):
     region_list = get_regions_from_mask(region_mask)
     region_list = filter_date_regions_by_width(region_list, minimum_region_width=100)
 
-    # plt.plot(fourier_ratio_orig)
-    # plt.plot(fourier_ratio)
-    # plt.plot(region_mask * np.max(fourier_ratio))
-    # plt.show()
+    column_start_position = np.argwhere(fourier_ratio > threshold)[0][0]
+    column_end_position = np.argwhere(fourier_ratio > threshold)[-1][0]
 
-    # # compare smoothed vs. non-smoothed data
-    # yhat = savgol_filter(fourier_ratio, 51, 1)  # window size 31, polynomial order 3
-    # plt.plot(fourier_ratio)
-    # plt.plot(yhat)
-    # plt.hlines(threshold,0,fourier_ratio.__len__())
-    # plt.show()
-    #
-    # # look at histogram
-    # plt.hist(yhat,100)
-    # plt.show()
-    #
-    # # look at differential values
-    # plt.plot(np.diff(yhat))
-    # plt.show()
-    #
-    # # try box-smoothing assuming, we know the length of the growthlanes
-    # filt_sig = filters.uniform_filter(fourier_ratio_orig, size=400, output=None, mode='reflect', cval=0.0, origin=0)
-    # plt.plot(fourier_ratio_orig)
-    # plt.plot(filt_sig)
-    # plt.show()
-
-    # threshold_factor = threshold_otsu(yhat)
-    # print(threshold_factor)
-
-    mincol = np.argwhere(fourier_ratio > threshold)[0][0]
-    maxcol = np.argwhere(fourier_ratio > threshold)[-1][0]
-
-    return mincol, maxcol, region_list
+    return column_start_position, column_end_position, region_list
 
 
 def filter_date_regions_by_width(region_list, minimum_region_width):
