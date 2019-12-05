@@ -17,43 +17,49 @@ class TestPreprocessing(TestCase):
 
         image = imread("./resources/10_20190424_hi2_hi3_med2_rplN_4_MMStack.ome-2.tif")
         centers = preprocessing.find_channels_in_region_new(image)
-        image_with_channel_indicators = get_image_with_lines(image, centers)
+        self.assertEqual(19, centers[0])
+        self.assertEqual(125, centers[1])
 
-        plt.imshow(image_with_channel_indicators, cmap="gray")
-        plt.show()
+        # image_with_channel_indicators = get_image_with_lines(image, centers)
+        # plt.imshow(image_with_channel_indicators, cmap="gray")
+        # plt.show()
 
     def test__find_channels_in_region_dataset_4(self):
         from mmpreprocesspy import preprocessing
 
         image = imread("./resources/04_20180531_gluIPTG5uM_lac_1_MMStack.ome-2_channel_region.tif")
         centers = preprocessing.find_channels_in_region_new(image)
-        image_with_channel_indicators = get_image_with_lines(image, centers)
+        self.assertEqual(71, centers[0])
+        self.assertEqual(144, centers[1])
 
-        plt.imshow(image_with_channel_indicators, cmap="gray")
-        plt.show()
+        # image_with_channel_indicators = get_image_with_lines(image, centers)
+        # plt.imshow(image_with_channel_indicators, cmap="gray")
+        # plt.show()
 
     def test__find_channels_in_region_dataset_11(self):
         from mmpreprocesspy import preprocessing
 
         image = imread("./resources/rotated_channel_region.tiff")
         centers = preprocessing.find_channels_in_region_new(image)
-        image_with_channel_indicators = get_image_with_lines(image, centers)
+        self.assertEqual(79, centers[0])
+        self.assertEqual(185, centers[1])
 
-        plt.imshow(image_with_channel_indicators, cmap="gray")
-        plt.show()
+        # image_with_channel_indicators = get_image_with_lines(image, centers)
+        # plt.imshow(image_with_channel_indicators, cmap="gray")
+        # plt.show()
 
-    def test__find_channels_in_region_new_2(self):
+    def test__find_channels_in_region_dataset_11_with_cropped_region(self):
         from mmpreprocesspy import preprocessing
 
         image = imread("./resources/rotated_channel_region.tiff")
-
         image = shift(image, [0, 1250])
-
         centers = preprocessing.find_channels_in_region_new(image)
-        image_with_channel_indicators = get_image_with_lines(image, centers)
+        self.assertEqual(105, centers[0])
+        self.assertEqual(212, centers[1])
 
-        plt.imshow(image_with_channel_indicators, cmap="gray")
-        plt.show()
+        # image_with_channel_indicators = get_image_with_lines(image, centers)
+        # plt.imshow(image_with_channel_indicators, cmap="gray")
+        # plt.show()
 
     def test_find_main_channel_orientation__returns_angle_0__for_main_channel_in_vertical_direction(self):
         from mmpreprocesspy import preprocessing
