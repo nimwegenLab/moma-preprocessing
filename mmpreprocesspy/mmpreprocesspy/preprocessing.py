@@ -119,7 +119,7 @@ def get_position_of_first_growthlane(channel_region_image, periodicity):
     shift = index - periodicity * np.floor(index/periodicity)  # get growthlane position closest to the image origin
     return shift
 
-def find_channels_in_region_new(channel_region_image):
+def find_channels_in_region(channel_region_image):
     periodicity = get_channel_periodicity(channel_region_image)
     shift = get_position_of_first_growthlane(channel_region_image, periodicity)
     fft_length = channel_region_image.shape[0]
@@ -136,8 +136,7 @@ def get_all_growthlane_rois(rotated_image, region_list):
     channel_centers = []
     for gl_region in region_list:
         channel_region_image = rotated_image[:, gl_region.start:gl_region.end]
-        centers = find_channels_in_region_new(channel_region_image)
-        # centers = find_channels_in_region(channel_region_image)
+        centers = find_channels_in_region(channel_region_image)
         rois = get_growthlane_rois(centers, gl_region.start, gl_region.end)
         growthlane_rois += rois
         channel_centers += centers
@@ -305,39 +304,6 @@ def calculate_fourier_ratio(image):
         fourier_ratio.append(fourier_sort[-2] / fourier_sort[-1])
     fourier_ratio = np.array(fourier_ratio)
     return fourier_ratio
-
-
-def find_channels_in_region(channel_region_image):
-    # find channels as peak of intensity in a projection
-    # define a threshold between inter-channel and peak intensity.
-    # For each chunk of rows corresponding to a channel, calculate a mean position as mid-channel
-
-    projected_image_intensity = np.sum(channel_region_image, axis=1)
-    inter_channel_val = np.mean(np.sort(projected_image_intensity)[0:100])
-
-    window = 30
-    peaks = np.array([x for x in np.arange(window, len(projected_image_intensity) - window)
-                      if np.all(projected_image_intensity[x] > projected_image_intensity[x - window:x]) & np.all(
-            projected_image_intensity[x] > projected_image_intensity[x + 1:x + window])])
-
-    peaks = peaks[projected_image_intensity[peaks] > 1.5 * inter_channel_val]
-
-    channel_val = np.mean(projected_image_intensity[peaks])
-    # mid_range = 0.5*(inter_channel_val+channel_val)
-    mid_range = inter_channel_val + 0.3 * (channel_val - inter_channel_val)
-
-    chunks = np.concatenate(np.argwhere(projected_image_intensity > mid_range))
-
-    channel_center = []
-    initchunk = [chunks[0]]
-    for x in range(1, len(chunks)):
-        if chunks[x] - chunks[x - 1] == 1:
-            initchunk.append(chunks[x])
-        else:
-            channel_center.append(np.mean(initchunk))
-            initchunk = [chunks[x]]
-    channel_center = channel_center
-    return channel_center
 
 
 def fft_align(im0, im1, pixlim=None):
