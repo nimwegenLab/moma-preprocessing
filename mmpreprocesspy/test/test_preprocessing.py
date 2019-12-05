@@ -14,7 +14,7 @@ class TestPreprocessing(TestCase):
         from mmpreprocesspy import preprocessing
 
         image = imread("./resources/10_20190424_hi2_hi3_med2_rplN_4_MMStack.ome-2.tif")
-        centers = preprocessing.find_channels_in_region(image)
+        centers = preprocessing.get_gl_center_positions_in_growthlane_region(image)
         self.assertEqual(19, centers[0])
         self.assertEqual(125, centers[1])
 
@@ -26,7 +26,7 @@ class TestPreprocessing(TestCase):
         from mmpreprocesspy import preprocessing
 
         image = imread("./resources/04_20180531_gluIPTG5uM_lac_1_MMStack.ome-2_channel_region.tif")
-        centers = preprocessing.find_channels_in_region(image)
+        centers = preprocessing.get_gl_center_positions_in_growthlane_region(image)
         self.assertEqual(71, centers[0])
         self.assertEqual(144, centers[1])
 
@@ -38,7 +38,7 @@ class TestPreprocessing(TestCase):
         from mmpreprocesspy import preprocessing
 
         image = imread("./resources/rotated_channel_region.tiff")
-        centers = preprocessing.find_channels_in_region(image)
+        centers = preprocessing.get_gl_center_positions_in_growthlane_region(image)
         self.assertEqual(79, centers[0])
         self.assertEqual(185, centers[1])
 
@@ -51,7 +51,7 @@ class TestPreprocessing(TestCase):
 
         image = imread("./resources/rotated_channel_region.tiff")
         image = shift(image, [0, 1250])
-        centers = preprocessing.find_channels_in_region(image)
+        centers = preprocessing.get_gl_center_positions_in_growthlane_region(image)
         self.assertEqual(105, centers[0])
         self.assertEqual(212, centers[1])
 

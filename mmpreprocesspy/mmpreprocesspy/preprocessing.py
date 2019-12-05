@@ -57,6 +57,7 @@ def refine_region(rotated_image, region):
     The median of these maximum intensities is used as threshold value.
     It then shifts the start and end indices of the region in both directions until their respective intensity values
     fall below this threshold (it does this using a lookahead-interval to avoid aborting prematurely).
+
     :param rotated_image:
     :param region:
     :return:
@@ -73,62 +74,73 @@ def refine_region(rotated_image, region):
     while np.any(projected_max_intensities[region.end:region.end+look_ahead_length] > threshold):
         region.end += 1
 
-    # normalizedImg = None
-    # normalizedImg = cv.normalize(rotated_image,  normalizedImg, 0, 255, cv.NORM_MINMAX)
-    # im = np.array(normalizedImg, dtype=np.uint8)
-    # cv.line(im, (region.start, 0), (region.start, im.shape[0]), (255, 0, 0), 5)
-    # cv.line(im, (region.end, 0), (region.end, im.shape[0]), (255, 0, 0), 5)
-    # aux.show_image(im, 'rotated image')
-    # cv.waitKey()
-    #
-    # #######################
-    #
-    # plt.hist(projected_max_intensities, 50), plt.show()
-    # plt.plot(projected_max_intensities), plt.hlines(threshold, region.start, region.end), plt.show()
-    # plt.plot(projected_max_intensities[region.start:region.end]), plt.hlines(threshold, region.start, region.end), plt.show()
-    # plt.plot(projected_max_intensities[region.start-look_ahead_length:region.start]), plt.hlines(threshold, region.start, region.end), plt.show()
-    # plt.plot(projected_max_intensities[region.end:region.end+look_ahead_length]), plt.hlines(threshold, region.start, region.end), plt.show()
+def get_growthlane_periodicity(growthlane_region_image):
+    '''
+    Determine the periodicity of the growthlanes and return it. It does so by calculating the average distance between
+    the `number_of_peaks` of highest peaks.
 
+    :param growthlane_region_image: region of the image containing growthlanes. The growthlanes are assumed to be
+    oriented horizontally and the image should be cropped, so that it does not contain too much space before and behind
+    the GLs. This method also assumed that the growthlanes appear bright foreground on dark background.
+    '''
+    min_distance_between_peaks = 10  # TODO-MM-20191205: Minimum distance between peaks should probably be a parameter.
+    number_of_peaks = 6  # TODO-MM-20191205: Number of peaks for periodicity calculation probably better be a parameter.
 
-def get_channel_periodicity(channel_region_image):
-    projected_image_intensity = np.sum(channel_region_image, axis=1)
+    projected_image_intensity = np.sum(growthlane_region_image, axis=1)
     projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
     cross_corr = np.correlate(projected_image_intensity_zero_mean, projected_image_intensity_zero_mean, 'same')
 
-    peak_inds = find_peaks(cross_corr, distance=10)[0]
+    peak_inds = find_peaks(cross_corr, distance=min_distance_between_peaks)[0]
     peak_vals = cross_corr[peak_inds]
 
     peak_inds_sorted = [x for _, x in sorted(zip(peak_vals, peak_inds), key=lambda pair: pair[0])]
-    periodicity = np.mean(np.diff(sorted(peak_inds_sorted[-6:])))
+    periodicity = np.mean(np.diff(sorted(peak_inds_sorted[-number_of_peaks:])))
     return periodicity
 
-def get_index_of_maximum_closest_to_position(fnc, position):
-    peak_inds = find_peaks(fnc, distance=10)[0]
-    peak_vals = fnc[peak_inds]
-    # keep only positive maxima
-    peak_inds = peak_inds[peak_vals > 0]
+
+def get_index_of_intensity_maximum_closest_to_position(intensity_profile, position):
+    """
+    Returns the index of the intensity maximum closest to :position:.
+
+    :intensity_profile: intensity profile from which to get the closes maximum.
+    :position: position to which the maximum should be closest.
+    """
+    peak_inds = find_peaks(intensity_profile, distance=10)[0]
+    peak_vals = intensity_profile[peak_inds]
+    peak_inds = peak_inds[peak_vals > 0]  # keep only positive maxima, because they correspond to the growthlane centers
     return peak_inds[np.argmin(np.abs(peak_inds-position))]
 
-def get_position_of_first_growthlane(channel_region_image, periodicity):
-    projected_image_intensity = np.sum(channel_region_image, axis=1)
+def get_position_of_first_growthlane(growthlane_region_image, periodicity):
+    """
+    Returns the position of the first growthlane in :growthlane_region_image: closest to the image origin.
+
+    :param growthlane_region_image: region of the image containing growthlanes. The growthlanes are assumed to be
+    oriented horizontally and the image should be cropped, so that it does not contain too much space before and behind
+    the GLs. This method also assumed that the growthlanes appear bright foreground on dark background.
+   """
+    projected_image_intensity = np.sum(growthlane_region_image, axis=1)
     projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
     acf_of_intensity_profile = np.correlate(projected_image_intensity_zero_mean, projected_image_intensity_zero_mean, 'same')
     ccf_of_acf_with_intensity_profile = np.correlate(projected_image_intensity_zero_mean, acf_of_intensity_profile, 'same')
     center_index = np.round(projected_image_intensity.shape[0]/2)
-    index = get_index_of_maximum_closest_to_position(ccf_of_acf_with_intensity_profile, center_index)
+    index = get_index_of_intensity_maximum_closest_to_position(ccf_of_acf_with_intensity_profile, center_index)
     shift = index - periodicity * np.floor(index/periodicity)  # get growthlane position closest to the image origin
     return shift
 
-def find_channels_in_region(channel_region_image):
-    periodicity = get_channel_periodicity(channel_region_image)
-    shift = get_position_of_first_growthlane(channel_region_image, periodicity)
-    fft_length = channel_region_image.shape[0]
-    channel_positions = get_channel_positions(periodicity, shift, fft_length)
-    return channel_positions
+def get_gl_center_positions_in_growthlane_region(growthlane_region_image):
+    """
+    Return the center positions of the growthlanes. The centers refer to the vertical position of the centers of the
+    growthlanes.
 
-def get_channel_positions(periodicity, shift, fft_size):
-    starting_value = shift
-    return list(np.arange(starting_value, fft_size, periodicity).astype(np.int))
+    :param growthlane_region_image: region of the image containing growthlanes. The growthlanes are assumed to be
+    oriented horizontally and the image should be cropped, so that it does not contain too much space before and behind
+    the GLs. This method also assumed that the growthlanes appear bright foreground on dark background.
+    """
+    periodicity = get_growthlane_periodicity(growthlane_region_image)
+    first_gl_position = get_position_of_first_growthlane(growthlane_region_image, periodicity)
+    fft_length = growthlane_region_image.shape[0]
+    channel_positions = list(np.arange(first_gl_position, fft_length, periodicity).astype(np.int))
+    return channel_positions
 
 def get_all_growthlane_rois(rotated_image, region_list):
     """Gets the growthlane ROIs from all growthlane regions that were found in the image."""
@@ -136,7 +148,7 @@ def get_all_growthlane_rois(rotated_image, region_list):
     channel_centers = []
     for gl_region in region_list:
         channel_region_image = rotated_image[:, gl_region.start:gl_region.end]
-        centers = find_channels_in_region(channel_region_image)
+        centers = get_gl_center_positions_in_growthlane_region(channel_region_image)
         rois = get_growthlane_rois(centers, gl_region.start, gl_region.end)
         growthlane_rois += rois
         channel_centers += centers
@@ -145,6 +157,7 @@ def get_all_growthlane_rois(rotated_image, region_list):
 def get_mean_distance_between_growthlanes(channel_centers):
     """
     Get the mean distance between two adjacent growth-lanes.
+
     :param channel_centers:
     :return:
     """
