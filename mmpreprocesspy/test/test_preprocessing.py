@@ -1,10 +1,10 @@
 from unittest import TestCase
 
 import mmpreprocesspy.dev_auxiliary_functions as dev_aux
+import numpy as np
 import skimage.transform
 from skimage.io import imread
 from skimage.transform import AffineTransform, warp
-import numpy as np
 
 
 class TestPreprocessing(TestCase):
@@ -94,7 +94,7 @@ class TestPreprocessing(TestCase):
             self.test_data_base_path + '/04_20180531_gluIPTG5uM_lac_1/first_images/Pos0/04_img_000000000_ DIA Ph3 (GFP)_000.tif')
 
         rotation_angle = -45
-        rotation_center = (image_array.shape[1]/2 - 0.5, image_array.shape[0]/2 - 0.5)
+        rotation_center = (image_array.shape[1] / 2 - 0.5, image_array.shape[0] / 2 - 0.5)
         matrix = preprocessing.get_rotation_matrix(rotation_angle, rotation_center)
 
         image_array = cv.warpAffine(image_array, matrix, (image_array.shape[1], image_array.shape[0]))
@@ -115,6 +115,7 @@ class TestPreprocessing(TestCase):
         # dev_aux.show_image(image_array)
         # cv.waitKey()
 
+
 def read_tiff_to_nparray(image_path):
     """Reads tiff-image and returns it as a numpy-array."""
 
@@ -124,12 +125,14 @@ def read_tiff_to_nparray(image_path):
     image_base = Image.open(image_path)
     return np.array(image_base, dtype=np.uint16)
 
+
 def get_image_with_lines(channel_region_image, channel_positions):
     new_image = np.float32(channel_region_image).copy()
     new_image /= np.max(new_image)
     for pos in channel_positions:
-        new_image[int(pos)-2:int(pos)+2, :] = 1
+        new_image[int(pos) - 2:int(pos) + 2, :] = 1
     return new_image
+
 
 def shift(image, vector):
     transform = AffineTransform(translation=vector)
