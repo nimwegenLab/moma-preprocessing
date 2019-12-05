@@ -85,7 +85,7 @@ def get_growthlane_periodicity(growthlane_region_image):
     the GLs. This method also assumed that the growthlanes appear bright foreground on dark background.
     '''
     min_distance_between_peaks = 10  # TODO-MM-20191205: Minimum distance between peaks should probably be a parameter.
-    number_of_peaks = 6  # TODO-MM-20191205: Number of peaks for periodicity calculation probably better be a parameter.
+    number_of_peaks = 5  # TODO-MM-20191205: Number of peaks for periodicity calculation probably better be a parameter.
 
     projected_image_intensity = np.sum(growthlane_region_image, axis=1)
     projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
