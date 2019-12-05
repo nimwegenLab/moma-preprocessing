@@ -109,25 +109,20 @@ def get_index_of_maximum_closest_to_position(fnc, position):
     peak_inds = peak_inds[peak_vals > 0]
     return peak_inds[np.argmin(np.abs(peak_inds-position))]
 
-def get_channel_shift(channel_region_image):
+def get_position_of_first_growthlane(channel_region_image, periodicity):
     projected_image_intensity = np.sum(channel_region_image, axis=1)
     projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
-    projected_image_intensity_zero_mean = gaussian(projected_image_intensity_zero_mean, 10, mode='mirror')
-    cross_corr = np.correlate(projected_image_intensity_zero_mean, projected_image_intensity_zero_mean, 'same')
-
-    cross_corr2 = np.correlate(cross_corr, projected_image_intensity_zero_mean, 'same')
-    N = projected_image_intensity.shape[0]
-    center_index = N/2
-    index = get_index_of_maximum_closest_to_position(cross_corr2, center_index)
-    shift = index - center_index
-    # if shift < 0:
-    #     shift += periodicity
-
+    acf_of_intensity_profile = np.correlate(projected_image_intensity_zero_mean, projected_image_intensity_zero_mean, 'same')
+    ccf_of_acf_with_intensity_profile = np.correlate(projected_image_intensity_zero_mean, acf_of_intensity_profile, 'same')
+    center_index = np.round(projected_image_intensity.shape[0]/2)
+    index = get_index_of_maximum_closest_to_position(ccf_of_acf_with_intensity_profile, center_index)
+    shift = index - periodicity * np.floor(index/periodicity)  # get growthlane position closest to the image origin
     return shift
 
 def find_channels_in_region_new(channel_region_image):
     periodicity = get_channel_periodicity(channel_region_image)
-    shift = get_channel_shift(channel_region_image)
+    shift = get_position_of_first_growthlane(channel_region_image, periodicity)
+    # if shift < 0: shift += periodicity
     fft_length = channel_region_image.shape[0]
     channel_positions = get_channel_positions(periodicity, shift, fft_length)
     print(channel_positions)

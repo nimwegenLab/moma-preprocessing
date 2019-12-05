@@ -132,7 +132,7 @@ def get_image_with_lines(channel_region_image, channel_positions):
     new_image = np.float32(channel_region_image).copy()
     new_image /= np.max(new_image)
     for pos in channel_positions:
-        new_image[int(pos), :] = 1
+        new_image[int(pos)-2:int(pos)+2, :] = 1
     return new_image
 
 def shift(image, vector):
