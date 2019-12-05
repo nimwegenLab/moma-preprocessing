@@ -122,10 +122,8 @@ def get_position_of_first_growthlane(channel_region_image, periodicity):
 def find_channels_in_region_new(channel_region_image):
     periodicity = get_channel_periodicity(channel_region_image)
     shift = get_position_of_first_growthlane(channel_region_image, periodicity)
-    # if shift < 0: shift += periodicity
     fft_length = channel_region_image.shape[0]
     channel_positions = get_channel_positions(periodicity, shift, fft_length)
-    print(channel_positions)
     return channel_positions
 
 def get_channel_positions(periodicity, shift, fft_size):

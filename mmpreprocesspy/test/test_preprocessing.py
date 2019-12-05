@@ -1,12 +1,10 @@
 from unittest import TestCase
 
-import matplotlib.pyplot as plt
 import mmpreprocesspy.dev_auxiliary_functions as dev_aux
 import skimage.transform
 from skimage.io import imread
 from skimage.transform import AffineTransform, warp
 import numpy as np
-import cv2
 
 
 class TestPreprocessing(TestCase):
@@ -85,7 +83,7 @@ class TestPreprocessing(TestCase):
     def test_create_growthlane_objects(self):
         from mmpreprocesspy import preprocessing
 
-        regions = preprocessing.get_growthlane_rois([1, 2], 20, 50)
+        regions = preprocessing.get_growthlane_rois([1, 20], 20, 50)
         pass
 
     def test_get_rotation_matrix(self):
@@ -114,9 +112,8 @@ class TestPreprocessing(TestCase):
         matrix = preprocessing.get_translation_matrix(horizontal_shift, vertical_shift)
 
         image_array = cv.warpAffine(image_array, matrix, (image_array.shape[1], image_array.shape[0]))
-        dev_aux.show_image(image_array)
-        cv.waitKey()
-
+        # dev_aux.show_image(image_array)
+        # cv.waitKey()
 
 def read_tiff_to_nparray(image_path):
     """Reads tiff-image and returns it as a numpy-array."""
@@ -126,13 +123,6 @@ def read_tiff_to_nparray(image_path):
 
     image_base = Image.open(image_path)
     return np.array(image_base, dtype=np.uint16)
-
-
-    # @staticmethod
-    # def show_image(image): # this method is currently broken
-    #     image.mode = 'I'
-    #     im2 = image.point(lambda i: i * (1. / 256)).convert('L')
-    #     im2.show()
 
 def get_image_with_lines(channel_region_image, channel_positions):
     new_image = np.float32(channel_region_image).copy()
@@ -147,13 +137,3 @@ def shift(image, vector):
     shifted = warp(image, transform, mode='constant', preserve_range=True, output_shape=output_shape)
     shifted_image = shifted.astype(image.dtype)
     return shifted_image[:]
-
-
-
-    # M = np.float32([[1, 0, vector[0]], [0, 1, vector[1]]])
-    # # Read image from disk.
-    # (rows, cols) = image.shape[:2]
-    #
-    # # warpAffine does appropriate shifting given the
-    # # translation matrix.
-    # return cv2.warpAffine(image, M, (cols, rows))
