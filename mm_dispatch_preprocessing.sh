@@ -66,8 +66,6 @@ for (( I=0; I<N; I++ )); do
 #SBATCH --export=MODULEPATH=$MODULEPATH \n\
 #SBATCH -o $S_OUT \n\
 #SBATCH -e $S_ERR \n\n\
-ml purge\n\
-ml Python/3.7.3-foss-2018b\n\
 source activate $MM_PYTHON_ENVIRONMENT_PATH\n\n\
 $CMD_STR \n"
   CMD_SBATCH="sbatch $SCRIPT"
