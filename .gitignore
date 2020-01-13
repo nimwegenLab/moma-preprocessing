@@ -1,6 +1,7 @@
 .*
 *.swp
 venv-testenv/
+mmpreprocesspy_conda_environment/
 *.pyc
 __pycache__/
 output/

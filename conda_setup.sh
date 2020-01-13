@@ -25,8 +25,8 @@ fi
 
 eval $(conda shell.bash hook)
 
-conda create -y -n mmpreprocesspy python=3.7
-source activate mmpreprocesspy
+conda create -y --prefix $DIR/mmpreprocesspy_conda_environment python=3.7
+source activate $DIR/mmpreprocesspy_conda_environment
 
 ######### packages for deep leaning ##############
 
