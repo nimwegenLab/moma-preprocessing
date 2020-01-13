@@ -6,6 +6,98 @@ from unittest import TestCase
 class TestPreproc_fun(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
+    def test__dataset_10_with_flatfield(self):
+        from mmpreprocesspy import preproc_fun
+
+        data_directory = self.test_data_base_path + '/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement'
+        flatfield_directory = self.test_data_base_path + '/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/flatfield'
+        directory_to_save = self.test_data_base_path + '/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/result_with_flatfield/'
+        positions = [0]
+        minframe = None
+        maxframe = 8
+        dark_noise = None
+        gaussian_sigma = None
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        preproc_fun.preproc_fun(data_directory, directory_to_save, positions, minframe=minframe, maxframe=maxframe,
+                                growthlane_length_threshold=300, flatfield_directory=flatfield_directory,
+                                dark_noise=dark_noise, gaussian_sigma=gaussian_sigma)
+
+    def test__dataset_11_with_flatfield(self):
+        from mmpreprocesspy import preproc_fun
+
+        data_directory = self.test_data_base_path + '/11_20190910_glc_spcm_1/MMStack'
+        flatfield_directory = self.test_data_base_path + '/11_20190910_glc_spcm_1/MMStack/flatfield'
+        directory_to_save = self.test_data_base_path + '/11_20190910_glc_spcm_1/MMStack/result_with_flatfield/'
+        positions = [0]
+        minframe = None
+        maxframe = 8
+        dark_noise = None
+        gaussian_sigma = None
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        preproc_fun.preproc_fun(data_directory, directory_to_save, positions, minframe=minframe, maxframe=maxframe,
+                                growthlane_length_threshold=300, flatfield_directory=flatfield_directory,
+                                dark_noise=dark_noise, gaussian_sigma=gaussian_sigma)
+
+    def test__dataset_11_no_flatfield(self):
+        from mmpreprocesspy import preproc_fun
+
+        data_directory = self.test_data_base_path + '/11_20190910_glc_spcm_1/MMStack'
+        directory_to_save = self.test_data_base_path + '/11_20190910_glc_spcm_1/MMStack/result_no_flatfield/'
+        positions = [0]
+        minframe = None
+        maxframe = 8
+        dark_noise = 90
+        gaussian_sigma = 5
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe,
+                                growthlane_length_threshold=300, dark_noise=dark_noise, gaussian_sigma=gaussian_sigma)
+
+        # preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
+        #                         gaussian_sigma=gaussian_sigma)
+
+    def test__dataset_12_with_flatfield(self):
+        from mmpreprocesspy import preproc_fun
+
+        data_directory = self.test_data_base_path + '/12_20190816_Theo/MMStack/'
+        flatfield_directory = self.test_data_base_path + '/12_20190816_Theo/MMStack/flatfield'
+        directory_to_save = self.test_data_base_path + '/12_20190816_Theo/MMStack/result_with_flatfield/'
+        positions = [0]
+        minframe = None
+        maxframe = 8
+        dark_noise = 90
+        gaussian_sigma = 5
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        preproc_fun.preproc_fun(data_directory, directory_to_save, positions, minframe=minframe, maxframe=maxframe, flatfield_directory=flatfield_directory, dark_noise=dark_noise,
+                                gaussian_sigma=gaussian_sigma)
+
+    def test__dataset_12_no_flatfield(self):
+        from mmpreprocesspy import preproc_fun
+
+        data_directory = self.test_data_base_path + '/12_20190816_Theo/MMStack/'
+        directory_to_save = self.test_data_base_path + '/12_20190816_Theo/MMStack/result_no_flatfield/'
+        positions = [0]
+        maxframe = 8
+        dark_noise = 90
+        gaussian_sigma = 5
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
+                                gaussian_sigma=gaussian_sigma)
+
     def test__dataset_11(self):
         from mmpreprocesspy import preproc_fun
 
