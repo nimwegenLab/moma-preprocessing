@@ -4,6 +4,7 @@ import shutil
 import time
 
 import numpy as np
+import matplotlib.pyplot as plt
 import skimage.external.tifffile
 import skimage.filters
 import skimage.measure
@@ -43,11 +44,13 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
     if flatfield_directory is not None:
         flatfield = MMData(flatfield_directory)
         preprocessor = ImagePreprocessor(dataset, flatfield, dark_noise, gaussian_sigma)
-        preprocessor.initialize()
+        roi_shape = (dataset.get_image_height(), dataset.get_image_width())
+        preprocessor.calculate_flatfields(roi_shape)
         # since we are correcting the images: correct the number and naming of the available colors
         colors_orig = colors.copy()
         colors[1:] = [name+'_corrected' for name in colors[1:]]
         colors = colors + colors_orig[1:]
+        preprocessor.save_flatfields(folder_to_save)
 
 
     # get default values for non-specified optional parameters
@@ -110,9 +113,12 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
 
             # correct images and append corrected and non-corrected images
             if preprocessor is not None:
-                corrected_color_image_stack = preprocessor.process_image_stack(color_image_stack)
-                color_image_stack = np.append(corrected_color_image_stack,
-                                              color_image_stack[:, :, 1:], 2)
+                corrected_colors = preprocessor.process_image_stack(color_image_stack[:, :, 1:])  # correct all colors, but the PhC channel
+                # corrected_color_image_stack = np.append(corrected_color_image_stack,
+                #                                         color_image_stack[:, :, 1:], 2)
+                color_image_stack_corr = np.append(color_image_stack[:, :, 0, np.newaxis], corrected_colors, 2)  # append corrected channel values
+                color_image_stack_corr = np.append(color_image_stack_corr, color_image_stack[:, :, 1:], 2)  # append original channel values
+                color_image_stack = color_image_stack_corr
 
             # go through all channels, check if there's a corresponding one in the new image. If yes go through all
             #  colors,cut out channel, and append to tif stack. Append also to the Kymograph for each color.
@@ -124,7 +130,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
                     if not os.path.exists(os.path.dirname(gl_file_path)):
                         os.makedirs(os.path.dirname(gl_file_path))
 
-                    save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path, preprocessor)
+                    save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path)
                     kymographs = append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t, minframe)
 
         # remove growth lanes that don't have all time points (e.g. because of drift)
@@ -151,11 +157,11 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
     print("Processing time [s]:" + str(end1 - start1))
 
 
-def save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path, preprocessor):
+def save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path):
     nr_of_colors = color_image_stack.shape[2]
     for color in range(nr_of_colors):
         imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
-        skimage.external.tifffile.imsave(gl_file_path, imtosave.astype(np.uint16), append='force',
+        skimage.external.tifffile.imsave(gl_file_path, np.float32(imtosave), append='force',
                                          imagej=True, metadata=metadata)
 
 

@@ -1,4 +1,7 @@
+import os
+
 import numpy as np
+import skimage.external.tifffile as tff
 from scipy.ndimage.filters import gaussian_filter
 
 
@@ -16,27 +19,41 @@ class ImagePreprocessor(object):
 
         self.assert_flatfield_color_channel_numbers()
 
-    def initialize(self):
-        self.calculate_averaged_flatfields()
+    def save_flatfields(self, folder_to_save):
+        if not os.path.isdir(folder_to_save):
+            os.mkdir(folder_to_save)
+        out_image = np.zeros((self.flatfields.shape[2], self.flatfields.shape[0], self.flatfields.shape[1]))
+        for color_ind in range(self.flatfields.shape[2]):
+            out_image[color_ind, ...] = self.flatfields[:, :, color_ind]
+        tff.imsave(folder_to_save + '/flatfields.tiff', np.float32(out_image))
+
+    def calculate_flatfields(self, roi_shape):
+        self.calculate_averaged_flatfields(roi_shape)
+        self.substract_dark_noise()
         self.smoothen_flatfields()
         self.normalize_flatfields()
 
-    def calculate_averaged_flatfields(self):
+    def calculate_averaged_flatfields(self, roi_shape):
         nr_of_flatfield_positions = self.flatfield_dataset.get_position_names()[0].__len__()
         nr_of_colors = self.flatfield_dataset.get_channels().__len__()
-        height = self.flatfield_dataset.height
-        width = self.flatfield_dataset.width
+        height = roi_shape[0]
+        width = roi_shape[1]
 
         self.flatfields = np.zeros((height, width, nr_of_colors))
         for color_ind in range(0, nr_of_colors):
             for pos_ind in range(0, nr_of_flatfield_positions):
-                self.flatfields[:, :, color_ind] += self.flatfield_dataset.get_image_fast(channel=color_ind, frame=0,
-                                                                                          position=pos_ind)
-        self.flatfields[:, :, color_ind] /= nr_of_flatfield_positions
-        self.flatfields -= self.dark_noise
+                next_image = self.flatfield_dataset.get_image_fast(channel=color_ind, frame=0, position=pos_ind)
+                self.flatfields[:, :, color_ind] += next_image[:height, :width]
+            self.flatfields[:, :, color_ind] /= nr_of_flatfield_positions
+        pass
+
+    def substract_dark_noise(self):
+        for color_ind in range(0, self.flatfields.shape[2]):
+            self.flatfields[:, :, color_ind] -= self.dark_noise
+        # if np.any(self.flatfields < 0):
+        #     raise ValueError("self.flatfields < 0: flatfield contains negative values")
 
     def smoothen_flatfields(self):
-        # self.flatfields = gaussian_filter(self.flatfields, (self.gaussian_sigma,self.gaussian_sigma,0))
         for color_ind in range(0, self.flatfields.shape[2]):
             self.flatfields[:, :, color_ind] = gaussian_filter(self.flatfields[:, :, color_ind], self.gaussian_sigma)
 
@@ -44,15 +61,15 @@ class ImagePreprocessor(object):
         for color_ind in range(0, self.flatfields.shape[2]):
             self.flatfields[:, :, color_ind] /= self.flatfields[:, :, color_ind].max()
 
-    def process_image_stack(self, frame_image_stack):
-        height = frame_image_stack.shape[0]
-        width = frame_image_stack.shape[1]
+    def process_image_stack(self, channels_to_correct):
+        colors_to_correct = channels_to_correct.copy()
 
-        tmp = frame_image_stack[:, :, 1:]
-        tmp = np.divide(tmp, self.flatfields[0:height, 0:width, :])
-        tmp -= self.dark_noise
-        frame_image_stack[:, :, 1:] = tmp
-        return frame_image_stack
+        for color_ind in range(0, colors_to_correct.shape[2]):
+            colors_to_correct[..., color_ind] -= self.dark_noise
+            # colors_to_correct[color_ind] = np.divide(colors_to_correct[color_ind], self.flatfields[color_ind])
+            colors_to_correct[..., color_ind] /= self.flatfields[..., color_ind]
+        # colors_to_correct[colors_to_correct < 0] = 0
+        return colors_to_correct
 
     def assert_flatfield_color_channel_numbers(self):
         nr_of_flatfield_channels = self.flatfield_dataset.get_channels().__len__()

@@ -10,8 +10,8 @@ import mmpreprocesspy.dev_auxiliary_functions as aux
 
 class TestImagePreprocessor(TestCase):
     def test__Process(self):
-        data_directory = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement'
-        flatfield_directory = '/home/micha/Documents/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/flatfield'
+        data_directory = '/home/micha/Documents/01_work/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement'
+        flatfield_directory = '/home/micha/Documents/01_work/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/flatfield'
 
         dark_noise = 100
         gaussian_sigma = 10
@@ -20,16 +20,19 @@ class TestImagePreprocessor(TestCase):
         flatfield = MMData(flatfield_directory)
 
         preprocessor = ImagePreprocessor(dataset, flatfield, dark_noise, gaussian_sigma)
-        preprocessor.initialize()
+
+        roi_shape = (dataset.get_image_height(), dataset.get_image_width())
+        preprocessor.calculate_flatfields(roi_shape)
 
         nr_of_colors = len(dataset.get_channels())
         image_stack = np.zeros((dataset.height, dataset.width, nr_of_colors))
-        for color in range(nr_of_colors):
+        for color in range(1, nr_of_colors):
             image_stack[:, :, color] = dataset.get_image_fast(channel=color, frame=0, position=0)
 
-        processed_stack = preprocessor.process_image_stack(image_stack)
+        images_to_correct = image_stack[:, :, 1:]
+        processed_stack = preprocessor.process_image_stack(images_to_correct)
 
-        aux.show_image(processed_stack[:,:,1])
+        aux.show_image(processed_stack[:,:,0])
         cv2.waitKey()
 
     # def test__flat_field_correction_works_correctly(self):
