@@ -32,7 +32,7 @@ source activate $DIR/mmpreprocesspy_conda_environment
 
 conda install -y wheel
 conda install -y -c conda-forge ipdb
- conda install -y -c conda-forge pudb
+conda install -y -c conda-forge pudb
 conda install -y -c conda-forge exifread
 conda install -y pillow
 conda install -y scipy
