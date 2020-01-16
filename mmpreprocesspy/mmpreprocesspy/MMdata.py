@@ -223,7 +223,7 @@ class MMData:
             binary_file.seek(ifd_pos) 
             nb_tags = np.fromfile(binary_file, np.dtype('<H'),count=1)
             binary_file.seek(ifd_pos+2+(nb_tags[0])*12+0)
-            next_ifd = np.fromfile(binary_file,np.dtype('<L'),count=1)[0]
+            next_ifd = np.fromfile(binary_file,np.dtype(dtype=np.int32),count=1)[0]
             im_bytes = np.fromfile(binary_file, np.dtype('<H'),count = self.height*self.width)
             image= np.reshape(im_bytes,newshape=[self.height,self.width])
             image = image.astype(float)
