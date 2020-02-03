@@ -8,17 +8,6 @@ import mmpreprocesspy.dev_auxiliary_functions as aux
 class TestMomaImageProcessor(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
-    def test__get_growthlane_rois__20200128_glcIPTG_glc_1_MMStack(self):
-        from mmpreprocesspy.moma_image_processing import MomaImageProcessor
-
-        sut = MomaImageProcessor()
-        sut.read_image("./resources/20200128_glcIPTG_glc_1_MMStack.ome-1.tif")
-        sut.process_image()
-        gl_rois = sut.growthlane_rois
-
-        show_image_with_growthlane_rois(sut.rotated_image, gl_rois)
-        cv2.waitKey()
-
     def test_process_image_dataset_03(self):
         from mmpreprocesspy.moma_image_processing import MomaImageProcessor
 
@@ -115,6 +104,29 @@ class TestMomaImageProcessor(TestCase):
         sut = MomaImageProcessor()
         sut.read_image(
             self.test_data_base_path + '/09_20190325_hi1_hi2_med1_rpmB_glu_gly_pl_chr_1/first_images/20190325_hi1_hi2_med1_rpmB_glu_gly_pl_chr_1_MMStack_1.ome-1.tif')
+        sut.process_image()
+        gl_rois = sut.growthlane_rois
+
+        show_image_with_growthlane_rois(sut.rotated_image, gl_rois)
+        cv2.waitKey()
+
+    def test__get_growthlane_rois__dataset_11(self):
+        from mmpreprocesspy.moma_image_processing import MomaImageProcessor
+
+        sut = MomaImageProcessor()
+        sut.growthlane_length_threshold = 300
+        sut.read_image("./resources/11_20190910_glc_spcm_1_MMStack.ome-1.tif")
+        sut.process_image()
+        gl_rois = sut.growthlane_rois
+
+        show_image_with_growthlane_rois(sut.rotated_image, gl_rois)
+        cv2.waitKey()
+
+    def test__get_growthlane_rois__20200128_glcIPTG_glc_1_MMStack(self):
+        from mmpreprocesspy.moma_image_processing import MomaImageProcessor
+
+        sut = MomaImageProcessor()
+        sut.read_image("./resources/20200128_glcIPTG_glc_1_MMStack.ome-1.tif")
         sut.process_image()
         gl_rois = sut.growthlane_rois
 
