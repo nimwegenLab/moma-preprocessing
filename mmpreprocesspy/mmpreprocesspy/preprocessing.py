@@ -64,8 +64,7 @@ def refine_region(rotated_image, region):
     """
     look_ahead_length = 20  # the distance that the algorithm will look ahead to see if the threshold is passed
     projected_max_intensities = np.max(rotated_image, axis=0)
-    sorted_max_intensities = np.sort(projected_max_intensities)
-    threshold = np.median(sorted_max_intensities)
+    threshold = 0.8 * np.median(projected_max_intensities[region.start:region.end])
 
     #  extend region at the channel start using lookahead interval
     while np.any(projected_max_intensities[region.start - look_ahead_length:region.start] > threshold):
