@@ -62,7 +62,7 @@ def refine_region(rotated_image, region):
     :param region:
     :return:
     """
-    look_ahead_length = 50  # the distance that the algorithm will look ahead to see if the threshold is passed
+    look_ahead_length = 20  # the distance that the algorithm will look ahead to see if the threshold is passed
     projected_max_intensities = np.max(rotated_image, axis=0)
     sorted_max_intensities = np.sort(projected_max_intensities)
     threshold = np.median(sorted_max_intensities)
