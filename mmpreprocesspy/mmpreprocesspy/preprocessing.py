@@ -23,7 +23,7 @@ def process_image(image, growthlane_length_threshold=0):
 
     # recalculate channel region boundary on rotated image
     image_rot = skimage.transform.rotate(image, angle, cval=0)
-    mincol, maxcol, region_list = pattern_limits(image_rot, use_smoothing=True)
+    mincol, maxcol, region_list = find_channel_regions(image_rot, use_smoothing=True)
     refine_regions(image_rot, region_list)
     region_list = filter_regions(region_list, minimum_required_growthlane_length=growthlane_length_threshold)
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rot, region_list)
@@ -217,7 +217,7 @@ def find_rotation(image):
     return angle
 
 
-def pattern_limits(image, threshold_factor=None, use_smoothing=False):
+def find_channel_regions(image, threshold_factor=None, use_smoothing=False):
     fourier_ratio_orig = calculate_fourier_ratio(image)
 
     if use_smoothing:
