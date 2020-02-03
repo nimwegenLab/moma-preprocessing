@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+# import matplotlib.pyplot as plt
 import mmpreprocesspy.dev_auxiliary_functions as dev_aux
 import numpy as np
 import skimage.transform
@@ -18,7 +19,7 @@ class TestPreprocessing(TestCase):
         self.assertEqual(18, centers[0])
         self.assertEqual(125, centers[1])
 
-        # image_with_channel_indicators = get_image_with_lines(image, centers)
+        # image_with_channel_indicators = get_image_with_hlines(image, centers)
         # plt.imshow(image_with_channel_indicators, cmap="gray")
         # plt.show()
 
@@ -126,7 +127,7 @@ def read_tiff_to_nparray(image_path):
     return np.array(image_base, dtype=np.uint16)
 
 
-def get_image_with_lines(channel_region_image, channel_positions):
+def get_image_with_hlines(channel_region_image, channel_positions):
     new_image = np.float32(channel_region_image).copy()
     new_image /= np.max(new_image)
     for pos in channel_positions:
