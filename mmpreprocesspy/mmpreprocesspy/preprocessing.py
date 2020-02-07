@@ -98,16 +98,17 @@ def get_growthlane_periodicity(growthlane_region_image):
     return periodicity
 
 
-def get_index_of_intensity_maximum_closest_to_position(intensity_profile, position):
+def get_index_of_intensity_maximum_closest_to_position(ccf_profile_orig, position):
     """
     Returns the index of the intensity maximum closest to :position:.
 
-    :intensity_profile: intensity profile from which to get the closes maximum.
+    :ccf_profile: intensity profile from which to get the closes maximum.
     :position: position to which the maximum should be closest.
     """
-    peak_inds = find_peaks(intensity_profile, distance=10)[0]
-    peak_vals = intensity_profile[peak_inds]
-    peak_inds = peak_inds[peak_vals > 0]  # keep only positive maxima, because they correspond to the growthlane centers
+    ccf_profile = (ccf_profile_orig - np.amin(ccf_profile_orig)) / (np.amax(ccf_profile_orig) - np.amin(ccf_profile_orig))
+    peak_inds = find_peaks(ccf_profile, distance=10)[0]
+    peak_vals = ccf_profile[peak_inds]
+    peak_inds = peak_inds[peak_vals > 0.5]  # keep only highest maxima, because they correspond to the growthlane centers
     return peak_inds[np.argmin(np.abs(peak_inds - position))]
 
 
