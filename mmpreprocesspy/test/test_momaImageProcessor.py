@@ -122,11 +122,22 @@ class TestMomaImageProcessor(TestCase):
         show_image_with_growthlane_rois(sut.rotated_image, gl_rois)
         cv2.waitKey()
 
-    def test__get_growthlane_rois__20200128_glcIPTG_glc_1_MMStack(self):
+    def test__get_growthlane_rois__20200128_glcIPTG_glc_1_Pos0(self):
         from mmpreprocesspy.moma_image_processing import MomaImageProcessor
 
         sut = MomaImageProcessor()
-        sut.read_image("./resources/20200128_glcIPTG_glc_1_MMStack.ome-1.tif")
+        sut.read_image("./resources/20200128_glcIPTG_glc_1_MMStack.ome_Pos0.tif")
+        sut.process_image()
+        gl_rois = sut.growthlane_rois
+
+        show_image_with_growthlane_rois(sut.rotated_image, gl_rois)
+        cv2.waitKey()
+
+    def test__get_growthlane_rois__20200128_glcIPTG_glc_1_Pos1(self):
+        from mmpreprocesspy.moma_image_processing import MomaImageProcessor
+
+        sut = MomaImageProcessor()
+        sut.read_image("./resources/20200128_glcIPTG_glc_1_MMStack.ome_Pos1.tif")
         sut.process_image()
         gl_rois = sut.growthlane_rois
 

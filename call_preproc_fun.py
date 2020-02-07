@@ -63,7 +63,7 @@ print(args.growthlanelengththreshold)
 # parse position argument; IMPORTANT: this only works for a single position argument
 res = re.match('Pos[0]*(\d+)', args.positions)
 posval = int(res.group(1))
-posval = [posval];
+posval = [posval]
 
 preproc_fun(args.input, args.output, positions=posval, minframe=args.timeframeminimum, maxframe=args.timeframemaximum,
             flatfield_directory=args.flatfieldpath, growthlane_length_threshold=args.growthlanelengththreshold)
