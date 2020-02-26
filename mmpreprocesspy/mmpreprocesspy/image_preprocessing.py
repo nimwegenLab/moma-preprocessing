@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import numpy as np
 import skimage.external.tifffile as tff
@@ -21,7 +22,8 @@ class ImagePreprocessor(object):
 
     def save_flatfields(self, folder_to_save):
         if not os.path.isdir(folder_to_save):
-            os.mkdir(folder_to_save)
+            path = Path(folder_to_save)
+            path.mkdir(parents=True, exist_ok=True)
         out_image = np.zeros((self.flatfields.shape[2], self.flatfields.shape[0], self.flatfields.shape[1]))
         for color_ind in range(self.flatfields.shape[2]):
             out_image[color_ind, ...] = self.flatfields[:, :, color_ind]

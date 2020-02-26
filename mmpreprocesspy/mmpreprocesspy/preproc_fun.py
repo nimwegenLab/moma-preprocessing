@@ -18,6 +18,9 @@ def get_gl_index_tiff_path(result_base_path, indp):
     return result_base_path + '/' + 'Pos' + str(indp) + '_GL_index.tiff'
 
 
+def get_position_folder_path(result_base_path, indp):
+    return result_base_path + '/' + 'Pos' + str(indp) + '/'
+
 def get_gl_tiff_path(result_base_path, base_name, indp, gl_index):
     gl_index += 1  # we do this to comply with legacy indexing of growthlanes, which starts at 1
     return result_base_path + '/' + 'Pos' + str(indp) + '/GL' + str(
@@ -39,20 +42,6 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
     colors = dataset.get_channels()
     phase_channel_index = 0
 
-    # load and use flatfield data, if provided
-    preprocessor = None
-    if flatfield_directory is not None:
-        flatfield = MMData(flatfield_directory)
-        preprocessor = ImagePreprocessor(dataset, flatfield, dark_noise, gaussian_sigma)
-        roi_shape = (dataset.get_image_height(), dataset.get_image_width())
-        preprocessor.calculate_flatfields(roi_shape)
-        # since we are correcting the images: correct the number and naming of the available colors
-        colors_orig = colors.copy()
-        colors[1:] = [name+'_corrected' for name in colors[1:]]
-        colors = colors + colors_orig[1:]
-        preprocessor.save_flatfields(folder_to_save)
-
-
     # get default values for non-specified optional parameters
     if minframe is None:
         minframe = 0
@@ -73,6 +62,20 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
     # start measurement of processing time
     start1 = time.time()
     for indp in positions:  # MM: Currently proproc_fun.py in only run for a single position; so this loop is not needed
+        # load and use flatfield data, if provided
+        preprocessor = None
+        if flatfield_directory is not None:
+            flatfield = MMData(flatfield_directory)
+            preprocessor = ImagePreprocessor(dataset, flatfield, dark_noise, gaussian_sigma)
+            roi_shape = (dataset.get_image_height(), dataset.get_image_width())
+            preprocessor.calculate_flatfields(roi_shape)
+            # since we are correcting the images: correct the number and naming of the available colors
+            colors_orig = colors.copy()
+            colors[1:] = [name + '_corrected' for name in colors[1:]]
+            colors = colors + colors_orig[1:]
+            position_folder = get_position_folder_path(folder_to_save, indp)
+            preprocessor.save_flatfields(position_folder)
+
         # load first phase image
         image_base = dataset.get_image_fast(channel=phase_channel_index, frame=minframe, position=indp)
 
