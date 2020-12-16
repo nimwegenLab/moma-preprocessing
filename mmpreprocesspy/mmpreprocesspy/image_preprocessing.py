@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 import numpy as np
-import skimage.external.tifffile as tff
+import tifffile as tff
 from scipy.ndimage.filters import gaussian_filter
 
 
