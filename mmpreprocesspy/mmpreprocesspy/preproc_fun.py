@@ -150,7 +150,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
                     kymo_file_path = get_kymo_tiff_path(folder_to_save, base_name, indp, gl_index, color)
                     if not os.path.exists(os.path.dirname(kymo_file_path)):
                         os.makedirs(os.path.dirname(kymo_file_path))
-                    tifffile.imsave(kymo_file_path,
+                    tifffile.imwrite(kymo_file_path,
                                                      kymographs[gl_index][:, :, color].astype(np.uint16),
                                                      append='force', imagej=True, metadata=metadataK)
 
@@ -164,7 +164,7 @@ def save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path):
     nr_of_colors = color_image_stack.shape[2]
     for color in range(nr_of_colors):
         imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
-        tifffile.imsave(gl_file_path, np.float32(imtosave), append='force',
+        tifffile.imwrite(gl_file_path, np.float32(imtosave), append='force',
                                          imagej=True, metadata=metadata)
 
 
