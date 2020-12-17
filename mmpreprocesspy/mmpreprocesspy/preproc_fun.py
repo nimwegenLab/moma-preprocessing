@@ -101,8 +101,8 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         # initialize list of images to hold the final GL crop images
         nr_of_timesteps = maxframe - minframe
         nr_of_color_channels = len(colors)
-        gl_image_dict = get_gl_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels)
-        gl_image_path_dict = get_gl_image_image_paths(imageProcessor.growthlane_rois, gl_image_dict, folder_to_save, base_name, position_index)
+        gl_image_path_dict = get_gl_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
+        gl_image_dict = get_gl_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels, gl_image_path_dict)
 
         # go through time-lapse and cut out channels
         for frame_index, t in enumerate(range(minframe, maxframe)):
@@ -146,7 +146,8 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
                     save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path)
                     kymographs = append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t, minframe)
 
-        save_gl_roi_image(growthlane_rois, gl_image_dict, gl_image_path_dict)
+        # save_gl_roi_image(growthlane_rois, gl_image_dict, gl_image_path_dict)
+        finalize_gl_roi_images(growthlane_rois, gl_image_dict)
 
         # remove growth lanes that don't have all time points (e.g. because of drift)
         incomplete_GL = np.where(frame_counter < nrOfFrames)[0]
@@ -172,14 +173,15 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
     print("Processing time [s]:" + str(end1 - start1))
 
 
-def get_gl_image_stacks(growthlane_rois, nr_of_timesteps, nr_of_color_channels):
+def get_gl_image_stacks(growthlane_rois, nr_of_timesteps, nr_of_color_channels, gl_image_path_dict):
     gl_image_stacks = {}
     for gl_roi in growthlane_rois:
-        gl_image_stacks[gl_roi.id] = initialize_gl_roi_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels)
+        image_path = gl_image_path_dict[gl_roi.id]
+        gl_image_stacks[gl_roi.id] = initialize_gl_roi_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, image_path)
     return gl_image_stacks
 
 
-def get_gl_image_image_paths(growthlane_rois, gl_image_dict, folder_to_save, base_name, position_ind):
+def get_gl_image_image_paths(growthlane_rois, folder_to_save, base_name, position_ind):
     gl_image_paths = {}
     for gl_roi in growthlane_rois:
         gl_image_paths[gl_roi.id] = get_gl_tiff_path(folder_to_save, base_name, position_ind, gl_roi.id)
@@ -217,6 +219,12 @@ def save_gl_roi_image(growthlane_rois, gl_image_dict, gl_image_path_dict):
         tifffile.imwrite(gl_file_path, gl_image_dict[gl_roi.id], metadata={'axes': 'TZCYX'}, imagej=True)
 
 
+def finalize_gl_roi_images(growthlane_rois, gl_image_dict):
+    for gl_roi in growthlane_rois:
+        gl_image_dict[gl_roi.id].flush()
+        del gl_image_dict[gl_roi.id]
+
+
 def save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path):
     pass
     # nr_of_colors = color_image_stack.shape[2]
@@ -225,11 +233,14 @@ def save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path):
     #     tifffile.imwrite(gl_file_path, np.float32(imtosave), append='force',
     #                                      imagej=True, metadata=metadata)
 
-def initialize_gl_roi_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels):
+def initialize_gl_roi_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, image_path):
     nr_of_z_planes = 1
     image_height = gl_roi.length
     image_width = gl_roi.width
-    image_stack = np.float32(np.zeros((nr_of_timesteps, nr_of_z_planes, nr_of_color_channels, image_height, image_width)))
+    image_shape = (nr_of_timesteps, nr_of_z_planes, nr_of_color_channels, image_height, image_width)
+    # image_stack = np.float32(np.zeros(image_shape))
+    os.makedirs(os.path.dirname(image_path), exist_ok=True)
+    image_stack = tifffile.memmap(image_path, shape=image_shape, dtype='float32', metadata={'axes': 'TZCYX'}, imagej=True)
     image_stack[:] = np.nan  # initialize to nan, so that we can test later that all pixels were correctly written to
     return image_stack
 
