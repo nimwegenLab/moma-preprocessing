@@ -321,9 +321,9 @@ def get_growthlane_rois(channel_centers, mincol, maxcol):
     """
     growthlaneRois = []
     roi_height = get_mean_distance_between_growthlanes(channel_centers)
-    for center in channel_centers:
+    for id, center in enumerate(channel_centers):
         roi = get_roi(center, roi_height, mincol, maxcol)
-        growthlaneRois.append(GrowthlaneRoi(roi))
+        growthlaneRois.append(GrowthlaneRoi(roi, id))
     return growthlaneRois
 
 

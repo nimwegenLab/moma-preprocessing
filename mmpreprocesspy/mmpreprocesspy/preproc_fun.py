@@ -22,7 +22,6 @@ def get_position_folder_path(result_base_path, indp):
     return result_base_path + '/' + 'Pos' + str(indp) + '/'
 
 def get_gl_tiff_path(result_base_path, base_name, indp, gl_index):
-    gl_index += 1  # we do this to comply with legacy indexing of growthlanes, which starts at 1
     return result_base_path + '/' + 'Pos' + str(indp) + '/GL' + str(
         gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '.tiff'
 
@@ -98,8 +97,14 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
                      'loop': False}
 
         frame_counter = np.zeros(len(channel_centers))  # stores per growthlane, the number of processed images
+
+        # initialize list of images to hold the final GL crop images
+        nr_of_timesteps = maxframe - minframe
+        nr_of_color_channels = len(colors)
+        gl_image_dict = get_gl_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels)
+
         # go through time-lapse and cut out channels
-        for t in range(minframe, maxframe):
+        for frame_index, t in enumerate(range(minframe, maxframe)):
             if np.mod(t, 10) == 0:
                 print('working on frame: ' + str(t))  # output frame number
 
@@ -109,10 +114,11 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
 
             print("Shift frame "+str(t)+": "+str(imageProcessor.horizontal_shift)+", "+str(imageProcessor.vertical_shift))
 
-            for gl_roi in growthlane_rois:
-                gl_roi.roi.translate((-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
+            growthlane_rois = translate_gl_rois(growthlane_rois, (-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
 
-            color_image_stack = dataset.get_image_stack(frame=t, position=indp)
+            growthlane_rois, gl_image_dict = remove_gls_outside_of_image(growthlane_rois, image.shape, gl_image_dict)
+
+            color_image_stack = dataset.get_image_stack(frame=t, position=indp)  # TODO: rename this to e.g. 'current_image_frame'
 
             # correct images and append corrected and non-corrected images
             if preprocessor is not None:
@@ -123,23 +129,28 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
                 color_image_stack_corr = np.append(color_image_stack_corr, color_image_stack[:, :, 1:], 2)  # append original channel values
                 color_image_stack = color_image_stack_corr
 
+            append_gl_roi_images(frame_index, growthlane_rois, gl_image_dict, color_image_stack)
+
             # go through all channels, check if there's a corresponding one in the new image. If yes go through all
             #  colors,cut out channel, and append to tif stack. Append also to the Kymograph for each color.
             for gl_index, gl_roi in enumerate(growthlane_rois):
                 if gl_roi.roi.is_inside_image(image):
                     frame_counter[gl_index] += 1
 
-                    gl_file_path = get_gl_tiff_path(folder_to_save, base_name, indp, gl_index)
+                    gl_file_path = get_gl_tiff_path(folder_to_save, base_name, indp, gl_index + 1)  # gl_index+1 to comply with legacy indexing of growthlanes, which starts at 1
+
                     if not os.path.exists(os.path.dirname(gl_file_path)):
                         os.makedirs(os.path.dirname(gl_file_path))
 
                     save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path)
                     kymographs = append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t, minframe)
 
+        save_gl_roi_image(growthlane_rois, gl_image_dict, folder_to_save, base_name, indp)
+
         # remove growth lanes that don't have all time points (e.g. because of drift)
         incomplete_GL = np.where(frame_counter < nrOfFrames)[0]
         for inc in incomplete_GL:
-            gl_result_folder = os.path.dirname(get_gl_tiff_path(folder_to_save, base_name, indp, inc))
+            gl_result_folder = os.path.dirname(get_gl_tiff_path(folder_to_save, base_name, indp, inc + 1))  # inc+1 to comply with legacy indexing of growthlanes, which starts at 1
             if os.path.exists(gl_result_folder):
                 shutil.rmtree(gl_result_folder)
 
@@ -160,13 +171,59 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
     print("Processing time [s]:" + str(end1 - start1))
 
 
-def save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path):
-    nr_of_colors = color_image_stack.shape[2]
-    for color in range(nr_of_colors):
-        imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
-        tifffile.imwrite(gl_file_path, np.float32(imtosave), append='force',
-                                         imagej=True, metadata=metadata)
+def get_gl_image_stacks(growthlane_rois, nr_of_timesteps, nr_of_color_channels):
+    gl_image_stacks = {}
+    for gl_roi in growthlane_rois:
+        gl_image_stacks[gl_roi.id] = initialize_gl_roi_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels)
+    return gl_image_stacks
 
+
+def translate_gl_rois(growthlane_rois, shift_x_y):
+    for gl_roi in growthlane_rois:
+        gl_roi.roi.translate(shift_x_y)
+    return growthlane_rois
+
+
+def remove_gls_outside_of_image(growthlane_rois, image_shape, gl_image_dict):
+    # if gl_roi.roi.is_inside_image(image):
+    #     frame_counter[gl_index] += 1
+
+    return growthlane_rois, gl_image_dict
+
+
+def append_gl_roi_images(time_index, growthlane_rois, gl_image_dict, color_image_stack):
+    z_index = 0
+    nr_of_colors = color_image_stack.shape[2]
+    for gl_roi in growthlane_rois:
+        color_index = 0
+        gl_image_dict[gl_roi.id][time_index, z_index, color_index, ...] = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
+        for color_index in range(1, nr_of_colors):  # add remaining channels
+            gl_image_dict[gl_roi.id][time_index, z_index, color_index, ...] = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
+
+
+def save_gl_roi_image(growthlane_rois, gl_image_dict, folder_to_save, base_name, position_ind):
+    for gl_roi in growthlane_rois:
+        gl_index = gl_roi.id
+        gl_file_path = get_gl_tiff_path(folder_to_save, base_name, position_ind, gl_index)
+        if not os.path.exists(os.path.dirname(gl_file_path)):
+            os.makedirs(os.path.dirname(gl_file_path))
+        tifffile.imwrite(gl_file_path, gl_image_dict[gl_index], metadata={'axes': 'TZCYX'}, imagej=True)
+
+def save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path):
+    pass
+    # nr_of_colors = color_image_stack.shape[2]
+    # for color in range(nr_of_colors):
+    #     imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
+    #     tifffile.imwrite(gl_file_path, np.float32(imtosave), append='force',
+    #                                      imagej=True, metadata=metadata)
+
+def initialize_gl_roi_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels):
+    nr_of_z_planes = 1
+    image_height = gl_roi.length
+    image_width = gl_roi.width
+    image_stack = np.float32(np.zeros((nr_of_timesteps, nr_of_z_planes, nr_of_color_channels, image_height, image_width)))
+    image_stack[:] = np.nan  # initialize to nan, so that we can test later that all pixels were correctly written to
+    return image_stack
 
 def append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t, minframe):
     kymo_index = t - minframe
