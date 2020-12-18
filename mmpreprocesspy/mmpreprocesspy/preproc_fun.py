@@ -103,6 +103,8 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         nr_of_color_channels = len(colors)
         gl_image_path_dict = get_gl_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
         gl_image_dict = get_gl_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels, gl_image_path_dict)
+        kymo_image_path_dict = get_kymo_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
+        kymo_image_dict = get_kymo_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels, kymo_image_path_dict)
 
         # go through time-lapse and cut out channels
         for frame_index, t in enumerate(range(minframe, maxframe)):
@@ -131,6 +133,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
                 color_image_stack = color_image_stack_corr
 
             append_gl_roi_images(frame_index, growthlane_rois, gl_image_dict, color_image_stack)
+            append_to_kymo_graph(frame_index, growthlane_rois, kymo_image_dict, color_image_stack)
 
             # go through all channels, check if there's a corresponding one in the new image. If yes go through all
             #  colors,cut out channel, and append to tif stack. Append also to the Kymograph for each color.
@@ -147,7 +150,8 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
                     kymographs = append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t, minframe)
 
         # save_gl_roi_image(growthlane_rois, gl_image_dict, gl_image_path_dict)
-        finalize_gl_roi_images(growthlane_rois, gl_image_dict)
+        finalize_memmap_images(growthlane_rois, gl_image_dict)
+        finalize_memmap_images(growthlane_rois, kymo_image_dict)
 
         # remove growth lanes that don't have all time points (e.g. because of drift)
         incomplete_GL = np.where(frame_counter < nrOfFrames)[0]
@@ -156,16 +160,16 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
             if os.path.exists(gl_result_folder):
                 shutil.rmtree(gl_result_folder)
 
-        # save kymograph
-        for gl_index in range(len(channel_centers)):
-            if gl_index not in incomplete_GL:
-                for color in range(len(colors)):
-                    kymo_file_path = get_kymo_tiff_path(folder_to_save, base_name, position_index, gl_index, color)
-                    if not os.path.exists(os.path.dirname(kymo_file_path)):
-                        os.makedirs(os.path.dirname(kymo_file_path))
-                    tifffile.imwrite(kymo_file_path,
-                                                     kymographs[gl_index][:, :, color].astype(np.uint16),
-                                                     append='force', imagej=True, metadata=metadataK)
+        # # save kymograph
+        # for gl_index in range(len(channel_centers)):
+        #     if gl_index not in incomplete_GL:
+        #         for color in range(len(colors)):
+        #             kymo_file_path = get_kymo_tiff_path(folder_to_save, base_name, position_index, gl_index, color)
+        #             if not os.path.exists(os.path.dirname(kymo_file_path)):
+        #                 os.makedirs(os.path.dirname(kymo_file_path))
+        #             tifffile.imwrite(kymo_file_path,
+        #                                              kymographs[gl_index][:, :, color].astype(np.uint16),
+        #                                              append='force', imagej=True, metadata=metadataK)
 
     # finalize measurement of processing time
     print("Out of bounds ROIs: " + str(incomplete_GL))
@@ -181,11 +185,31 @@ def get_gl_image_stacks(growthlane_rois, nr_of_timesteps, nr_of_color_channels, 
     return gl_image_stacks
 
 
+def get_kymo_image_stacks(growthlane_rois, nr_of_timesteps, nr_of_color_channels, gl_image_path_dict):
+    kymo_image_stacks = {}
+    for gl_roi in growthlane_rois:
+        image_path = gl_image_path_dict[gl_roi.id]
+        kymo_image_stacks[gl_roi.id] = initialize_kymo_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, image_path)
+    return kymo_image_stacks
+
+
 def get_gl_image_image_paths(growthlane_rois, folder_to_save, base_name, position_ind):
     gl_image_paths = {}
     for gl_roi in growthlane_rois:
         gl_image_paths[gl_roi.id] = get_gl_tiff_path(folder_to_save, base_name, position_ind, gl_roi.id)
     return gl_image_paths
+
+
+def get_kymo_image_image_paths(growthlane_rois, folder_to_save, base_name, position_index):
+    kymo_image_paths = {}
+    for gl_roi in growthlane_rois:
+        kymo_image_paths[gl_roi.id] =  get_kymo_tiff_path_2(folder_to_save, base_name, position_index, gl_roi.id)
+    return kymo_image_paths
+
+
+def get_kymo_tiff_path_2(result_base_path, base_name, indp, gl_index):
+    return result_base_path + '/' + 'Pos' + str(indp) + '/GL' + str(
+        gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_kymo.tiff'
 
 
 def translate_gl_rois(growthlane_rois, shift_x_y):
@@ -211,6 +235,23 @@ def append_gl_roi_images(time_index, growthlane_rois, gl_image_dict, color_image
             gl_image_dict[gl_roi.id][time_index, z_index, color_index, ...] = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
 
 
+def append_to_kymo_graph(time_index, growthlane_rois, kymo_image_dict, color_image_stack):
+    stack_time_index = 0  # kymo-graph does not have a time-index
+    z_index = 0
+    nr_of_colors = color_image_stack.shape[2]
+    for gl_roi in growthlane_rois:
+        color_index = 0
+        gl_roi_image = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
+        kymo_image_dict[gl_roi.id][stack_time_index, z_index, color_index, :, time_index] = np.mean(gl_roi_image, axis=1)
+        for color_index in range(1, nr_of_colors):  # add remaining channels
+            gl_roi_image = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
+            kymo_image_dict[gl_roi.id][stack_time_index, z_index, color_index, :, time_index] = np.mean(gl_roi_image, axis=1)
+
+
+        # imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
+        # kymographs[gl_index][:, kymo_index, color] = np.mean(imtosave, axis=1)
+
+
 def save_gl_roi_image(growthlane_rois, gl_image_dict, gl_image_path_dict):
     for gl_roi in growthlane_rois:
         gl_file_path = gl_image_path_dict[gl_roi.id]
@@ -219,7 +260,7 @@ def save_gl_roi_image(growthlane_rois, gl_image_dict, gl_image_path_dict):
         tifffile.imwrite(gl_file_path, gl_image_dict[gl_roi.id], metadata={'axes': 'TZCYX'}, imagej=True)
 
 
-def finalize_gl_roi_images(growthlane_rois, gl_image_dict):
+def finalize_memmap_images(growthlane_rois, gl_image_dict):
     for gl_roi in growthlane_rois:
         gl_image_dict[gl_roi.id].flush()
         del gl_image_dict[gl_roi.id]
@@ -243,6 +284,19 @@ def initialize_gl_roi_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels,
     image_stack = tifffile.memmap(image_path, shape=image_shape, dtype='float32', metadata={'axes': 'TZCYX'}, imagej=True)
     image_stack[:] = np.nan  # initialize to nan, so that we can test later that all pixels were correctly written to
     return image_stack
+
+
+def initialize_kymo_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, image_path):
+    nr_stack_time_steps = 1  # the kymo-graph does not have any timesteps
+    nr_of_z_planes = 1
+    image_height = gl_roi.length
+    image_width = nr_of_timesteps  # the kymo-graph has a many columns as frames in the movie
+    image_shape = (nr_stack_time_steps, nr_of_z_planes, nr_of_color_channels, image_height, image_width)
+    os.makedirs(os.path.dirname(image_path), exist_ok=True)
+    image_stack = tifffile.memmap(image_path, shape=image_shape, dtype='float32', metadata={'axes': 'TZCYX'}, imagej=True)
+    image_stack[:] = np.nan  # initialize to nan, so that we can test later that all pixels were correctly written to
+    return image_stack
+
 
 def append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t, minframe):
     kymo_index = t - minframe
