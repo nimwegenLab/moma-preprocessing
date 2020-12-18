@@ -241,16 +241,29 @@ def append_to_kymo_graph(time_index, growthlane_rois, kymo_image_dict, color_ima
     nr_of_colors = color_image_stack.shape[2]
     for gl_roi in growthlane_rois:
         color_index = 0
-        gl_roi_image = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
-        kymo_image_dict[gl_roi.id][stack_time_index, z_index, color_index, :, time_index] = np.mean(gl_roi_image, axis=1)
+        gl_roi_crop = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
+        kymo_image_dict[gl_roi.id][stack_time_index, z_index, color_index, :, time_index] = get_kymo_graph_slice(gl_roi_crop)
         for color_index in range(1, nr_of_colors):  # add remaining channels
-            gl_roi_image = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
-            kymo_image_dict[gl_roi.id][stack_time_index, z_index, color_index, :, time_index] = np.mean(gl_roi_image, axis=1)
+            gl_roi_crop = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
+            kymo_image_dict[gl_roi.id][stack_time_index, z_index, color_index, :, time_index] = get_kymo_graph_slice(gl_roi_crop)
 
 
-        # imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
-        # kymographs[gl_index][:, kymo_index, color] = np.mean(imtosave, axis=1)
+def get_kymo_graph_slice(gl_roi_crop):
+    """
+    Calculate the row-wise average intensity in the region of the GL channel.
+    This constitutes one slice vertical column in the final kymo-graph.
 
+    :param gl_roi_crop:
+    :return:
+    """
+
+    gl_channel_width_halved = 10/2  # unit: [px]; channel width is roughly 10px
+    image_width = gl_roi_crop.shape[1]
+    image_center = int(image_width/2)
+    start_ind = image_center - int(gl_channel_width_halved)
+    end_ind = image_center + int(gl_channel_width_halved)
+    kymo_slice = np.mean(gl_roi_crop[:, start_ind:end_ind], axis=1)
+    return kymo_slice
 
 def save_gl_roi_image(growthlane_rois, gl_image_dict, gl_image_path_dict):
     for gl_roi in growthlane_rois:
