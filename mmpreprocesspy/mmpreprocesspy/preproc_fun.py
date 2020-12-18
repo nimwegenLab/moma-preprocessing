@@ -151,6 +151,9 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         finalize_memmap_images(growthlane_rois, gl_image_dict)
         finalize_memmap_images(growthlane_rois, kymo_image_dict)
 
+        path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_final.tiff'
+        store_gl_index_image(growthlane_rois, imageProcessor.image, path)
+
         # remove growth lanes that don't have all time points (e.g. because of drift)
         incomplete_GL = np.where(frame_counter < nrOfFrames)[0]
         for inc in incomplete_GL:
