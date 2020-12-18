@@ -12,10 +12,7 @@ import skimage.transform
 from mmpreprocesspy.MMdata import MMData
 from mmpreprocesspy.image_preprocessing import ImagePreprocessor
 from mmpreprocesspy.moma_image_processing import MomaImageProcessor
-
-
-def get_gl_index_tiff_path(result_base_path, indp):
-    return result_base_path + '/' + 'Pos' + str(indp) + '_GL_index.tiff'
+import cv2 as cv
 
 
 def get_position_folder_path(result_base_path, indp):
@@ -75,7 +72,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
             position_folder = get_position_folder_path(folder_to_save, position_index)
             preprocessor.save_flatfields(position_folder)
 
-        # load first phase image
+        # load first phase contrast image
         image_base = dataset.get_image_fast(channel=phase_channel_index, frame=minframe, position=position_index)
 
         # Process first image to find ROIs, etc.
@@ -88,8 +85,9 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         # store GL index image
         if not os.path.exists(os.path.dirname(folder_to_save)):
             os.makedirs(os.path.dirname(folder_to_save))
-        path = get_gl_index_tiff_path(folder_to_save, position_index)
-        imageProcessor.store_gl_index_image(path)
+
+        path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_initial.tiff'
+        store_gl_index_image(imageProcessor.growthlane_rois, imageProcessor.image, path)
 
         # create empty kymographs to fill
         kymographs = [np.zeros((roi.length, nrOfFrames, len(colors))) for roi in imageProcessor.growthlane_rois]
@@ -319,3 +317,17 @@ def append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t, min
         kymographs[gl_index][:, kymo_index, color] = np.mean(imtosave, axis=1)
     return kymographs
 
+def store_gl_index_image(growthlane_rois, full_frame_image, path):
+    """ Draw the growthlane ROIs and indices onto the image and save it. """
+    font = cv.FONT_HERSHEY_SIMPLEX
+    rotated_rois = [x.roi for x in growthlane_rois]
+    # show_image_with_rotated_rois(image, rotated_rois)
+    # normalizedImg = None
+    normalized_image = cv.normalize(full_frame_image, None, 0, 255, cv.NORM_MINMAX)
+    final_image = np.array(normalized_image, dtype=np.uint8)
+
+    for gl_index, roi in enumerate(rotated_rois):
+        roi.draw_to_image(final_image, False)
+        cv.putText(final_image, str(gl_index + 1), (np.int0(roi.center[0]), np.int0(roi.center[1])), font, 1, (255, 255, 255), 2, cv.LINE_AA)
+
+    cv.imwrite(path, final_image)
