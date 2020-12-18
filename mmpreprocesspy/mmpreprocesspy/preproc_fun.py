@@ -73,11 +73,11 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
             preprocessor.save_flatfields(position_folder)
 
         # load first phase contrast image
-        image_base = dataset.get_image_fast(channel=phase_channel_index, frame=minframe, position=position_index)
+        first_phc_image = dataset.get_image_fast(channel=phase_channel_index, frame=minframe, position=position_index)
 
         # Process first image to find ROIs, etc.
         imageProcessor = MomaImageProcessor()
-        imageProcessor.load_numpy_image_array(image_base)
+        imageProcessor.load_numpy_image_array(first_phc_image)
         imageProcessor.growthlane_length_threshold = growthlane_length_threshold
         imageProcessor.process_image()
         channel_centers = imageProcessor.channel_centers
@@ -117,7 +117,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
 
             growthlane_rois = translate_gl_rois(growthlane_rois, (-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
 
-            growthlane_rois, gl_image_dict = remove_gls_outside_of_image(growthlane_rois, image.shape, gl_image_dict)
+            growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict = remove_gls_outside_of_image(image, growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict)
 
             color_image_stack = dataset.get_image_stack(frame=t, position=position_index)  # TODO: rename this to e.g. 'current_image_frame'
 
@@ -154,12 +154,12 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_final.tiff'
         store_gl_index_image(growthlane_rois, imageProcessor.image, path)
 
-        # remove growth lanes that don't have all time points (e.g. because of drift)
-        incomplete_GL = np.where(frame_counter < nrOfFrames)[0]
-        for inc in incomplete_GL:
-            gl_result_folder = os.path.dirname(get_gl_tiff_path(folder_to_save, base_name, position_index, inc + 1))  # inc+1 to comply with legacy indexing of growthlanes, which starts at 1
-            if os.path.exists(gl_result_folder):
-                shutil.rmtree(gl_result_folder)
+        # # remove growth lanes that don't have all time points (e.g. because of drift)
+        # incomplete_GL = np.where(frame_counter < nrOfFrames)[0]
+        # for inc in incomplete_GL:
+        #     gl_result_folder = os.path.dirname(get_gl_tiff_path(folder_to_save, base_name, position_index, inc + 1))  # inc+1 to comply with legacy indexing of growthlanes, which starts at 1
+        #     if os.path.exists(gl_result_folder):
+        #         shutil.rmtree(gl_result_folder)
 
         # # save kymograph
         # for gl_index in range(len(channel_centers)):
@@ -219,11 +219,33 @@ def translate_gl_rois(growthlane_rois, shift_x_y):
     return growthlane_rois
 
 
-def remove_gls_outside_of_image(growthlane_rois, image_shape, gl_image_dict):
-    # if gl_roi.roi.is_inside_image(image):
-    #     frame_counter[gl_index] += 1
+def remove_gls_outside_of_image(image, growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict):
+    """
+    This method checks, if a GL ROI lies outside of the image.
+    If so, it is removed from all lists/dicts.
 
-    return growthlane_rois, gl_image_dict
+    :param image:
+    :param growthlane_rois:
+    :param gl_image_dict:
+    :param kymo_image_dict:
+    :param gl_image_path_dict:
+    :return:
+    """
+
+    inds = list(range(len(growthlane_rois)))
+    inds.reverse()
+    for ind in inds:
+        gl_roi = growthlane_rois[ind]
+        if not gl_roi.roi.is_inside_image(image):
+            del gl_image_dict[ind]
+            del kymo_image_dict[ind]
+            gl_folder_path = os.path.dirname(gl_image_path_dict[ind])
+            del gl_image_path_dict[ind]
+            del growthlane_rois[ind]
+            if os.path.exists(gl_folder_path):
+                shutil.rmtree(gl_folder_path)
+
+    return growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict
 
 
 def append_gl_roi_images(time_index, growthlane_rois, gl_image_dict, color_image_stack):
@@ -319,6 +341,7 @@ def append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t, min
         imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
         kymographs[gl_index][:, kymo_index, color] = np.mean(imtosave, axis=1)
     return kymographs
+
 
 def store_gl_index_image(growthlane_rois, full_frame_image, path):
     """ Draw the growthlane ROIs and indices onto the image and save it. """

@@ -68,7 +68,7 @@ class MomaImageProcessor(object):
     def determine_location_of_growthlane_exit(self, growthlane_roi_image, search_area):
         """
         This function determines the location of the growthlane by comparing the value sum of values
-        at the start of the *extend* GL to those at the end.
+        at the start of the *extended* GL to those at the end.
         :param growthlane_roi_image: the image of from the extended GL ROI.
         :param search_area: the value by which the GL was extended in *both* directions.
         :return:
