@@ -24,7 +24,7 @@ def get_gl_tiff_path(result_base_path, base_name, indp, gl_index):
 
 
 def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index):
-    gl_index += 1  # we do this to comply with legacy indexing of growthlanes, which starts at 1
+    gl_index = calculate_gl_output_index(gl_index)
     return result_base_path + '/' + 'Pos' + str(indp) + '/GL' + str(
         gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_Col' + str(
         color_index) + '_kymo.tiff'
@@ -139,7 +139,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
                 if gl_roi.roi.is_inside_image(image):
                     frame_counter[gl_index] += 1
 
-                    gl_file_path = get_gl_tiff_path(folder_to_save, base_name, position_index, gl_index + 1)  # gl_index+1 to comply with legacy indexing of growthlanes, which starts at 1
+                    gl_file_path = get_gl_tiff_path(folder_to_save, base_name, position_index, calculate_gl_output_index(gl_index))
 
                     if not os.path.exists(os.path.dirname(gl_file_path)):
                         os.makedirs(os.path.dirname(gl_file_path))
@@ -171,9 +171,9 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         #             tifffile.imwrite(kymo_file_path,
         #                                              kymographs[gl_index][:, :, color].astype(np.uint16),
         #                                              append='force', imagej=True, metadata=metadataK)
-
-    # finalize measurement of processing time
-    print("Out of bounds ROIs: " + str(incomplete_GL))
+    #
+    # # finalize measurement of processing time
+    # print("Out of bounds ROIs: " + str(incomplete_GL))
     end1 = time.time()
     print("Processing time [s]:" + str(end1 - start1))
 
@@ -197,16 +197,19 @@ def get_kymo_image_stacks(growthlane_rois, nr_of_timesteps, nr_of_color_channels
 def get_gl_image_image_paths(growthlane_rois, folder_to_save, base_name, position_ind):
     gl_image_paths = {}
     for gl_roi in growthlane_rois:
-        gl_image_paths[gl_roi.id] = get_gl_tiff_path(folder_to_save, base_name, position_ind, gl_roi.id)
+        gl_image_paths[gl_roi.id] = get_gl_tiff_path(folder_to_save, base_name, position_ind, calculate_gl_output_index(gl_roi.id))
     return gl_image_paths
 
 
 def get_kymo_image_image_paths(growthlane_rois, folder_to_save, base_name, position_index):
     kymo_image_paths = {}
     for gl_roi in growthlane_rois:
-        kymo_image_paths[gl_roi.id] =  get_kymo_tiff_path_2(folder_to_save, base_name, position_index, gl_roi.id)
+        kymo_image_paths[gl_roi.id] =  get_kymo_tiff_path_2(folder_to_save, base_name, position_index, calculate_gl_output_index(gl_roi.id))
     return kymo_image_paths
 
+
+def calculate_gl_output_index(gl_id):
+    return gl_id + 1  # start GL indexing with 1 to be compatible with legacy preprocessing
 
 def get_kymo_tiff_path_2(result_base_path, base_name, indp, gl_index):
     return result_base_path + '/' + 'Pos' + str(indp) + '/GL' + str(
@@ -354,6 +357,6 @@ def store_gl_index_image(growthlane_rois, full_frame_image, path):
 
     for gl_index, roi in enumerate(rotated_rois):
         roi.draw_to_image(final_image, False)
-        cv.putText(final_image, str(gl_index + 1), (np.int0(roi.center[0]), np.int0(roi.center[1])), font, 1, (255, 255, 255), 2, cv.LINE_AA)
+        cv.putText(final_image, str(calculate_gl_output_index(gl_index)), (np.int0(roi.center[0]), np.int0(roi.center[1])), font, 1, (255, 255, 255), 2, cv.LINE_AA)
 
     cv.imwrite(path, final_image)
