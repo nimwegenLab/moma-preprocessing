@@ -133,20 +133,6 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
             append_gl_roi_images(frame_index, growthlane_rois, gl_image_dict, color_image_stack)
             append_to_kymo_graph(frame_index, growthlane_rois, kymo_image_dict, color_image_stack)
 
-            # go through all channels, check if there's a corresponding one in the new image. If yes go through all
-            #  colors,cut out channel, and append to tif stack. Append also to the Kymograph for each color.
-            for gl_index, gl_roi in enumerate(growthlane_rois):
-                if gl_roi.roi.is_inside_image(image):
-                    frame_counter[gl_index] += 1
-
-                    gl_file_path = get_gl_tiff_path(folder_to_save, base_name, position_index, calculate_gl_output_index(gl_index))
-
-                    if not os.path.exists(os.path.dirname(gl_file_path)):
-                        os.makedirs(os.path.dirname(gl_file_path))
-
-                    save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path)
-                    kymographs = append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t, minframe)
-
         # save_gl_roi_image(growthlane_rois, gl_image_dict, gl_image_path_dict)
         finalize_memmap_images(growthlane_rois, gl_image_dict)
         finalize_memmap_images(growthlane_rois, kymo_image_dict)
@@ -154,24 +140,6 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_final.tiff'
         store_gl_index_image(growthlane_rois, imageProcessor.image, path)
 
-        # # remove growth lanes that don't have all time points (e.g. because of drift)
-        # incomplete_GL = np.where(frame_counter < nrOfFrames)[0]
-        # for inc in incomplete_GL:
-        #     gl_result_folder = os.path.dirname(get_gl_tiff_path(folder_to_save, base_name, position_index, inc + 1))  # inc+1 to comply with legacy indexing of growthlanes, which starts at 1
-        #     if os.path.exists(gl_result_folder):
-        #         shutil.rmtree(gl_result_folder)
-
-        # # save kymograph
-        # for gl_index in range(len(channel_centers)):
-        #     if gl_index not in incomplete_GL:
-        #         for color in range(len(colors)):
-        #             kymo_file_path = get_kymo_tiff_path(folder_to_save, base_name, position_index, gl_index, color)
-        #             if not os.path.exists(os.path.dirname(kymo_file_path)):
-        #                 os.makedirs(os.path.dirname(kymo_file_path))
-        #             tifffile.imwrite(kymo_file_path,
-        #                                              kymographs[gl_index][:, :, color].astype(np.uint16),
-        #                                              append='force', imagej=True, metadata=metadataK)
-    #
     # # finalize measurement of processing time
     # print("Out of bounds ROIs: " + str(incomplete_GL))
     end1 = time.time()
@@ -305,14 +273,6 @@ def finalize_memmap_images(growthlane_rois, gl_image_dict):
         del gl_image_dict[gl_roi.id]
 
 
-def save_gl_roi(metadata, color_image_stack, gl_roi, gl_file_path):
-    pass
-    # nr_of_colors = color_image_stack.shape[2]
-    # for color in range(nr_of_colors):
-    #     imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
-    #     tifffile.imwrite(gl_file_path, np.float32(imtosave), append='force',
-    #                                      imagej=True, metadata=metadata)
-
 def initialize_gl_roi_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, image_path):
     nr_of_z_planes = 1
     image_height = gl_roi.length
@@ -337,13 +297,6 @@ def initialize_kymo_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, i
     return image_stack
 
 
-def append_to_kymographs(color_image_stack, gl_roi, kymographs, gl_index, t, minframe):
-    kymo_index = t - minframe
-    nr_of_colors = color_image_stack.shape[2]
-    for color in range(nr_of_colors):
-        imtosave = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color])
-        kymographs[gl_index][:, kymo_index, color] = np.mean(imtosave, axis=1)
-    return kymographs
 
 
 def store_gl_index_image(growthlane_rois, full_frame_image, path):
