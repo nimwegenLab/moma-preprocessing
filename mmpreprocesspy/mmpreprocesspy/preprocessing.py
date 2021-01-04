@@ -155,10 +155,25 @@ def get_all_growthlane_rois(rotated_image, region_list):
     for gl_region in region_list:
         channel_region_image = rotated_image[:, gl_region.start:gl_region.end]
         centers = get_gl_center_positions_in_growthlane_region(channel_region_image)
-        rois = get_growthlane_rois(centers, gl_region.start, gl_region.end)
-        growthlane_rois += rois
+        growthlane_rois += get_growthlane_rois(centers, gl_region.start, gl_region.end)
         channel_centers += centers
+    growthlane_rois = fix_roi_ids(growthlane_rois)
     return growthlane_rois, channel_centers
+
+
+def fix_roi_ids(rois):
+    """
+    This function fixes the indexing of the ROIs to have a single continuously increasing index.
+    This is necessary because in the function get_growthlane_rois assigns the IDs per vertical growthlane-column.
+    This means that for two-sided MMs we get the same IDs twice (i.e. 0, 1, 2, ...) for each side. But what we
+    want is to have a monotonously increasing ID-value.
+
+    :param rois:
+    :return:
+    """
+    for id, roi in enumerate(rois):  # we can simple enumarte contiguously here, because the ROIs are sorted per-column/side of the MM main-channel
+        roi.id = id
+    return rois
 
 
 def get_mean_distance_between_growthlanes(channel_centers):
