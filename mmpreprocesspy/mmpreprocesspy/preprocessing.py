@@ -24,8 +24,8 @@ def process_image(image, growthlane_length_threshold=0):
     # recalculate channel region boundary on rotated image
     image_rot = skimage.transform.rotate(image, angle, cval=0)
     mincol, maxcol, region_list = find_channel_regions(image_rot, use_smoothing=True)
-    refine_regions(image_rot, region_list)
     region_list = filter_regions(region_list, minimum_required_growthlane_length=growthlane_length_threshold)
+    refine_regions(image_rot, region_list)
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rot, region_list)
 
     return image_rot, main_channel_angle, mincol, maxcol, channel_centers, growthlane_rois
@@ -47,7 +47,9 @@ def filter_regions(region_list, minimum_required_growthlane_length):
 
 def refine_regions(rotated_image, region_list):
     for region in region_list:
+        plot_region(rotated_image, region)
         refine_region(rotated_image, region)
+        plot_region(rotated_image, region)
 
 
 def refine_region(rotated_image, region):
@@ -72,6 +74,47 @@ def refine_region(rotated_image, region):
     #  extend region at the channel end using lookahead interval
     while np.any(projected_max_intensities[region.end:region.end + look_ahead_length] > threshold):
         region.end += 1
+
+    region = extend_region_at_mothercell(rotated_image, region)
+
+
+def extend_region_at_mothercell(rotated_image, region, region_extension_length = 20, search_interval_length = 80):
+    """
+    This method figures out at what side of the region-interval the mother-cell is located.
+    It then extends the region boundary in that direction by.
+
+    :param rotated_image:
+    :param region: region that will be extended
+    :param region_extension_length: the amount of pixels by which the region will be extended
+    :param search_interval_length: length in pixel of the inteval for which we compare the summed intensities; in our images, the ROI image is brighter at the exit of the GL
+    :return: the extended region
+    """
+
+    projected_max_intensities = np.max(rotated_image, axis=0)
+    sum_at_start = np.sum(projected_max_intensities[region.start: region.start + search_interval_length])
+    sum_at_end = np.sum(projected_max_intensities[region.end - search_interval_length: region.end])
+
+    if sum_at_start > sum_at_end:  # mother cell is located at region.end, so we extend there
+        region.end = region.end + region_extension_length
+    elif sum_at_start < sum_at_end:  # mother cell is located at region.start, so we extend there
+        region.start = region.start - region_extension_length
+
+    return region
+
+
+###### DEBUG #### TODO-MM-20210104: Remove
+def plot_region(rotated_image, region):
+    import matplotlib.pyplot as plt
+    projected_max_intensities = np.max(rotated_image, axis=0)
+    threshold = 0.8 * np.median(projected_max_intensities[region.start:region.end])
+    median = np.median(projected_max_intensities[region.start:region.end])
+    plt.plot(projected_max_intensities)
+    plt.axvline(region.start, color='g')
+    plt.axvline(region.end, color='r')
+    plt.axhline(threshold)
+    plt.axhline(median, linestyle='--')
+    plt.show()
+###### /DEBUG ####
 
 
 def get_growthlane_periodicity(growthlane_region_image):
