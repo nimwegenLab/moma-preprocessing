@@ -47,9 +47,7 @@ def filter_regions(region_list, minimum_required_growthlane_length):
 
 def refine_regions(rotated_image, region_list):
     for region in region_list:
-        plot_region(rotated_image, region)
         refine_region(rotated_image, region)
-        plot_region(rotated_image, region)
 
 
 def refine_region(rotated_image, region):
@@ -100,21 +98,6 @@ def extend_region_at_mothercell(rotated_image, region, region_extension_length =
         region.start = region.start - region_extension_length
 
     return region
-
-
-###### DEBUG #### TODO-MM-20210104: Remove
-def plot_region(rotated_image, region):
-    import matplotlib.pyplot as plt
-    projected_max_intensities = np.max(rotated_image, axis=0)
-    threshold = 0.8 * np.median(projected_max_intensities[region.start:region.end])
-    median = np.median(projected_max_intensities[region.start:region.end])
-    plt.plot(projected_max_intensities)
-    plt.axvline(region.start, color='g')
-    plt.axvline(region.end, color='r')
-    plt.axhline(threshold)
-    plt.axhline(median, linestyle='--')
-    plt.show()
-###### /DEBUG ####
 
 
 def get_growthlane_periodicity(growthlane_region_image):
