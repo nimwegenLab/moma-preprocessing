@@ -42,7 +42,7 @@ class MMData:
         self.folder = folder
         self.tiffs = self.get_all_tiffs()
         self.read_mm_metadata()
-        self.channels = self.get_channels()
+        # self.channels = self.get_channels()
         self.mm_meta = mm_meta
         self.mm_map = mm_map
         self.interval = interval
@@ -57,26 +57,22 @@ class MMData:
         first_chunk = [f for f in self.tiffs if not re.search('.*(MMStack.ome).*',f)==None][0]
         return first_chunk
         
-    def get_last_tiff(self):
-        """Return name of last .tif block of the acquisition"""
-        last_chunk = self.tiffs[np.argmax([int(re.search('(?<=MMStack_)(\d+)',f).group(0)) if re.search('.*(MMStack.ome).*',f)==None else 0 for f in self.tiffs])]
-        return last_chunk
-
     def read_mm_metadata(self):
         """Return MicroManager metadata string contained in Tag 50839"""
         path_to_first_tiff = self.folder+'/'+self.get_first_tiff()
         with warnings.catch_warnings():
-            tiff = tff.TiffFile(path_to_first_tiff)
-            code = 270
-            tag = tiff.pages[0].tags.get(code, None)
-            self.omexml_string = tiff.pages[0].description
-            self.height = tiff.pages[0].shape[0]
-            self.width = tiff.pages[0].shape[1]
-            self.xmlroot_metadata = xml.etree.ElementTree.parse(io.StringIO(self.omexml_string))
-
-    def find_tag_in_metadata(self, tag):
-        namespaces = {'ome': 'http://www.openmicroscopy.org/Schemas/OME/2016-06'}
-        return self.xmlroot_metadata.findall(tag, namespaces)
+            with tff.TiffFile(path_to_first_tiff) as tiff:
+                metadata = tiff.micromanager_metadata['Summary']
+                self.height = metadata['Height']
+                self.width = metadata['Width']
+                self.channels = [c.strip(' ') for c in metadata['ChNames']]
+                self.number_of_frames = metadata['Frames']
+                if 'InitialPositionList' in metadata:
+                    self.positions = [c['Label'] for c in metadata['InitialPositionList']]  # this is for OME-TIFF format from MicroManager 1
+                elif 'StagePositions' in metadata:
+                    self.positions = [c['Label'] for c in metadata['StagePositions']]  # this is for OME-TIFF format from MicroManager 2
+                else:
+                    raise LookupError("TIFF metadata contains no entry for either 'InitialPositionList' or 'StagePositions'")
 
     def get_image_height(self):
         return self.height
@@ -181,7 +177,7 @@ class MMData:
             nb_tags = np.fromfile(binary_file, np.dtype('<H'),count=1)
             binary_file.seek(ifd_pos+2+(nb_tags[0])*12+0)
             next_ifd = np.fromfile(binary_file,np.dtype(dtype=np.int32),count=1)[0]
-            im_bytes = np.fromfile(binary_file, np.dtype('<H'),count = self.height*self.width)
+            im_bytes = np.fromfile(binary_file, np.dtype('<H'),count = self.height * self.width)
             image= np.reshape(im_bytes,newshape=[self.height,self.width])
             image = image.astype(float)
 
@@ -205,22 +201,17 @@ class MMData:
             stack[:,:,i] = self.get_image_fast(frame=frame,channel=channel,plane=planes[i],position=position, compress = compress)
         return stack
         
-    
     def get_max_frame(self):
         """Return total number of time-points in the acquisition"""
-        self.maxframe = self.get_map_indices().frame.values.max()
-        return self.maxframe
+        return self.number_of_frames
     
     def get_channels(self):
         """Return channels of the acquisition"""
-
-        channels = self.find_tag_in_metadata('ome:Image[1]/ome:Pixels/ome:Channel')
-        return [c.attrib['Name'].strip(' ') for c in channels]
+        return self.channels
 
     def get_position_names(self):
         """Return list with position names"""
-        stagelabels = self.find_tag_in_metadata('ome:Image/ome:StageLabel')
-        return [c.attrib['Name'].strip(' ') for c in stagelabels]
+        return self.positions
 
 def onselect(eclick, erelease):
     'eclick and erelease are matplotlib events at press and release'

@@ -37,7 +37,7 @@ class ImagePreprocessor(object):
 
     def calculate_averaged_flatfields(self, roi_shape):
         nr_of_flatfield_positions = len(self.flatfield_dataset.get_position_names())
-        nr_of_colors = len(flatfield_dataset.get_channels())
+        nr_of_colors = len(self.flatfield_dataset.get_channels())
         height = roi_shape[0]
         width = roi_shape[1]
 
@@ -74,8 +74,8 @@ class ImagePreprocessor(object):
         return colors_to_correct
 
     def assert_flatfield_color_channel_numbers(self):
-        nr_of_flatfield_channels = self.flatfield_dataset.get_channels().__len__()
-        nr_of_data_channels = self.mm_dataset.get_channels().__len__()
+        nr_of_flatfield_channels = len(self.flatfield_dataset.get_channels())
+        nr_of_data_channels = len(self.mm_dataset.get_channels())
         if nr_of_flatfield_channels != nr_of_data_channels - 1:
             raise AssertionError(
                 "Number of flat-field color channels must be N-1, where N is the number of channels in the dataset.")
