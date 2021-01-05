@@ -36,8 +36,8 @@ class ImagePreprocessor(object):
         self.normalize_flatfields()
 
     def calculate_averaged_flatfields(self, roi_shape):
-        nr_of_flatfield_positions = self.flatfield_dataset.get_position_names()[0].__len__()
-        nr_of_colors = self.flatfield_dataset.get_channels().__len__()
+        nr_of_flatfield_positions = len(self.flatfield_dataset.get_position_names())
+        nr_of_colors = len(flatfield_dataset.get_channels())
         height = roi_shape[0]
         width = roi_shape[1]
 

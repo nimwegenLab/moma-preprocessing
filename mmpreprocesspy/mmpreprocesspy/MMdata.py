@@ -5,27 +5,13 @@ import struct
 import numpy as np
 import pandas as pd
 import tifffile as tff
-# from tifffile.tifffile import tiffcomment
+import xml.etree.ElementTree
+import io
 
 import warnings
 
 
 class MMData:
-    def tiffcomment(arg, comment=None, index=None, code=None):
-        """Return or replace ImageDescription value in first page of TIFF file."""
-        if index is None:
-            index = 0
-        if code is None:
-            code = 270
-        mode = None if comment is None else 'r+b'
-        with TiffFile(arg, mode=mode) as tif:
-            tag = tif.pages[index].tags.get(code, None)
-            if tag is None:
-                raise ValueError(f'no {TIFF.TAGS[code]} tag found')
-            if comment is None:
-                return tag.value
-            tag.overwrite(tif, comment)
-
     """Parsing of MicroManager metadata"""
     def __init__(self, folder = None, tiffs = None, mm_meta = None, height = None, 
                  width = None, mm_map = None, interval = None, channels = None,  num_planes = None):
@@ -55,20 +41,11 @@ class MMData:
         
         self.folder = folder
         self.tiffs = self.get_all_tiffs()
-
-        self.get_MM_metadata_new()
-
+        self.read_mm_metadata()
+        self.channels = self.get_channels()
         self.mm_meta = mm_meta
-        self.height = height
-        self.height = self.get_image_height()
-        self.width = width
-        self.width = self.get_image_width()
         self.mm_map = mm_map
         self.interval = interval
-        self.channels = channels
-        self.channels = self.get_channels()
-        self.num_planes = num_planes
-        self.num_planes = self.get_number_planes()
 
     def get_all_tiffs(self):
         """Return list of all files composing an acquisition"""
@@ -85,102 +62,28 @@ class MMData:
         last_chunk = self.tiffs[np.argmax([int(re.search('(?<=MMStack_)(\d+)',f).group(0)) if re.search('.*(MMStack.ome).*',f)==None else 0 for f in self.tiffs])]
         return last_chunk
 
-    def get_MM_metadata_new(self):
+    def read_mm_metadata(self):
         """Return MicroManager metadata string contained in Tag 50839"""
         path_to_first_tiff = self.folder+'/'+self.get_first_tiff()
         with warnings.catch_warnings():
-            # image_tmp = tff.imread(path_to_first_tiff)
-
-            tmp2 = tff.TiffFile(path_to_first_tiff)
+            tiff = tff.TiffFile(path_to_first_tiff)
             code = 270
-            tag = tmp2.pages[0].tags.get(code, None)
-            omexml_string = tmp2.pages[0].description
-            tmp2.pages[0].shape
+            tag = tiff.pages[0].tags.get(code, None)
+            self.omexml_string = tiff.pages[0].description
+            self.height = tiff.pages[0].shape[0]
+            self.width = tiff.pages[0].shape[1]
+            self.xmlroot_metadata = xml.etree.ElementTree.parse(io.StringIO(self.omexml_string))
 
-            import xml.etree.ElementTree
-            import io
+    def find_tag_in_metadata(self, tag):
+        namespaces = {'ome': 'http://www.openmicroscopy.org/Schemas/OME/2016-06'}
+        return self.xmlroot_metadata.findall(tag, namespaces)
 
-            root = xml.etree.ElementTree.parse(io.StringIO(omexml_string))
-            namespaces = {'ome': 'http://www.openmicroscopy.org/Schemas/OME/2016-06'}
-            channels = root.findall('ome:Image[1]/ome:Pixels/ome:Channel', namespaces)
-            channel_names = [c.attrib['Name'] for c in channels]
-
-            print("stop")
-            # self.width =
-
-        # with open(self.folder+'/'+self.get_first_tiff(), "rb") as binary_file:
-        #     tmp2 = tff.TiffFile(binary_file)
-        #
-        #     pass
-
-    def get_MM_metadata(self):
-        """Return MicroManager metadata string contained in Tag 50839"""
-
-        with open(self.folder+'/'+self.get_first_tiff(), "rb") as binary_file:
-            #ipdb.set_trace()
-
-            # Seek position and read N bytes
-            binary_file.seek(0)  # Go to beginning
-            byte_order = struct.unpack('<ss',binary_file.read(2))
-            tiff_id = struct.unpack('<H',binary_file.read(2))
-            ifd_pos = struct.unpack('<L',binary_file.read(4))
-
-            binary_file.seek(ifd_pos[0])
-            nb_tags = struct.unpack('<H',binary_file.read(2))[0]
-
-            for i in range(nb_tags+1):
-                binary_file.seek(ifd_pos[0])
-                binary_file.seek(ifd_pos[0]+2+(i-1)*12)
-
-                tagID = struct.unpack('<H',binary_file.read(2))[0]
-                if tagID ==50839:
-                    struct.unpack('<H',binary_file.read(2))
-                    offset_size = struct.unpack('<L',binary_file.read(4))[0]
-                    offset = struct.unpack('<L',binary_file.read(4))[0]
-                    break;
-            binary_file.seek(offset)
-            metadata = struct.unpack('<'+str(offset_size)+'s',binary_file.read(offset_size))
-            metadata_str = str(metadata)
-            metadata_str = metadata_str.replace('\\x00','')
-            metadata_str = metadata_str.replace("\\", "")
-            self.mm_meta = metadata_str
-            return metadata_str
-    
     def get_image_height(self):
-        # return 2048
-
-        """Return image height in px"""
-        if self.height is None:
-            if self.mm_meta is None:
-                self.get_MM_metadata()
-            #ipdb.set_trace()
-            height = int(re.findall('(?:(?<=Height":")|(?<=Height":)|(?<=Height":\{"PropVal":"))(\d+).*', self.mm_meta)[0])
-            #height = int(re.findall('(?:((?<=Height":")|(?<=Height":\{"PropVal":")))(\d+).*', self.mm_meta)[0])
-            self.height = height
         return self.height
-    
-    def get_image_width(self):
-        return 2048
 
-        """Return image width in px"""
-        if self.width is None:
-            if self.mm_meta is None:
-                self.get_MM_metadata()
-            width = int(re.findall('(?:(?<=Width":")|(?<=Width":)|(?<=Width":\{"PropVal":"))(\d+).*', self.mm_meta)[0])
-            self.width = width
+    def get_image_width(self):
         return self.width
-    
-    def get_interval(self):
-        """Return time-lapse interval"""
-        if self.interval is None:
-            if self.mm_meta is None:
-                self.get_MM_metadata()
-            #interval = int(re.findall('(?<=WaitInterval":")|(?<=WaitInterval":)(\d+).*', self.mm_meta)[0])
-            interval = int(re.findall('(?<=WaitInterval":)["]*(\d+).*', self.mm_meta)[0])
-            self.interval = interval
-        return self.interval
-    
-    
+
     def get_map_indices(self):
         """Return the index map of the acquisition as a list of dict
         
@@ -309,44 +212,16 @@ class MMData:
         return self.maxframe
     
     def get_channels(self):
-        return ["DIA Ph3 (Dual)", "GFP (Dual)"]
-
         """Return channels of the acquisition"""
-        #self.channels = re.findall('(?<=ChNames":"\[)|(?<=ChNames":\[)(.*?)(?=\].*)',self.get_MM_metadata())[0].replace('"','').split(',')
-        #ipdb.set_trace()
-        self.channels = re.findall('(?<=ChNames":)["]*\[(.*?)(?=\].*)',self.get_MM_metadata())[0].replace('"','').split(',')
-        return self.channels
-    
-    def get_zstep(self):
-        """Return size of the z-step in stack acquisition in nm"""
-        #z_step = float(re.findall('(?:(?<=z-step_um":")|(?<=z-step_um":))([\d\.]+).*', self.get_MM_metadata())[0])*1000
-        z_step = float(re.findall('(?:(?<=z-step_um":)["]*)([\d\.]+).*', self.get_MM_metadata())[0])*1000
-        return z_step
-    
-    def get_number_planes(self):
-        return [1, 1, 1]
 
-        """Return number of planes for each channel"""
-        if self.num_planes is None:
+        channels = self.find_tag_in_metadata('ome:Image[1]/ome:Pixels/ome:Channel')
+        return [c.attrib['Name'].strip(' ') for c in channels]
 
-            indexmap = self.get_map_indices()
-            num_planes = [indexmap.loc[(indexmap['frame'] == 0) & (indexmap['position']==0) & (indexmap['channel']==i),
-                                       ['chunk','image_index','offset']].values.shape[0] 
-                          for i in range(len(self.get_channels()))]
-            self.num_planes = num_planes
-        return self.num_planes
-    
     def get_position_names(self):
-        """Return position (A1-Site0, B3-Site10 etc) names and well names (A1, B3 etc) of the acquisition"""
-        positions = re.findall('(?:(?<=Label":")|(?<=label":"))([a-zA-Z0-9_-]+)', self.get_MM_metadata())
-        if 'Site' in positions[0]:
-            wells = np.unique([re.findall('([a-zA-Z0-9_]+)(?:(?=-Site))', x)[0] for x in positions])
-        else:
-            wells = []
-            
-        return positions, wells
-    
-    
+        """Return list with position names"""
+        stagelabels = self.find_tag_in_metadata('ome:Image/ome:StageLabel')
+        return [c.attrib['Name'].strip(' ') for c in stagelabels]
+
 def onselect(eclick, erelease):
     'eclick and erelease are matplotlib events at press and release'
     print(' startposition : (%f, %f)' % (eclick.xdata, eclick.ydata))
