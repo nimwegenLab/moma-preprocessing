@@ -4,9 +4,28 @@ import struct
 
 import numpy as np
 import pandas as pd
+import tifffile as tff
+# from tifffile.tifffile import tiffcomment
+
+import warnings
 
 
 class MMData:
+    def tiffcomment(arg, comment=None, index=None, code=None):
+        """Return or replace ImageDescription value in first page of TIFF file."""
+        if index is None:
+            index = 0
+        if code is None:
+            code = 270
+        mode = None if comment is None else 'r+b'
+        with TiffFile(arg, mode=mode) as tif:
+            tag = tif.pages[index].tags.get(code, None)
+            if tag is None:
+                raise ValueError(f'no {TIFF.TAGS[code]} tag found')
+            if comment is None:
+                return tag.value
+            tag.overwrite(tif, comment)
+
     """Parsing of MicroManager metadata"""
     def __init__(self, folder = None, tiffs = None, mm_meta = None, height = None, 
                  width = None, mm_map = None, interval = None, channels = None,  num_planes = None):
@@ -36,6 +55,9 @@ class MMData:
         
         self.folder = folder
         self.tiffs = self.get_all_tiffs()
+
+        self.get_MM_metadata_new()
+
         self.mm_meta = mm_meta
         self.height = height
         self.height = self.get_image_height()
@@ -47,7 +69,7 @@ class MMData:
         self.channels = self.get_channels()
         self.num_planes = num_planes
         self.num_planes = self.get_number_planes()
-    
+
     def get_all_tiffs(self):
         """Return list of all files composing an acquisition"""
         image_files = [re.search('.*(MMStack).*', f).group(0) for f in os.listdir(self.folder) if re.search('.*(MMStack).*ome.tif', f)]
@@ -62,7 +84,35 @@ class MMData:
         """Return name of last .tif block of the acquisition"""
         last_chunk = self.tiffs[np.argmax([int(re.search('(?<=MMStack_)(\d+)',f).group(0)) if re.search('.*(MMStack.ome).*',f)==None else 0 for f in self.tiffs])]
         return last_chunk
-    
+
+    def get_MM_metadata_new(self):
+        """Return MicroManager metadata string contained in Tag 50839"""
+        path_to_first_tiff = self.folder+'/'+self.get_first_tiff()
+        with warnings.catch_warnings():
+            # image_tmp = tff.imread(path_to_first_tiff)
+
+            tmp2 = tff.TiffFile(path_to_first_tiff)
+            code = 270
+            tag = tmp2.pages[0].tags.get(code, None)
+            omexml_string = tmp2.pages[0].description
+            tmp2.pages[0].shape
+
+            import xml.etree.ElementTree
+            import io
+
+            root = xml.etree.ElementTree.parse(io.StringIO(omexml_string))
+            namespaces = {'ome': 'http://www.openmicroscopy.org/Schemas/OME/2016-06'}
+            channels = root.findall('ome:Image[1]/ome:Pixels/ome:Channel', namespaces)
+            channel_names = [c.attrib['Name'] for c in channels]
+
+            print("stop")
+            # self.width =
+
+        # with open(self.folder+'/'+self.get_first_tiff(), "rb") as binary_file:
+        #     tmp2 = tff.TiffFile(binary_file)
+        #
+        #     pass
+
     def get_MM_metadata(self):
         """Return MicroManager metadata string contained in Tag 50839"""
 
@@ -97,6 +147,8 @@ class MMData:
             return metadata_str
     
     def get_image_height(self):
+        # return 2048
+
         """Return image height in px"""
         if self.height is None:
             if self.mm_meta is None:
@@ -108,6 +160,8 @@ class MMData:
         return self.height
     
     def get_image_width(self):
+        return 2048
+
         """Return image width in px"""
         if self.width is None:
             if self.mm_meta is None:
@@ -255,6 +309,8 @@ class MMData:
         return self.maxframe
     
     def get_channels(self):
+        return ["DIA Ph3 (Dual)", "GFP (Dual)"]
+
         """Return channels of the acquisition"""
         #self.channels = re.findall('(?<=ChNames":"\[)|(?<=ChNames":\[)(.*?)(?=\].*)',self.get_MM_metadata())[0].replace('"','').split(',')
         #ipdb.set_trace()
@@ -268,6 +324,8 @@ class MMData:
         return z_step
     
     def get_number_planes(self):
+        return [1, 1, 1]
+
         """Return number of planes for each channel"""
         if self.num_planes is None:
 
