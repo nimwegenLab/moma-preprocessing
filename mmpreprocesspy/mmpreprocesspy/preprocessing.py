@@ -148,6 +148,8 @@ def get_position_of_first_growthlane(growthlane_region_image, periodicity):
     oriented horizontally and the image should be cropped, so that it does not contain too much space before and behind
     the GLs. This method also assumed that the growthlanes appear bright foreground on dark background.
    """
+    growthlane_region_image_orig = growthlane_region_image
+    growthlane_region_image = skimage.filters.gaussian(growthlane_region_image_orig, sigma=20)
     projected_image_intensity = np.sum(growthlane_region_image, axis=1)
     projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
     acf_of_intensity_profile = np.correlate(projected_image_intensity_zero_mean, projected_image_intensity_zero_mean,
