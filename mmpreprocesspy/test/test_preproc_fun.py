@@ -6,6 +6,22 @@ from unittest import TestCase
 class TestPreproc_fun(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
+    def test__dataset_15_no_flatfield(self):
+        from mmpreprocesspy import preproc_fun
+
+        data_directory = self.test_data_base_path + '/15_lis_20201119_VNG1040_AB2h_2h_1/MMStack/'
+        directory_to_save = self.test_data_base_path + '/15_lis_20201119_VNG1040_AB2h_2h_1/MMStack/result_no_flatfield/'
+        positions = [0]
+        maxframe = 1
+        dark_noise = 90
+        gaussian_sigma = 5
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
+                                gaussian_sigma=gaussian_sigma)
+
     def test__dataset_14_no_flatfield(self):
         from mmpreprocesspy import preproc_fun
 

@@ -46,7 +46,6 @@ class MomaImageProcessor(object):
             self.image, self.growthlane_length_threshold)
         self.rotate_rois()
         self.remove_rois_not_fully_in_image()
-        self.set_growthlane_orientation(self.gl_orientation_search_area)
         self.reset_growthlane_roi_ids()
         self.get_image_registration_template()
 
@@ -67,34 +66,6 @@ class MomaImageProcessor(object):
             if not gl_roi.roi.is_inside_image(self.image):
                 del self.growthlane_rois[ind]
 
-    def set_growthlane_orientation(self, search_area):
-        """
-        Finds the orientation of the growthlane within the ROI.
-        :param growthlane_rois:
-        :param search_area: the area before and after the ROI the will be looked to determine the direction; unit: [px]
-        :return:
-        """
-
-        for index, gl_roi in enumerate(self.growthlane_rois):
-            roi_image = gl_roi.roi.get_from_image(self.image)
-            gl_roi.exit_location = self.determine_location_of_growthlane_exit(roi_image, search_area)
-
-    def determine_location_of_growthlane_exit(self, growthlane_roi_image, search_area):
-        """
-        This function determines the location of the growthlane by comparing the value sum of values
-        at the start of the *extended* GL to those at the end.
-        :param growthlane_roi_image: the image of from the extended GL ROI.
-        :param search_area: the value by which the GL was extended in *both* directions.
-        :return:
-        """
-        sum_at_start = np.sum(growthlane_roi_image[:, 0:search_area].flatten(), 0)
-        sum_at_end = np.sum(growthlane_roi_image[:, -search_area:].flatten(), 0)
-        if sum_at_start > sum_at_end:
-            return GrowthlaneExitLocation.AT_LEFT
-        elif sum_at_end > sum_at_start:
-            return GrowthlaneExitLocation.AT_RIGHT
-        else:
-            raise ValueError("Could not determine location of growthlane exit.")
 
     def rotate_rois(self):
         rotation_center = (np.int0(self.image.shape[1]/2), np.int0(self.image.shape[0]/2))
