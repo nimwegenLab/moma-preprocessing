@@ -86,7 +86,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         if not os.path.exists(os.path.dirname(folder_to_save)):
             os.makedirs(os.path.dirname(folder_to_save))
 
-        path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index.tiff'
+        path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_initial.tiff'
         store_gl_index_image(imageProcessor.growthlane_rois, imageProcessor.image, path)
 
         # create empty kymographs to fill
@@ -117,7 +117,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
 
             growthlane_rois = translate_gl_rois(growthlane_rois, (-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
 
-            # growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict = remove_gls_outside_of_image(image, growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict)
+            growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict = remove_gls_outside_of_image(image, growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict)
 
             color_image_stack = dataset.get_image_stack(frame=t, position=position_index)  # TODO: rename this to e.g. 'current_image_frame'
 
@@ -137,8 +137,8 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         finalize_memmap_images(growthlane_rois, gl_image_dict)
         finalize_memmap_images(growthlane_rois, kymo_image_dict)
 
-        # path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_final.tiff'
-        # store_gl_index_image(growthlane_rois, imageProcessor.image, path)
+        path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_final.tiff'
+        store_gl_index_image(growthlane_rois, imageProcessor.image, path)
 
     # # finalize measurement of processing time
     # print("Out of bounds ROIs: " + str(incomplete_GL))
