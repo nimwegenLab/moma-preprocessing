@@ -11,16 +11,18 @@ class TestPreproc_fun(TestCase):
 
         data_directory = self.test_data_base_path + '/15_lis_20201119_VNG1040_AB2h_2h_1/MMStack/'
         directory_to_save = self.test_data_base_path + '/15_lis_20201119_VNG1040_AB2h_2h_1/MMStack/result_no_flatfield/'
-        positions = [0]
+        positions = [1]
         maxframe = 1
         dark_noise = 90
         gaussian_sigma = 5
+        main_channel_angle = 90
+        # main_channel_angle = None
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
 
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
-                                gaussian_sigma=gaussian_sigma)
+                                gaussian_sigma=gaussian_sigma, main_channel_angle=main_channel_angle)
 
     def test__dataset_14_no_flatfield(self):
         from mmpreprocesspy import preproc_fun

@@ -43,7 +43,7 @@ class MomaImageProcessor(object):
 
     def process_image(self):
         self.rotated_image, self.main_channel_angle, self.mincol, self.maxcol, self.channel_centers, self.growthlane_rois = preprocessing.process_image(
-            self.image, self.growthlane_length_threshold)
+            self.image, self.growthlane_length_threshold, main_channel_angle=self.main_channel_angle)
         self.rotate_rois()
         self.remove_rois_not_fully_in_image()
         self.reset_growthlane_roi_ids()

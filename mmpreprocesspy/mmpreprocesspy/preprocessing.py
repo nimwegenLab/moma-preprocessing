@@ -11,8 +11,10 @@ from skimage.filters import threshold_otsu
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
-def process_image(image, growthlane_length_threshold=0):
-    main_channel_angle = find_main_channel_orientation(image)
+def process_image(image, growthlane_length_threshold=0, main_channel_angle=None):
+    if not main_channel_angle:
+        main_channel_angle = find_main_channel_orientation(image)
+
     if main_channel_angle != 0:
         image = skimage.transform.rotate(image, main_channel_angle,
                                          resize=True)  # rotate image angle back to 0, if needed

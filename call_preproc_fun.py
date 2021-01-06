@@ -21,8 +21,8 @@ parser.add_argument("-o", "--output", type=str,
                     help="output directory")
 parser.add_argument("-p", "--positions", type=str,
                     help="positions of the images")
-parser.add_argument("-r", "--rotations", type=str,
-                    help="rotations of the images")
+parser.add_argument("-r", "--rotation", type=int,
+                    help="rotation of the images")
 parser.add_argument("-tmin", "--timeframeminimum", type=int,
                     help="minimum time frame after which the data is processed")
 parser.add_argument("-tmax", "--timeframemaximum", type=int,
@@ -51,8 +51,8 @@ print("Log-file path:")
 print(args.logfile)
 print("Position:")
 print(args.positions)
-print("Rotations:")
-print(args.rotations)
+print("Rotation:")
+print(args.rotation)
 print("Start frame (tmin):")
 print(args.timeframeminimum)
 print("End frame (tmax):")
@@ -66,5 +66,6 @@ posval = int(res.group(1))
 posval = [posval]
 
 preproc_fun(args.input, args.output, positions=posval, minframe=args.timeframeminimum, maxframe=args.timeframemaximum,
-            flatfield_directory=args.flatfieldpath, growthlane_length_threshold=args.growthlanelengththreshold)
+            flatfield_directory=args.flatfieldpath, growthlane_length_threshold=args.growthlanelengththreshold,
+            main_channel_angle=args.rotation)
 
