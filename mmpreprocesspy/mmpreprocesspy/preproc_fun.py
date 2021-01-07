@@ -42,7 +42,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
     if minframe is None:
         minframe = 0
     if maxframe is None:
-        maxframe = dataset.get_max_frame() + 1  # +1 needed, because range(0,N) goes from 0 to N-1 (see below)
+        maxframe = dataset.get_number_of_frames()
     if positions is None:
         nr_of_positions_in_data = len(dataset.get_position_names())
         positions = range(0, nr_of_positions_in_data)

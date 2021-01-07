@@ -201,7 +201,7 @@ class MMData:
             stack[:,:,i] = self.get_image_fast(frame=frame,channel=channel,plane=planes[i],position=position, compress = compress)
         return stack
         
-    def get_max_frame(self):
+    def get_number_of_frames(self):
         """Return total number of time-points in the acquisition"""
         return self.number_of_frames
     
