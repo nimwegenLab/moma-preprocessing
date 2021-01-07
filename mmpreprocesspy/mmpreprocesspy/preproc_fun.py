@@ -107,14 +107,11 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
 
         # go through time-lapse and cut out channels
         for frame_index, t in enumerate(range(minframe, maxframe)):
-            if np.mod(t, 10) == 0:
-                print('working on frame: ' + str(t))  # output frame number
-
             image = dataset.get_image_fast(channel=phase_channel_index, frame=t, position=position_index)
             imageProcessor.determine_image_shift(image)
             growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
 
-            print("Shift frame "+str(t)+": "+str(imageProcessor.horizontal_shift)+", "+str(imageProcessor.vertical_shift))
+            print("Shift of frame "+str(t)+": "+str(imageProcessor.horizontal_shift)+", "+str(imageProcessor.vertical_shift))
 
             growthlane_rois = translate_gl_rois(growthlane_rois, (-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
 
