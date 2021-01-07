@@ -111,7 +111,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
             imageProcessor.determine_image_shift(image)
             growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
 
-            print("Shift of frame "+str(t)+": "+str(imageProcessor.horizontal_shift)+", "+str(imageProcessor.vertical_shift))
+            print(f"Shift of frame {t}: {imageProcessor.horizontal_shift:.2}, {imageProcessor.vertical_shift:.2}")
 
             growthlane_rois = translate_gl_rois(growthlane_rois, (-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
 
