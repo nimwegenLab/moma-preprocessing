@@ -6,28 +6,112 @@ import numpy as np
 import skimage.transform
 from skimage.io import imread
 from skimage.transform import AffineTransform, warp
+from parameterized import parameterized
 
 
 class TestPreprocessing(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
-    def test__find_channel_regions__dataset_14(self):
+    def get_tests__test__find_channel_regions(self):
+        tests = []
+        tests.append({'name': 'dataset_15',
+                      'path': "./resources/test_preprocessing_data/15_lis__20201119_VNG1040_AB2h_2h_1_MMStack.ome.tif",
+                      'angle': 90,
+                      'glt': 100,
+                      'centers': [556, 1409]})
+        tests.append({'name': 'dataset_13',
+                      'path': "./resources/test_preprocessing_data/13_20200128_glcIPTG_glc_1__MMStack.ome.tif",
+                      'angle': 0,
+                      'glt': 100,
+                      'centers': [477, 752]})
+        tests.append({'name': 'dataset_12',
+                      'path': "./resources/test_preprocessing_data/12_20190816_Theo_MMStack.ome.tif",
+                      'angle': 0,
+                      'glt': 100,
+                      'centers': [526]})
+        tests.append({'name': 'dataset_11',
+                      'path': "./resources/test_preprocessing_data/11_20190910_glc_spcm_1_MMStack.ome.tif",
+                      'angle': 0,
+                      'glt': 300,
+                      'centers': [555, 1391]})
+        tests.append({'name': 'dataset_10',
+                      'path': "./resources/test_preprocessing_data/10_20190424_hi2_hi3_med2_rplN_glu_gly.ome.tif",
+                      'angle': 0,
+                      'glt': 300,
+                      'centers': [392, 1249]})
+        tests.append({'name': 'dataset_9',
+                      'path': "./resources/test_preprocessing_data/09_20190325_hi1_hi2_med1_rpmB_glu_gly_pl_chr_1.tif",
+                      'angle': 0,
+                      'glt': 300,
+                      'centers': [519, 1372]})
+        tests.append({'name': 'dataset_8',
+                      'path': "./resources/test_preprocessing_data/08_20190222_LB_SpentLB_TrisEDTA_LB_1.tif",
+                      'angle': -4,
+                      'glt': 300,
+                      'centers': [591, 1441]})
+        tests.append({'name': 'dataset_7',
+                      'path': "./resources/test_preprocessing_data/07_20181203_glu_lac_switch16h_1__Pos0.tif",
+                      'angle': 0,
+                      'glt': 100,
+                      'centers': [478]})
+        tests.append({'name': 'dataset_6',
+                      'path': "./resources/test_preprocessing_data/06_20180313_glu_lac_switch24h_1__Pos0.tif",
+                      'angle': 0,
+                      'glt': 300,
+                      'centers': [528]})
+        tests.append({'name': 'dataset_5',
+                      'path': "./resources/test_preprocessing_data/05_20180404_glu_lacCM-ara_1__Pos0.tif",
+                      'angle': 0,
+                      'glt': 300,
+                      'centers': [525]})
+        tests.append({'name': 'dataset_4',
+                      'path': "./resources/test_preprocessing_data/04_20180531_gluIPTG5uM_lac_1__Pos0.tif",
+                      'angle': 0,
+                      'glt': 300,
+                      'centers': [513]})
+        tests.append({'name': 'dataset_3',
+                      'path': "./resources/test_preprocessing_data/03_20180604_gluIPTG10uM_lac_lacIoe_1__Pos0.tif",
+                      'angle': 0,
+                      'glt': 300,
+                      'centers': [496]})
+        tests.append({'name': 'dataset_0',
+                      'path': "./resources/test_preprocessing_data/00_20150710_mmtest_2ch__Pos0__rotated.tif",
+                      'angle': -1.5,
+                      'glt': 300,
+                      'centers': [678]})
+        return tests
+
+    def test__find_channel_regions(self):
         import tifffile as tff
         from mmpreprocesspy import preprocessing
         import matplotlib.pyplot as plt
+        import skimage
 
-        imdata = tff.imread("./resources/test_preprocessing_data/phc_frame_0__20201229_glc_lac_1_MMStack.ome.tif")
-        imdata = np.rot90(imdata)
+        tests = self.get_tests__test__find_channel_regions()
 
-        mincol, maxcol, region_list = preprocessing.find_channel_regions(imdata, use_smoothing=True)
+        for test in tests:
+            path = test['path']
+            rotation_angle = test['angle']
+            growthlane_length_threshold = test['glt']
+            region_centers = test['centers']
 
-        plt.imshow(imdata, cmap='gray')
-        for region in region_list:
-            plt.axvline(region.start, color='r')
-            plt.axvline(region.end, color='g')
-        plt.show()
+            with self.subTest(test=test['name']):
+                imdata = tff.imread(path)
+                imdata = skimage.transform.rotate(imdata, rotation_angle)
+                region_list = preprocessing.find_channel_regions(imdata, use_smoothing=True, minimum_required_growthlane_length=growthlane_length_threshold)
 
-        pass
+                # plt.imshow(imdata, cmap='gray')
+                # for ind, region in enumerate(region_list):
+                #     plt.axvline(region.start, color='r')
+                #     plt.axvline(region.end, color='g')
+                # plt.title(test['name'])
+                # plt.show()
+
+                for ind, region in enumerate(region_list):
+                    expected = region_centers[ind]
+                    actual = region_horizontal_center = region.start + region.width/2
+                    self.assertAlmostEqual(expected, actual, delta=10)
+
 
     def test__find_channels_in_region_dataset_10(self):
         from mmpreprocesspy import preprocessing

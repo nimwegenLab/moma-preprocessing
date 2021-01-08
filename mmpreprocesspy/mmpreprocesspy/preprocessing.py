@@ -25,12 +25,10 @@ def process_image(image, growthlane_length_threshold=0, main_channel_angle=None)
 
     # recalculate channel region boundary on rotated image
     image_rot = skimage.transform.rotate(image, angle, cval=0)
-    mincol, maxcol, region_list = find_channel_regions(image_rot, use_smoothing=True)
-    region_list = filter_regions(region_list, minimum_required_growthlane_length=growthlane_length_threshold)
-    refine_regions(image_rot, region_list)
+    region_list = find_channel_regions(image_rot, use_smoothing=True, minimum_required_growthlane_length=growthlane_length_threshold)
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rot, region_list)
 
-    return image_rot, main_channel_angle, mincol, maxcol, channel_centers, growthlane_rois
+    return image_rot, main_channel_angle, channel_centers, growthlane_rois
 
 
 def filter_regions(region_list, minimum_required_growthlane_length):
@@ -262,7 +260,7 @@ def find_rotation(image):
     return angle
 
 
-def find_channel_regions(image, threshold_factor=None, use_smoothing=False):
+def find_channel_regions(image, threshold_factor=None, use_smoothing=False, minimum_required_growthlane_length=0):
     fourier_ratio_orig = calculate_fourier_ratio(image)
 
     if use_smoothing:
@@ -277,12 +275,12 @@ def find_channel_regions(image, threshold_factor=None, use_smoothing=False):
 
     region_mask = fourier_ratio > threshold
     region_list = get_regions_from_mask(region_mask)
-    region_list = filter_date_regions_by_width(region_list, minimum_region_width=100)
 
-    column_start_position = np.argwhere(fourier_ratio > threshold)[0][0]
-    column_end_position = np.argwhere(fourier_ratio > threshold)[-1][0]
+    region_list = filter_regions(region_list, minimum_required_growthlane_length=minimum_required_growthlane_length)
 
-    return column_start_position, column_end_position, region_list
+    refine_regions(image, region_list)
+
+    return region_list
 
 
 def filter_date_regions_by_width(region_list, minimum_region_width):
