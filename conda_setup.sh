@@ -40,6 +40,7 @@ conda install -y -c lightsource2-tag pystackreg
 conda install -y conda-build
 conda install -y scikit-image
 conda install -y tifffile
+conda install -y -c conda-forge imagecodecs
 conda install -y pandas
 conda develop $PREPROC_PACKAGE_PATH
 

@@ -6,6 +6,26 @@ from unittest import TestCase
 class TestPreproc_fun(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
+    def test__dataset_16_no_flatfield(self):
+        from mmpreprocesspy import preproc_fun
+        import tifffile as tff
+
+        data_directory = self.test_data_base_path + '/16_thomas_20201229_glc_lac_1/MMStack/'
+        directory_to_save = self.test_data_base_path + '/16_thomas_20201229_glc_lac_1/MMStack/result_no_flatfield/'
+        positions = [0]
+        maxframe = 1
+        dark_noise = 90
+        gaussian_sigma = 5
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
+                                gaussian_sigma=gaussian_sigma)
+
+        image_with_rois = tff.imread(os.path.join(directory_to_save, "Pos0_GL_index_initial.tiff"))
+        self.show_image(image_with_rois)
+
     def test__dataset_15_no_flatfield(self):
         from mmpreprocesspy import preproc_fun
 
@@ -26,6 +46,7 @@ class TestPreproc_fun(TestCase):
 
     def test__dataset_14_no_flatfield(self):
         from mmpreprocesspy import preproc_fun
+        import tifffile as tff
 
         data_directory = self.test_data_base_path + '/14_thomas_20201228_glc_ara_1/MMStack/'
         directory_to_save = self.test_data_base_path + '/14_thomas_20201228_glc_ara_1/MMStack/result_no_flatfield/'
@@ -39,6 +60,9 @@ class TestPreproc_fun(TestCase):
 
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
                                 gaussian_sigma=gaussian_sigma)
+
+        image_with_rois = tff.imread(os.path.join(directory_to_save, "Pos0_GL_index_initial.tiff"))
+        self.show_image(image_with_rois)
 
     def test__dataset_13_with_flatfield(self):
         from mmpreprocesspy import preproc_fun
@@ -248,3 +272,17 @@ class TestPreproc_fun(TestCase):
         kymo_file_path = preproc_fun.get_kymo_tiff_path('/path/to/file', 'experiment_name', '1', '5', '0')
         print(kymo_file_path)
         print(os.path.dirname(kymo_file_path))
+
+    def show_image(self, imdata):
+        import matplotlib.pyplot as plt
+
+        fig = plt.figure()
+        axes = fig.add_subplot(1, 1, 1)
+        # axes.plot(xs, ys)
+        axes.imshow(imdata, cmap='gray')
+        axes.get_xaxis().set_visible(False)
+        fig.tight_layout(pad=0)
+        plt.axis('off')
+        plt.show()
+
+
