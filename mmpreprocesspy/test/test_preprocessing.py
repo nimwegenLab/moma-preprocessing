@@ -11,6 +11,24 @@ from skimage.transform import AffineTransform, warp
 class TestPreprocessing(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
+    def test__find_channel_regions__dataset_14(self):
+        import tifffile as tff
+        from mmpreprocesspy import preprocessing
+        import matplotlib.pyplot as plt
+
+        imdata = tff.imread("./resources/test_preprocessing_data/phc_frame_0__20201229_glc_lac_1_MMStack.ome.tif")
+        imdata = np.rot90(imdata)
+
+        mincol, maxcol, region_list = preprocessing.find_channel_regions(imdata, use_smoothing=True)
+
+        plt.imshow(imdata, cmap='gray')
+        for region in region_list:
+            plt.axvline(region.start, color='r')
+            plt.axvline(region.end, color='g')
+        plt.show()
+
+        pass
+
     def test__find_channels_in_region_dataset_10(self):
         from mmpreprocesspy import preprocessing
 
