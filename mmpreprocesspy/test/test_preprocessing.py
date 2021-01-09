@@ -14,11 +14,21 @@ class TestPreprocessing(TestCase):
 
     def get_tests__test__find_channel_regions(self):
         tests = []
+        tests.append({'name': 'dataset_16',
+                      'path': "./resources/test_preprocessing_data/16_thomas__20201229_glc_lac_1_MMStack__Pos0__rotated.tif",
+                      'angle': 0,
+                      'glt': 300,
+                      'centers': [0, 0]})
         tests.append({'name': 'dataset_15',
                       'path': "./resources/test_preprocessing_data/15_lis__20201119_VNG1040_AB2h_2h_1_MMStack.ome.tif",
                       'angle': 90,
                       'glt': 100,
                       'centers': [556, 1409]})
+        tests.append({'name': 'dataset_14',
+                      'path': "./resources/test_preprocessing_data/14_thomas_20201228_glc_ara_1__Pos0__rotated.tif",
+                      'angle': -.5,
+                      'glt': 300,
+                      'centers': [0, 0]})
         tests.append({'name': 'dataset_13',
                       'path': "./resources/test_preprocessing_data/13_20200128_glcIPTG_glc_1__MMStack.ome.tif",
                       'angle': 0,
@@ -100,12 +110,13 @@ class TestPreprocessing(TestCase):
                 imdata = skimage.transform.rotate(imdata, rotation_angle)
                 region_list = preprocessing.find_channel_regions(imdata, use_smoothing=True, minimum_required_growthlane_length=growthlane_length_threshold)
 
-                # plt.imshow(imdata, cmap='gray')
-                # for ind, region in enumerate(region_list):
-                #     plt.axvline(region.start, color='r')
-                #     plt.axvline(region.end, color='g')
-                # plt.title(test['name'])
-                # plt.show()
+                if test['name'] == 'dataset_14' or test['name'] == 'dataset_16':
+                    plt.imshow(imdata, cmap='gray')
+                    for ind, region in enumerate(region_list):
+                        plt.axvline(region.start, color='r')
+                        plt.axvline(region.end, color='g')
+                    plt.title(test['name'])
+                    plt.show()
 
                 for ind, region in enumerate(region_list):
                     expected = region_centers[ind]
