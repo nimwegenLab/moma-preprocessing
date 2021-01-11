@@ -12,7 +12,7 @@ from skimage.filters import threshold_otsu
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
 def process_image(image, growthlane_length_threshold=0, main_channel_angle=None):
-    if not main_channel_angle:
+    if main_channel_angle == None:
         main_channel_angle = find_main_channel_orientation(image)
 
     if main_channel_angle != 0:
@@ -341,6 +341,21 @@ def get_regions_from_mask(region_mask):
     return region_list
 
 
+def calculate_fourier_ratio(image):
+    """Calculates the ratio between highest and second-highest value of the absolute FFT of 'image'
+    along the vertical dimension.
+    """
+    fourier_ratio = []
+    for i in range(image.shape[1]):
+        fourier_col = np.fft.fftshift(np.abs(np.fft.fft(image[:, i])))
+        fourier_col[np.argmax(fourier_col) - 20:np.argmax(fourier_col)] = 0
+        fourier_col[np.argmax(fourier_col) + 1:np.argmax(fourier_col) + 20] = 0
+
+        # fourier_col = np.fft.fftshift(np.abs(np.fft.fft(skimage.transform.rotate(image,-5,cval=0)[:,1000])))
+        fourier_sort = np.sort(fourier_col)
+        fourier_ratio.append(fourier_sort[-2] / fourier_sort[-1])
+    fourier_ratio = np.array(fourier_ratio)
+    return fourier_ratio
 
 
 def fft_align(im0, im1, pixlim=None):
