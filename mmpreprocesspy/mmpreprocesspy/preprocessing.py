@@ -7,6 +7,7 @@ from mmpreprocesspy.data_region import DataRegion
 from mmpreprocesspy.roi import Roi
 from mmpreprocesspy.rotated_roi import RotatedRoi
 from scipy.signal import savgol_filter, find_peaks
+from scipy.ndimage.filters import gaussian_filter1d
 from skimage.filters import threshold_otsu
 
 
@@ -65,6 +66,18 @@ def refine_region(rotated_image, region):
     look_ahead_length = 20  # the distance that the algorithm will look ahead to see if the threshold is passed
     projected_max_intensities = np.max(rotated_image, axis=0)
     threshold = 0.8 * np.median(projected_max_intensities[region.start:region.end])
+
+    ### DEBUG ###
+    if is_debugging():
+        import matplotlib.pyplot as plt
+        plt.plot(projected_max_intensities)
+        plt.axvline(region.start, color='r')
+        plt.axvline(region.end, color='g')
+        plt.axhline(threshold)
+        plt.axvline(290)
+        plt.show()
+    ### /DEBUG ###
+
 
     #  extend region at the channel start using lookahead interval
     while np.any(projected_max_intensities[region.start - look_ahead_length:region.start] > threshold):
@@ -278,10 +291,64 @@ def find_channel_regions(image, threshold_factor=None, use_smoothing=False, mini
 
     region_list = filter_regions(region_list, minimum_required_growthlane_length=minimum_required_growthlane_length)
 
+    ### DEBUG ###
+    if is_debugging():
+        import matplotlib.pyplot as plt
+        plt.plot(fourier_ratio)
+        plt.axhline(threshold)
+        plt.axvline(290)
+        for region in region_list:
+            plt.axvline(region.start, color='r')
+            plt.axvline(region.end, color='g')
+        plt.show()
+    ### /DEBUG ###
+
+    if is_debugging():
+        # image_orig = image
+        image = image_orig
+        image = image - np.mean(image, axis=0)
+        projected_max_intensities = np.max(image, axis=0)
+        projected_max_intensities_orig = projected_max_intensities
+        projected_max_intensities = projected_max_intensities - np.min(projected_max_intensities)
+        projected_max_intensities_savgol = savgol_filter(projected_max_intensities, 11, 1)
+        plt.plot(projected_max_intensities)
+        plt.plot(projected_max_intensities_savgol)
+        plt.axhline(0.06)
+        # plt.plot(np.diff(projected_max_intensities))
+        plt.show()
+
+        res = np.histogram(projected_max_intensities, bins=256)
+        plt.plot(res[1][1:], res[0])
+        res = np.histogram(projected_max_intensities_savgol, bins=256)
+        plt.plot(res[1][1:], res[0])
+        plt.show()
+
+    debug_plot_regions_on_image(image, region_list)
+
     refine_regions(image, region_list)
+
+    debug_plot_regions_on_image(image, region_list)
 
     return region_list
 
+
+def debug_plot_regions_on_image(image, region_list):
+    if is_debugging():
+        import matplotlib.pyplot as plt
+
+        plt.imshow(image)
+        for region in region_list:
+            plt.axvline(region.start, color='r')
+            plt.axvline(region.end, color='g')
+        plt.show()
+
+
+def is_debugging():
+    try:
+        import pydevd
+        return True
+    except ImportError:
+        return False
 
 def filter_date_regions_by_width(region_list, minimum_region_width):
     """
@@ -327,9 +394,94 @@ def calculate_fourier_ratio(image):
     """Calculates the ratio between highest and second-highest value of the absolute FFT of 'image'
     along the vertical dimension.
     """
+    image_orig = image
+
+    # scipy.ndimage.filters.gaussian_filter1d(input, sigma, axis=-1, order=0, output=None, mode='reflect', cval=0.0,
+    #                                         truncate=4.0)
+    # filtered_image = skimage.filters.gaussian(image, sigma=20)
+    filtered_image = gaussian_filter1d(image, sigma=20, axis=0)
+    # filtered_image = image
+
+
+    # ### DEBUG ###
+    # if is_debugging():
+    #     import matplotlib.pyplot as plt
+    #     plt.imshow(image)
+    #     plt.axvline(290, color='r')
+    #     plt.show()
+    #
+    #     plt.imshow(filtered_image)
+    #     plt.show()
+    # ### /DEBUG ###
+
+
+    ### DEBUG ###
+    if is_debugging():
+        import matplotlib.pyplot as plt
+        plt.imshow(image_orig)
+        plt.axvline(500, color='r')
+        plt.axvline(340, color='k')
+        plt.axvline(290, color='g')
+        plt.axvline(190, color='c')
+        plt.show()
+
+        plt.imshow(filtered_image)
+        plt.show()
+    ### /DEBUG ###
+
+    image = filtered_image
+
+    image_normalized_vertically = np.zeros_like(image)
+    image_normalized_vertically = image
+    for i in range(image.shape[1]):
+        im_min = np.min(image[:, i])
+        im_max = np.max(image[:, i])
+        # image_normalized_vertically[:, i] = (image[:, i] - im_min)/(im_max - im_min)
+        image_normalized_vertically[:, i] = image_normalized_vertically[:, i] - np.mean(image_normalized_vertically[:, i])
+
+    image = image_normalized_vertically
+
+    vertical_abs_spectrum = np.zeros_like(image)
+    for i in range(image.shape[1]):
+        # vertical_abs_spectrum[:, i] = np.fft.fftshift(np.abs(np.fft.fft(image[:, i])))
+        vertical_abs_spectrum[:, i] = np.abs(np.fft.fft(image[:, i]))
+
+    # if is_debugging():
+    #     import matplotlib.pyplot as plt
+    #     plt.imshow(np.log(vertical_abs_spectrum))
+    #     plt.show()
+    #
+    vertical_abs_spectrum_orig = vertical_abs_spectrum
+    vert_size_half = np.int(vertical_abs_spectrum.shape[0]/2)
+    vertical_abs_spectrum = vertical_abs_spectrum[0:vert_size_half, :]
+    if is_debugging():
+        import matplotlib.pyplot as plt
+        # plt.plot(np.log(vertical_abs_spectrum[:, 500]), color='r')
+        # plt.plot(np.log(vertical_abs_spectrum[:, 340]), color='k')
+        # plt.plot(np.log(vertical_abs_spectrum[:, 290]), color='g')
+        # plt.plot(np.log(vertical_abs_spectrum[:, 190]), color='c')
+
+        plt.plot(vertical_abs_spectrum[:, 500], color='r')
+        channel_peak = np.argmax(vertical_abs_spectrum[:, 500])
+        plt.axvline(channel_peak, color='r')
+        plt.plot(vertical_abs_spectrum[:, 340], color='k')
+        plt.plot(vertical_abs_spectrum[:, 290], color='g')
+        plt.plot(vertical_abs_spectrum[:, 190], color='c')
+
+        # plt.xlim([950, 1100])
+        plt.xlim([0, 50])
+        # plt.ylim([-5, 5])
+        plt.show()
+
+        # plt.plot(np.max(vertical_abs_spectrum[15:25, :], axis=0))
+        # plt.show()
+
+    return np.max(vertical_abs_spectrum[15:25, :], axis=0)
+
     fourier_ratio = []
     for i in range(image.shape[1]):
-        fourier_col = np.fft.fftshift(np.abs(np.fft.fft(image[:, i])))
+        # fourier_col = np.fft.fftshift(np.abs(np.fft.fft(image[:, i])))
+        fourier_col = vertical_abs_spectrum[:, i]
         fourier_col[np.argmax(fourier_col) - 20:np.argmax(fourier_col)] = 0
         fourier_col[np.argmax(fourier_col) + 1:np.argmax(fourier_col) + 20] = 0
 
@@ -337,6 +489,11 @@ def calculate_fourier_ratio(image):
         fourier_sort = np.sort(fourier_col)
         fourier_ratio.append(fourier_sort[-2] / fourier_sort[-1])
     fourier_ratio = np.array(fourier_ratio)
+
+    if is_debugging():
+        plt.plot(fourier_ratio)
+        plt.show()
+
     return fourier_ratio
 
 
