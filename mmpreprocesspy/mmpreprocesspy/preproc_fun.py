@@ -131,12 +131,11 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
             append_gl_roi_images(frame_index, growthlane_rois, gl_image_dict, color_image_stack)
             append_to_kymo_graph(frame_index, growthlane_rois, kymo_image_dict, color_image_stack)
 
-        # save_gl_roi_image(growthlane_rois, gl_image_dict, gl_image_path_dict)
         finalize_memmap_images(growthlane_rois, gl_image_dict)
         finalize_memmap_images(growthlane_rois, kymo_image_dict)
 
         path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_final.tiff'
-        store_gl_index_image(growthlane_rois, imageProcessor.image, path)
+        store_gl_index_image(imageProcessor.growthlane_rois, imageProcessor.image, path)
 
     # # finalize measurement of processing time
     # print("Out of bounds ROIs: " + str(incomplete_GL))
@@ -258,13 +257,6 @@ def get_kymo_graph_slice(gl_roi_crop):
     kymo_slice = np.mean(gl_roi_crop[:, start_ind:end_ind], axis=1)
     return kymo_slice
 
-def save_gl_roi_image(growthlane_rois, gl_image_dict, gl_image_path_dict):
-    for gl_roi in growthlane_rois:
-        gl_file_path = gl_image_path_dict[gl_roi.id]
-        if not os.path.exists(os.path.dirname(gl_file_path)):
-            os.makedirs(os.path.dirname(gl_file_path))
-        tifffile.imwrite(gl_file_path, gl_image_dict[gl_roi.id], metadata={'axes': 'TZCYX'}, imagej=True)
-
 
 def finalize_memmap_images(growthlane_rois, gl_image_dict):
     for gl_roi in growthlane_rois:
@@ -296,19 +288,15 @@ def initialize_kymo_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, i
     return image_stack
 
 
-
-
 def store_gl_index_image(growthlane_rois, full_frame_image, path):
     """ Draw the growthlane ROIs and indices onto the image and save it. """
     font = cv.FONT_HERSHEY_SIMPLEX
-    rotated_rois = [x.roi for x in growthlane_rois]
-    # show_image_with_rotated_rois(image, rotated_rois)
-    # normalizedImg = None
     normalized_image = cv.normalize(full_frame_image, None, 0, 255, cv.NORM_MINMAX)
     final_image = np.array(normalized_image, dtype=np.uint8)
 
-    for gl_index, roi in enumerate(rotated_rois):
-        roi.draw_to_image(final_image, False)
-        cv.putText(final_image, str(calculate_gl_output_index(gl_index)), (np.int0(roi.center[0]), np.int0(roi.center[1])), font, 1, (255, 255, 255), 2, cv.LINE_AA)
+    for roi in growthlane_rois:
+        roi.roi.draw_to_image(final_image, False)
+        gl_index = calculate_gl_output_index(roi.id)
+        cv.putText(final_image, str(gl_index), (np.int0(roi.roi.center[0]), np.int0(roi.roi.center[1])), font, 1, (255, 255, 255), 2, cv.LINE_AA)
 
     cv.imwrite(path, final_image)
