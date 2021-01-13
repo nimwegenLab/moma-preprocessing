@@ -1,8 +1,7 @@
 import tifffile as tff
 import numpy as np
-import matplotlib.pyplot as plt
 
-class MMDataNew():
+class MicroManagerTiffReader(object):
 
     def __init__(self, image_path):
         self.image_path = image_path
@@ -24,11 +23,11 @@ class MMDataNew():
                     "TIFF metadata contains no entry for either 'InitialPositionList' or 'StagePositions'")
             self.number_of_positions = len(self.positions)
 
-    def get_image_fast(self, frame_index, channel_index, position_index):
+    def get_image(self, frame_index, channel_index, position_index):
         page_nr = self.calculate_page_nr(frame_index, channel_index, position_index)
         return self.get_copy_of_page(page=page_nr)
 
-    def get_image_stack(self, frame_index, position_index):
+    def get_channel_stack(self, frame_index, position_index):
         pass
 
     def calculate_page_nr(self, frame_index, channel_index, position_index):
