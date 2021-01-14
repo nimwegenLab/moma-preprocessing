@@ -29,6 +29,7 @@ conda create -y --prefix $DIR/mmpreprocesspy_conda_environment python=3.7
 source activate $DIR/mmpreprocesspy_conda_environment
 
 ######### packages for deep leaning ##############
+conda install pip
 
 conda install -y wheel
 conda install -y -c conda-forge ipdb
@@ -40,13 +41,16 @@ conda install -y -c lightsource2-tag pystackreg
 conda install -y conda-build
 conda install -y scikit-image
 conda install -y tifffile
+pip install aicsimageio
+conda install -y -c bioconda python-bioformats
+conda install -y zarr
 conda install -y -c conda-forge imagecodecs
 conda install -y pandas
 conda develop $PREPROC_PACKAGE_PATH
 
 #conda install -y -c conda-forge opencv-contrib-python
 
-conda install pip
+
 pip install opencv-contrib-python
 
 #if [[ "$runningOnScicore" = false  ]]; then
