@@ -18,23 +18,31 @@ data = MicroManagerOmeTiffReader(image_path)
 
 
 channel_index = 0
-position_index = 31
-start_frame = 10
+position_index = 0
+start_frame = 0
 
 max_index = 4
 grid_size = int(np.sqrt(max_index))
 fig, ax = plt.subplots(grid_size, grid_size)
 ax = ax.flatten()
 
+# plot `max_index` frames of the selected position and channel
 imgs = []
 for ax_index, frame_index in enumerate(range(start_frame, start_frame + max_index)):
-    img = data.get_image(frame_index, channel_index, position_index)
+    img = data.get_image(position_index, frame_index, channel_index)
     min = np.min(img)
     max = np.max(img)
     img = (img - min)/(max - min)
     ax[ax_index].imshow(img)
     ax[ax_index].set_title(f"S/Pos: {position_index}, 'C': {channel_index}, T: {frame_index}")
     imgs.append(img)
+plt.show()
+
+# get all channels at specified position and time-frame and show them
+imgs = data.get_channel_stack(position_index, frame_index)
+fig, ax = plt.subplots(1, imgs.shape[0])
+for ind, ax in enumerate(ax.flatten()):
+    ax.imshow(imgs[ind, ...])
 plt.show()
 
 print('DONE')
