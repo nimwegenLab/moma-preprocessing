@@ -12,8 +12,7 @@ class TestRoi(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
     def test__get_roi_from_image(self):
-        imdata = read_image(
-            self.test_data_base_path + '/03_20180604_gluIPTG10uM_lac_lacIoe_1/first_images/Pos0/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
+        imdata = read_image('resources/data__test_rotated_roi_py/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
         angle = -15
         center = (imdata.shape[1]/2, imdata.shape[0]/2)
         M = cv2.getRotationMatrix2D(center,angle, 1.0)
@@ -27,13 +26,15 @@ class TestRoi(TestCase):
         # aux.show_image_with_rotated_rois(imdata, [sut])
 
         roi_image = sut.get_from_image(imdata)
-        aux.show_image(roi_image)
-
-        cv2.waitKey()
+        # np.save('resources/data__test_rotated_roi_py/test__get_roi_from_image__expected_00.npy',roi_image)  # for updating the expected image
+        expected = np.load('resources/data__test_rotated_roi_py/test__get_roi_from_image__expected_00.npy')
+        self.assertTrue(np.all(expected == roi_image))
+        # aux.show_image(roi_image)
+        #
+        # cv2.waitKey()
 
     def test__rotate(self):
-        imdata = read_image(
-            self.test_data_base_path + '/03_20180604_gluIPTG10uM_lac_lacIoe_1/first_images/Pos0/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
+        imdata = read_image('resources/data__test_rotated_roi_py/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
         angle = -15
         # angle = 0
         image_center = (imdata.shape[1]/2, imdata.shape[0]/2)
@@ -50,12 +51,17 @@ class TestRoi(TestCase):
         sut.rotate(image_center, angle)
 
         # Plot rotated ROI against rotated image
-        aux.show_image_with_rotated_rois(imdata_rotated, [sut])
+        # aux.show_image_with_rotated_rois(imdata_rotated, [sut])
 
         roi_image = sut.get_from_image(imdata_rotated)
-        aux.show_image(roi_image)
 
-        cv2.waitKey()
+        # np.save('resources/data__test_rotated_roi_py/test__rotate__expected_00.npy',roi_image)  # for updating the expected image
+        expected = np.load('resources/data__test_rotated_roi_py/test__rotate__expected_00.npy')
+        self.assertTrue(np.all(expected == roi_image))
+
+        # aux.show_image(roi_image)
+        #
+        # cv2.waitKey()
 
     def test__translate__updates_roi_center_correctly(self):
         roi_center = 542, 140
@@ -156,8 +162,8 @@ class TestRoi(TestCase):
 
         self.assertEqual(roi_image.shape[0], 100)
         self.assertEqual(roi_image.shape[1], 400)
-        aux.show_image(roi_image)
-        cv2.waitKey()
+        # aux.show_image(roi_image)
+        # cv2.waitKey()
 
     def test__width_setter__modifies_width_value_correctly(self):
         roi_center = 100, 100

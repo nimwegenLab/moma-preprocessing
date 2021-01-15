@@ -32,8 +32,13 @@ class TestImagePreprocessor(TestCase):
         images_to_correct = image_stack[:, :, 1:]
         processed_stack = preprocessor.process_image_stack(images_to_correct)
 
-        aux.show_image(processed_stack[:,:,0])
-        cv2.waitKey()
+        np.save('./resources/data__test_image_preprocessing_py/test__Process__expected_image_00.npy', processed_stack)  # this is for updating the expected data
+        expected = np.load('resources/data__test_image_preprocessing_py/test__Process__expected_image_00.npy')
+
+        self.assertTrue(np.all(expected == processed_stack))
+        #
+        # aux.show_image(processed_stack[:,:,0])
+        # cv2.waitKey()
 
     # def test__flat_field_correction_works_correctly(self):
     # NOTE-2019-05-17: this is test for checking, if the flatfield works correctly. This was done using the same flatfield dataset

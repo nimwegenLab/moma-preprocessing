@@ -31,20 +31,17 @@ class TestRoi(TestCase):
     #     box = cv.boxPoints(rot_rect)
     #     pass
 
-    test_data_base_path = '/home/micha/Documents/git/MM_Testing'
-
     def test__get_roi_from_image__returns_image_with_correct_size(self):
         from mmpreprocesspy.roi import Roi
-        imdata = read_image(
-            self.test_data_base_path + '/03_20180604_gluIPTG10uM_lac_lacIoe_1/first_images/Pos0/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
+        imdata = read_image('resources/data__test_roi_py/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
 
         sut = Roi(90, 342, 190, 742)  # size: (width=400, height=100)
 
         roi_image = sut.get_from_image(imdata)
         self.assertEqual(roi_image.shape[0], 100)
         self.assertEqual(roi_image.shape[1], 400)
-        aux.show_image(roi_image)
-        cv2.waitKey()
+        # aux.show_image(roi_image)
+        # cv2.waitKey()
 
     def test__translate__for_non_integer_y_value__raises_value_error(self):
         from mmpreprocesspy.roi import Roi

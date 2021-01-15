@@ -15,77 +15,77 @@ class TestPreprocessing(TestCase):
     def get_tests__test__find_channel_regions(self):
         tests = []
         tests.append({'name': 'dataset_16',
-                      'path': "./resources/test_preprocessing_data/16_thomas__20201229_glc_lac_1_MMStack__Pos0__rotated.tif",
+                      'path': "./resources/data__test_preprocessing_py/16_thomas__20201229_glc_lac_1_MMStack__Pos0__rotated.tif",
                       'angle': 0,
                       'glt': 200,
                       'centers': [538, 1343]})
         tests.append({'name': 'dataset_15',
-                      'path': "./resources/test_preprocessing_data/15_lis__20201119_VNG1040_AB2h_2h_1_MMStack.ome.tif",
+                      'path': "./resources/data__test_preprocessing_py/15_lis__20201119_VNG1040_AB2h_2h_1_MMStack.ome.tif",
                       'angle': 90,
                       'glt': 200,
                       'centers': [573, 1409]})
         tests.append({'name': 'dataset_14',
-                      'path': "./resources/test_preprocessing_data/14_thomas_20201228_glc_ara_1__Pos0__rotated.tif",
+                      'path': "./resources/data__test_preprocessing_py/14_thomas_20201228_glc_ara_1__Pos0__rotated.tif",
                       'angle': -.5,
                       'glt': 300,
                       'centers': [489, 1315]})
         tests.append({'name': 'dataset_13',
-                      'path': "./resources/test_preprocessing_data/13_20200128_glcIPTG_glc_1__MMStack.ome.tif",
+                      'path': "./resources/data__test_preprocessing_py/13_20200128_glcIPTG_glc_1__MMStack.ome.tif",
                       'angle': 0,
                       'glt': 200,
                       'centers': [465, 752]})
         tests.append({'name': 'dataset_12',
-                      'path': "./resources/test_preprocessing_data/12_20190816_Theo_MMStack.ome.tif",
+                      'path': "./resources/data__test_preprocessing_py/12_20190816_Theo_MMStack.ome.tif",
                       'angle': 0,
                       'glt': 200,
                       'centers': [526]})
         tests.append({'name': 'dataset_11',
-                      'path': "./resources/test_preprocessing_data/11_20190910_glc_spcm_1_MMStack.ome.tif",
+                      'path': "./resources/data__test_preprocessing_py/11_20190910_glc_spcm_1_MMStack.ome.tif",
                       'angle': 0,
                       'glt': 300,
                       'centers': [518, 1355]})
         tests.append({'name': 'dataset_10',
-                      'path': "./resources/test_preprocessing_data/10_20190424_hi2_hi3_med2_rplN_glu_gly.ome.tif",
+                      'path': "./resources/data__test_preprocessing_py/10_20190424_hi2_hi3_med2_rplN_glu_gly.ome.tif",
                       'angle': 0,
                       'glt': 300,
                       'centers': [392, 1249]})
         tests.append({'name': 'dataset_9',
-                      'path': "./resources/test_preprocessing_data/09_20190325_hi1_hi2_med1_rpmB_glu_gly_pl_chr_1.tif",
+                      'path': "./resources/data__test_preprocessing_py/09_20190325_hi1_hi2_med1_rpmB_glu_gly_pl_chr_1.tif",
                       'angle': 0,
                       'glt': 300,
                       'centers': [519, 1372]})
         tests.append({'name': 'dataset_8',
-                      'path': "./resources/test_preprocessing_data/08_20190222_LB_SpentLB_TrisEDTA_LB_1.tif",
+                      'path': "./resources/data__test_preprocessing_py/08_20190222_LB_SpentLB_TrisEDTA_LB_1.tif",
                       'angle': -4,
                       'glt': 300,
                       'centers': [591, 1441]})
         tests.append({'name': 'dataset_7',
-                      'path': "./resources/test_preprocessing_data/07_20181203_glu_lac_switch16h_1__Pos0.tif",
+                      'path': "./resources/data__test_preprocessing_py/07_20181203_glu_lac_switch16h_1__Pos0.tif",
                       'angle': 0,
                       'glt': 200,
                       'centers': [461]})
         tests.append({'name': 'dataset_6',
-                      'path': "./resources/test_preprocessing_data/06_20180313_glu_lac_switch24h_1__Pos0.tif",
+                      'path': "./resources/data__test_preprocessing_py/06_20180313_glu_lac_switch24h_1__Pos0.tif",
                       'angle': 0,
                       'glt': 300,
                       'centers': [512]})
         tests.append({'name': 'dataset_5',
-                      'path': "./resources/test_preprocessing_data/05_20180404_glu_lacCM-ara_1__Pos0.tif",
+                      'path': "./resources/data__test_preprocessing_py/05_20180404_glu_lacCM-ara_1__Pos0.tif",
                       'angle': 0,
                       'glt': 300,
                       'centers': [513]})
         tests.append({'name': 'dataset_4',
-                      'path': "./resources/test_preprocessing_data/04_20180531_gluIPTG5uM_lac_1__Pos0.tif",
+                      'path': "./resources/data__test_preprocessing_py/04_20180531_gluIPTG5uM_lac_1__Pos0.tif",
                       'angle': 0,
                       'glt': 300,
                       'centers': [513]})
         tests.append({'name': 'dataset_3',
-                      'path': "./resources/test_preprocessing_data/03_20180604_gluIPTG10uM_lac_lacIoe_1__Pos0.tif",
+                      'path': "./resources/data__test_preprocessing_py/03_20180604_gluIPTG10uM_lac_lacIoe_1__Pos0.tif",
                       'angle': 0,
                       'glt': 300,
                       'centers': [484]})
         tests.append({'name': 'dataset_0',
-                      'path': "./resources/test_preprocessing_data/00_20150710_mmtest_2ch__Pos0__rotated.tif",
+                      'path': "./resources/data__test_preprocessing_py/00_20150710_mmtest_2ch__Pos0__rotated.tif",
                       'angle': -1.5,
                       'glt': 300,
                       'centers': [660]})
@@ -131,8 +131,8 @@ class TestPreprocessing(TestCase):
 
         image = imread("./resources/10_20190424_hi2_hi3_med2_rplN_4_MMStack.ome-2.tif")
         centers = preprocessing.get_gl_center_positions_in_growthlane_region(image)
-        self.assertEqual(18, centers[0])
-        self.assertEqual(125, centers[1])
+        self.assertAlmostEqual(18, centers[0], delta=5)
+        self.assertAlmostEqual(125, centers[1], delta=5)
 
         # image_with_channel_indicators = get_image_with_hlines(image, centers)
         # plt.imshow(image_with_channel_indicators, cmap="gray")
@@ -143,8 +143,8 @@ class TestPreprocessing(TestCase):
 
         image = imread("./resources/04_20180531_gluIPTG5uM_lac_1_MMStack.ome-2_channel_region.tif")
         centers = preprocessing.get_gl_center_positions_in_growthlane_region(image)
-        self.assertEqual(74, centers[1])
-        self.assertEqual(147, centers[2])
+        self.assertAlmostEqual(74, centers[1], delta=5)
+        self.assertAlmostEqual(147, centers[2], delta=5)
 
         # image_with_channel_indicators = get_image_with_lines(image, centers)
         # plt.imshow(image_with_channel_indicators, cmap="gray")
