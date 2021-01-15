@@ -5,7 +5,7 @@ The goal of this script is to test out the memory-mapped loading of OME-TIFF fil
 
 import matplotlib.pyplot as plt
 import numpy as np
-from MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
+from mmpreprocesspy.mmpreprocesspy.MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
 
 image_path = '/home/micha/Documents/01_work/git/MM_Testing/16_thomas_20201229_glc_lac_1/MMStack/20201229_glc_lac_1_MMStack.ome.tif'
 # image_path = '/scicore/home/nimwegen/GROUP/MM_Data/Thomas/20201229/20201229_glc_lac_1/20201229_glc_lac_1_MMStack.ome.tif'
