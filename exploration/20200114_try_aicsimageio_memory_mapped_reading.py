@@ -1,5 +1,9 @@
 from aicsimageio import AICSImage, imread_dask
 
+# Notes:
+# * To run this script you need to install: pip install aicsimageio
+# * I did not get this to run and in the end used tifffile package after I figured out how to use it.
+
 image_path = '/home/micha/Documents/01_work/git/MM_Testing/16_thomas_20201229_glc_lac_1/MMStack/20201229_glc_lac_1_MMStack.ome.tif'
 # image_path = '/scicore/home/nimwegen/GROUP/MM_Data/Thomas/20201229/20201229_glc_lac_1/20201229_glc_lac_1_MMStack.ome.tif'
 

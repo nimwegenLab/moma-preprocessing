@@ -41,8 +41,6 @@ conda install -y -c lightsource2-tag pystackreg
 conda install -y conda-build
 conda install -y scikit-image
 conda install -y tifffile
-pip install aicsimageio
-conda install -y -c bioconda python-bioformats
 conda install -y zarr
 conda install -y -c conda-forge imagecodecs
 conda install -y pandas

@@ -29,13 +29,12 @@ ax = ax.flatten()
 imgs = []
 for ax_index, frame_index in enumerate(range(start_frame, start_frame + max_index)):
     img = data.get_image(frame_index, channel_index, position_index)
-    # page_nr = data.calculate_page_nr(frame_index, channel_index, position_index)
     min = np.min(img)
     max = np.max(img)
     img = (img - min)/(max - min)
     ax[ax_index].imshow(img)
-    # ax[ax_index].set_title(f"page_nr: {page_nr}")
+    ax[ax_index].set_title(f"S/Pos: {position_index}, 'C': {channel_index}, T: {frame_index}")
     imgs.append(img)
 plt.show()
 
-print('test')
+print('DONE')
