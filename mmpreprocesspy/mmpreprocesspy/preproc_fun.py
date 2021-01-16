@@ -9,7 +9,7 @@ import tifffile
 import skimage.filters
 import skimage.measure
 import skimage.transform
-from mmpreprocesspy.MMdata import MMData
+from mmpreprocesspy.MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
 from mmpreprocesspy.image_preprocessing import ImagePreprocessor
 from mmpreprocesspy.moma_image_processing import MomaImageProcessor
 import cv2 as cv
@@ -32,7 +32,7 @@ def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index)
 
 def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxframe=None, flatfield_directory=None, dark_noise=None, gaussian_sigma=None, growthlane_length_threshold=0, main_channel_angle=None):
     # create a micro-manager image object
-    dataset = MMData(data_folder)
+    dataset = MicroManagerOmeTiffReader(data_folder)
 
     # define basic parameters
     colors = dataset.get_channels()
@@ -61,7 +61,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         # load and use flatfield data, if provided
         preprocessor = None
         if flatfield_directory is not None:
-            flatfield = MMData(flatfield_directory)
+            flatfield = MicroManagerOmeTiffReader(flatfield_directory)
             preprocessor = ImagePreprocessor(dataset, flatfield, dark_noise, gaussian_sigma)
             roi_shape = (dataset.get_image_height(), dataset.get_image_width())
             preprocessor.calculate_flatfields(roi_shape)
@@ -117,7 +117,7 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
 
             growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict = remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image_dict, kymo_image_dict, gl_image_path_dict)
 
-            color_image_stack = dataset.get_image_stack(frame=t, position=position_index)  # TODO: rename this to e.g. 'current_image_frame'
+            color_image_stack = dataset.get_image_stack(frame_index=t, position_index=position_index)  # TODO: rename this to e.g. 'current_image_frame'
 
             # correct images and append corrected and non-corrected images
             if preprocessor is not None:

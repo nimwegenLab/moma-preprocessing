@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import cv2
 import numpy as np
-from mmpreprocesspy.MMdata import MMData
+from mmpreprocesspy.MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
 from mmpreprocesspy.image_preprocessing import ImagePreprocessor
 
 import mmpreprocesspy.dev_auxiliary_functions as aux
@@ -16,8 +16,8 @@ class TestImagePreprocessor(TestCase):
         dark_noise = 100
         gaussian_sigma = 10
 
-        dataset = MMData(data_directory)
-        flatfield = MMData(flatfield_directory)
+        dataset = MicroManagerOmeTiffReader(data_directory)
+        flatfield = MicroManagerOmeTiffReader(flatfield_directory)
 
         preprocessor = ImagePreprocessor(dataset, flatfield, dark_noise, gaussian_sigma)
 
@@ -32,7 +32,7 @@ class TestImagePreprocessor(TestCase):
         images_to_correct = image_stack[:, :, 1:]
         processed_stack = preprocessor.process_image_stack(images_to_correct)
 
-        np.save('./resources/data__test_image_preprocessing_py/test__Process__expected_image_00.npy', processed_stack)  # this is for updating the expected data
+        # np.save('./resources/data__test_image_preprocessing_py/test__Process__expected_image_00.npy', processed_stack)  # this is for updating the expected data
         expected = np.load('resources/data__test_image_preprocessing_py/test__Process__expected_image_00.npy')
 
         self.assertTrue(np.all(expected == processed_stack))
