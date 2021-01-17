@@ -25,17 +25,17 @@ class TestPreprocessing(TestCase):
                                                  1183.0, 1290.0, 1396.0, 1503.0, 1609.0, 1716.0, 1822.0, 1929.0, 126.0,
                                                  232.0, 339.0, 445.0, 552.0, 658.0, 765.0, 871.0, 978.0, 1084.0, 1191.0,
                                                  1297.0, 1404.0, 1510.0, 1617.0, 1723.0, 1830.0, 1936.0]})
-        # tests.append({'name': 'dataset_16',
-        #               'path': "./resources/data__test_preprocessing_py/16_thomas__20201229_glc_lac_1_MMStack__Pos0__rotated.tif",
-        #               'angle': 0,
-        #               'glt': 200,
-        #               'centers': [538, 1343],
-        #               'dataregions': [[354, 910], [1160, 1751]],
-        #               # 'roi_vertical_positions': [139.0, 350.0, 561.0, 772.0, 983.0, 1194.0, 1405.0, 1616.0, 1827.0, 141.0,
-        #               #                          246.0, 352.0, 457.0, 563.0, 668.0, 774.0, 879.0, 985.0, 1090.0, 1196.0,
-        #               #                          1301.0, 1407.0, 1512.0, 1618.0, 1723.0, 1829.0, 1934.0]
-        #               'roi_vertical_positions': [[]]
-        #               })
+        tests.append({'name': 'dataset_16',
+                      'path': "./resources/data__test_preprocessing_py/16_thomas__20201229_glc_lac_1_MMStack__Pos0__rotated.tif",
+                      'angle': 0,
+                      'glt': 200,
+                      'centers': [538, 1343],
+                      'dataregions': [[354, 910], [1160, 1751]],
+                      'roi_vertical_positions': [137.0, 243.0, 349.0, 454.0, 560.0, 666.0, 771.0, 877.0, 983.0, 1088.0,
+                                                 1194.0, 1300.0, 1405.0, 1511.0, 1617.0, 1722.0, 1828.0, 1934.0, 142.0,
+                                                 247.0, 352.0, 458.0, 563.0, 668.0, 774.0, 879.0, 984.0, 1090.0, 1195.0,
+                                                 1300.0, 1406.0, 1511.0, 1616.0, 1722.0, 1827.0, 1932.0]
+                      })
         tests.append({'name': 'dataset_15',
                       'path': "./resources/data__test_preprocessing_py/15_lis__20201119_VNG1040_AB2h_2h_1_MMStack.ome.tif",
                       'angle': 90,
@@ -219,7 +219,7 @@ class TestPreprocessing(TestCase):
                 for ind, roi in enumerate(growthlane_rois):
                     expected = roi_vertical_positions[ind]
                     actual = roi.roi.center[1]
-                    self.assertAlmostEqual(expected, actual, region_center_tolerance)
+                    self.assertAlmostEqual(expected, actual, delta=region_center_tolerance)
 
     def show_gl_index_image(self, growthlane_rois, full_frame_image, figure_title=None):
         import cv2 as cv
