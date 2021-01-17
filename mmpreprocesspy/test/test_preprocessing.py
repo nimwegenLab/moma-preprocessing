@@ -15,6 +15,16 @@ class TestPreprocessing(TestCase):
 
     def get_tests__test__get_all_growthlane_rois(self):
         tests = []
+        tests.append({'name': 'dataset_17',
+                      'path': "./resources/data__test_preprocessing_py/17_lis__20201218_VNG40_AB6min_2h_1_1_MMStack.ome.tif",
+                      'angle': 90,
+                      'glt': 200,
+                      'centers': [538, 1343],
+                      'dataregions': [[317, 966], [1211, 1781]],
+                      'roi_vertical_positions': [118.0, 225.0, 331.0, 438.0, 544.0, 651.0, 757.0, 864.0, 970.0, 1077.0,
+                                                 1183.0, 1290.0, 1396.0, 1503.0, 1609.0, 1716.0, 1822.0, 1929.0, 126.0,
+                                                 232.0, 339.0, 445.0, 552.0, 658.0, 765.0, 871.0, 978.0, 1084.0, 1191.0,
+                                                 1297.0, 1404.0, 1510.0, 1617.0, 1723.0, 1830.0, 1936.0]})
         # tests.append({'name': 'dataset_16',
         #               'path': "./resources/data__test_preprocessing_py/16_thomas__20201229_glc_lac_1_MMStack__Pos0__rotated.tif",
         #               'angle': 0,
@@ -201,7 +211,7 @@ class TestPreprocessing(TestCase):
                 growthlane_rois = preprocessing.rotate_rois(imdata, growthlane_rois, 0)
                 growthlane_rois = preprocessing.remove_rois_not_fully_in_image(imdata, growthlane_rois)
 
-                if not test['roi_vertical_positions'][0]:   # output information for setting up test, if test assert-data is not yet fully defined
+                if not test['roi_vertical_positions']:   # output information for setting up test, if test assert-data is not yet fully defined
                     print(f"'roi_vertical_positions': {[roi.roi.center[1] for roi in growthlane_rois]}")
                     self.show_gl_index_image(growthlane_rois, imdata, figure_title=test['name'])
 
@@ -238,6 +248,11 @@ class TestPreprocessing(TestCase):
 
     def get_tests__test__find_channel_regions(self):
         tests = []
+        tests.append({'name': 'dataset_17',
+                      'path': "./resources/data__test_preprocessing_py/17_lis__20201218_VNG40_AB6min_2h_1_1_MMStack.ome.tif",
+                      'angle': 90,
+                      'glt': 200,
+                      'centers': [435.0, 1415.0]})
         tests.append({'name': 'dataset_16',
                       'path': "./resources/data__test_preprocessing_py/16_thomas__20201229_glc_lac_1_MMStack__Pos0__rotated.tif",
                       'angle': 0,
@@ -336,13 +351,15 @@ class TestPreprocessing(TestCase):
                 imdata = skimage.transform.rotate(imdata, rotation_angle)
                 region_list = preprocessing.find_channel_regions(imdata, use_smoothing=True, minimum_required_growthlane_length=growthlane_length_threshold)
 
-                # if test['name'] == 'dataset_14' or test['name'] == 'dataset_16':
-                #     plt.imshow(imdata, cmap='gray')
-                #     for ind, region in enumerate(region_list):
-                #         plt.axvline(region.start, color='r')
-                #         plt.axvline(region.end, color='g')
-                #     plt.title(test['name'])
-                #     plt.show()
+                if not region_centers:  # output needed data for asserts, if it is not defined
+                    res = [region.start + region.width/2 for region in region_list]
+                    print(f"'centers': {res}")
+                    plt.imshow(imdata, cmap='gray')
+                    for ind, region in enumerate(region_list):
+                        plt.axvline(region.start, color='r')
+                        plt.axvline(region.end, color='g')
+                    plt.title(test['name'])
+                    plt.show()
 
                 for ind, region in enumerate(region_list):
                     expected = region_centers[ind]
