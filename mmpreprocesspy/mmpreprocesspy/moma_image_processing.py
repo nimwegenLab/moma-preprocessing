@@ -42,8 +42,6 @@ class MomaImageProcessor(object):
     def process_image(self):
         self.rotated_image, self.main_channel_angle, self.channel_centers, self.growthlane_rois = preprocessing.process_image(
             self.image, self.growthlane_length_threshold, main_channel_angle=self.main_channel_angle)
-        self.rotate_rois()
-        self.remove_rois_not_fully_in_image()
         self.reset_growthlane_roi_ids()
         self.get_image_registration_template()
 
@@ -51,24 +49,6 @@ class MomaImageProcessor(object):
         self.growthlane_rois = sorted(self.growthlane_rois, key=operator.attrgetter("id"))  # make sure that the GLs are sorted by ID
         for new_id, roi in enumerate(self.growthlane_rois):
             roi.id = new_id
-
-    def remove_rois_not_fully_in_image(self):
-        """
-        This method removes ROI that do not lie fully inside the image.
-        :return:
-        """
-        inds = list(range(len(self.growthlane_rois)))
-        inds.reverse()
-        for ind in inds:
-            gl_roi = self.growthlane_rois[ind]
-            if not gl_roi.roi.is_inside_image(self.image):
-                del self.growthlane_rois[ind]
-
-
-    def rotate_rois(self):
-        rotation_center = (np.int0(self.image.shape[1]/2), np.int0(self.image.shape[0]/2))
-        for growthlane_roi in self.growthlane_rois:
-            growthlane_roi.roi.rotate(rotation_center, -self.main_channel_angle)
 
     def get_image_registration_template(self):
         self._image_for_registration = self.image.copy()

@@ -27,8 +27,31 @@ def process_image(image, growthlane_length_threshold=0, main_channel_angle=None)
     image_rot = skimage.transform.rotate(image, angle, cval=0)
     region_list = find_channel_regions(image_rot, use_smoothing=True, minimum_required_growthlane_length=growthlane_length_threshold)
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rot, region_list)
+    growthlane_rois = rotate_rois(image, growthlane_rois, main_channel_angle)
+    growthlane_rois = remove_rois_not_fully_in_image(image, growthlane_rois)
 
     return image_rot, main_channel_angle, channel_centers, growthlane_rois
+
+
+def rotate_rois(image, growthlane_rois, main_channel_angle):
+    rotation_center = (np.int0(image.shape[1]/2), np.int0(image.shape[0]/2))
+    for growthlane_roi in growthlane_rois:
+        growthlane_roi.roi.rotate(rotation_center, -main_channel_angle)
+    return growthlane_rois
+
+
+def remove_rois_not_fully_in_image(image, growthlane_rois):
+    """
+    This method removes ROI that do not lie fully inside the image.
+    :return:
+    """
+    inds = list(range(len(growthlane_rois)))
+    inds.reverse()
+    for ind in inds:
+        gl_roi = growthlane_rois[ind]
+        if not gl_roi.roi.is_inside_image(image):
+            del growthlane_rois[ind]
+    return growthlane_rois
 
 
 def filter_regions(region_list, minimum_required_growthlane_length):

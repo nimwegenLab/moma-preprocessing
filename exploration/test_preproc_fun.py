@@ -16,18 +16,20 @@ class TestPreproc_fun(TestCase):
         maxframe = 1
         dark_noise = 90
         gaussian_sigma = 5
+        growthlane_length_threshold = 300
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
 
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
-                                gaussian_sigma=gaussian_sigma)
+                                growthlane_length_threshold=growthlane_length_threshold, gaussian_sigma=gaussian_sigma)
 
         image_with_rois = tff.imread(os.path.join(directory_to_save, "Pos0_GL_index_initial.tiff"))
         self.show_image(image_with_rois)
 
     def test__dataset_15_no_flatfield(self):
         from mmpreprocesspy import preproc_fun
+        import tifffile as tff
 
         data_directory = self.test_data_base_path + '/15_lis_20201119_VNG1040_AB2h_2h_1/MMStack/'
         directory_to_save = self.test_data_base_path + '/15_lis_20201119_VNG1040_AB2h_2h_1/MMStack/result_no_flatfield/'
@@ -37,12 +39,17 @@ class TestPreproc_fun(TestCase):
         gaussian_sigma = 5
         main_channel_angle = 90
         # main_channel_angle = None
+        growthlane_length_threshold = 300
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
 
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
-                                gaussian_sigma=gaussian_sigma, main_channel_angle=main_channel_angle)
+                                growthlane_length_threshold=growthlane_length_threshold, gaussian_sigma=gaussian_sigma,
+                                main_channel_angle=main_channel_angle)
+
+        image_with_rois = tff.imread(os.path.join(directory_to_save, "Pos1_GL_index_initial.tiff"))
+        self.show_image(image_with_rois)
 
     def test__dataset_14_no_flatfield(self):
         from mmpreprocesspy import preproc_fun
@@ -54,12 +61,13 @@ class TestPreproc_fun(TestCase):
         maxframe = 1
         dark_noise = 90
         gaussian_sigma = 5
+        growthlane_length_threshold = 300
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
 
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
-                                gaussian_sigma=gaussian_sigma)
+                                growthlane_length_threshold=growthlane_length_threshold, gaussian_sigma=gaussian_sigma)
 
         image_with_rois = tff.imread(os.path.join(directory_to_save, "Pos0_GL_index_initial.tiff"))
         self.show_image(image_with_rois)
@@ -76,12 +84,13 @@ class TestPreproc_fun(TestCase):
         maxframe = 8
         dark_noise = None
         gaussian_sigma = None
+        growthlane_length_threshold = 300
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
 
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, minframe=minframe, maxframe=maxframe,
-                                growthlane_length_threshold=240, flatfield_directory=flatfield_directory,
+                                growthlane_length_threshold=growthlane_length_threshold, flatfield_directory=flatfield_directory,
                                 dark_noise=dark_noise, gaussian_sigma=gaussian_sigma)
 
     def test__dataset_10_with_flatfield(self):
