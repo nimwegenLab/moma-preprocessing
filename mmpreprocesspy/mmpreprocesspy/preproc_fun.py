@@ -34,7 +34,7 @@ def get_gl_folder_path(result_base_path, indp, gl_index):
     :param gl_index:
     :return:
     """
-    return get_position_folder_path(result_base_path, indp) + '/GL' + str(
+    return get_position_folder_path(result_base_path, indp) + '/Pos' + str(indp) + '_GL' + str(
         gl_index)
 
 def get_gl_tiff_path(result_base_path, base_name, indp, gl_index):
@@ -50,7 +50,7 @@ def get_gl_tiff_path(result_base_path, base_name, indp, gl_index):
     return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '.tiff'
 
 
-def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index):
+def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index):
     """
     Return path to the kymo-graph image-stack.
 
@@ -61,9 +61,8 @@ def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index)
     :param color_index:
     :return:
     """
-    gl_index = calculate_gl_output_index(gl_index)
-    return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_Col' + str(
-        color_index) + '_kymo.tiff'
+
+    return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_kymo.tiff'
 
 
 def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxframe=None, flatfield_directory=None, dark_noise=None, gaussian_sigma=None, growthlane_length_threshold=0, main_channel_angle=None):
@@ -187,10 +186,10 @@ def get_gl_image_stacks(growthlane_rois, nr_of_timesteps, nr_of_color_channels, 
     return gl_image_stacks
 
 
-def get_kymo_image_stacks(growthlane_rois, nr_of_timesteps, nr_of_color_channels, gl_image_path_dict):
+def get_kymo_image_stacks(growthlane_rois, nr_of_timesteps, nr_of_color_channels, kymo_image_path_dict):
     kymo_image_stacks = {}
     for gl_roi in growthlane_rois:
-        image_path = gl_image_path_dict[gl_roi.id]
+        image_path = kymo_image_path_dict[gl_roi.id]
         kymo_image_stacks[gl_roi.id] = initialize_kymo_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, image_path)
     return kymo_image_stacks
 
@@ -205,16 +204,12 @@ def get_gl_image_image_paths(growthlane_rois, folder_to_save, base_name, positio
 def get_kymo_image_image_paths(growthlane_rois, folder_to_save, base_name, position_index):
     kymo_image_paths = {}
     for gl_roi in growthlane_rois:
-        kymo_image_paths[gl_roi.id] =  get_kymo_tiff_path_2(folder_to_save, base_name, position_index, calculate_gl_output_index(gl_roi.id))
+        kymo_image_paths[gl_roi.id] = get_kymo_tiff_path(folder_to_save, base_name, position_index, calculate_gl_output_index(gl_roi.id))
     return kymo_image_paths
 
 
 def calculate_gl_output_index(gl_id):
     return gl_id + 1  # start GL indexing with 1 to be compatible with legacy preprocessing
-
-def get_kymo_tiff_path_2(result_base_path, base_name, indp, gl_index):
-    return result_base_path + '/' + 'Pos' + str(indp) + '/GL' + str(
-        gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_kymo.tiff'
 
 
 def translate_gl_rois(growthlane_rois, shift_x_y):

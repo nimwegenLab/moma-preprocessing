@@ -298,13 +298,6 @@ class TestPreproc_fun(TestCase):
         print(gl_file_path)
         print(os.path.dirname(gl_file_path))
 
-    def test__get_kymo_tiff_path(self):
-        from mmpreprocesspy import preproc_fun
-
-        kymo_file_path = preproc_fun.get_kymo_tiff_path('/path/to/file', 'experiment_name', '1', '5', '0')
-        print(kymo_file_path)
-        print(os.path.dirname(kymo_file_path))
-
     def show_image(self, imdata):
         import matplotlib.pyplot as plt
 
