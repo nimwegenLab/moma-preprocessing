@@ -124,6 +124,7 @@ def extend_region_at_mothercell(rotated_image, region, region_extension_length =
 
 
 def get_growthlane_periodicity(growthlane_region_image):
+    from scipy.ndimage.filters import uniform_filter1d
     '''
     Determine the periodicity of the growthlanes and return it. It does so by calculating the average distance between
     the `number_of_peaks` of highest peaks.
@@ -137,13 +138,19 @@ def get_growthlane_periodicity(growthlane_region_image):
 
     projected_image_intensity = np.sum(growthlane_region_image, axis=1)
     projected_image_intensity_zero_mean = projected_image_intensity - np.mean(projected_image_intensity)
-    cross_corr = np.correlate(projected_image_intensity_zero_mean, projected_image_intensity_zero_mean, 'same')
+    auto_correlation = np.correlate(projected_image_intensity_zero_mean, projected_image_intensity_zero_mean, 'same')
+    auto_correlation = auto_correlation / np.max(
+        auto_correlation)  # normalize the auto-correlation function, so that we can use an absolut prominence of 0.5
 
-    peak_inds = find_peaks(cross_corr, distance=min_distance_between_peaks)[0]
-    peak_vals = cross_corr[peak_inds]
+    peak_inds = find_peaks(auto_correlation, prominence=0.5, distance=min_distance_between_peaks)[0]
+    peak_vals = auto_correlation[peak_inds]
 
-    peak_inds_sorted = [x for _, x in sorted(zip(peak_vals, peak_inds), key=lambda pair: pair[0])]
-    periodicity = np.mean(np.diff(sorted(peak_inds_sorted[-number_of_peaks:])))
+    peak_ind = np.argmax(peak_vals)
+    start_ind = peak_ind - int(number_of_peaks / 2)
+    end_ind = peak_ind + int(number_of_peaks / 2) + 1
+    selected_peak_inds = peak_inds[start_ind:end_ind]  # get `number_of_peaks` around the center peak with shift=0 and value=1
+    periodicity = np.mean(np.diff(selected_peak_inds))
+
     return periodicity
 
 

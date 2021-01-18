@@ -185,7 +185,7 @@ class TestPreprocessing(TestCase):
             rotation_angle = test['angle']
             growthlane_length_threshold = test['glt']
             region_centers = test['centers']
-            roi_vertical_positions = test['roi_vertical_positions']
+            expected_vertical_positions = test['roi_vertical_positions']
 
             imdata = tff.imread(path)
             imdata = skimage.transform.rotate(imdata, rotation_angle)
@@ -215,11 +215,21 @@ class TestPreprocessing(TestCase):
                     print(f"'roi_vertical_positions': {[roi.roi.center[1] for roi in growthlane_rois]}")
                     self.show_gl_index_image(growthlane_rois, imdata, figure_title=test['name'])
 
-                # ASSERT
+                actual_vertical_positions = [roi.roi.center[1] for roi in growthlane_rois]
+
+                # ASSERTS
+                actual_periodicity = self.calculate_periodicty(actual_vertical_positions)
+                expected_periodicity = self.calculate_periodicty(expected_vertical_positions)
+
+                self.assertAlmostEqual(expected_periodicity, actual_periodicity, delta=3)
+
                 for ind, roi in enumerate(growthlane_rois):
-                    expected = roi_vertical_positions[ind]
+                    expected = expected_vertical_positions[ind]
                     actual = roi.roi.center[1]
                     self.assertAlmostEqual(expected, actual, delta=region_center_tolerance)
+
+    def calculate_periodicty(self, positions):
+        return np.mean(np.diff(positions))
 
     def show_gl_index_image(self, growthlane_rois, full_frame_image, figure_title=None):
         import cv2 as cv
