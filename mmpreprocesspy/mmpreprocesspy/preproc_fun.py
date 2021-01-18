@@ -16,17 +16,53 @@ import cv2 as cv
 
 
 def get_position_folder_path(result_base_path, indp):
+    """
+    Return the path to the position folder containing the growthlane folders.
+
+    :param result_base_path:
+    :param indp:
+    :return:
+    """
     return result_base_path + '/' + 'Pos' + str(indp) + '/'
 
+def get_gl_folder_path(result_base_path, indp, gl_index):
+    """
+    Return path to the folder containing the growthlane and kymo image stacks.
+
+    :param result_base_path:
+    :param indp:
+    :param gl_index:
+    :return:
+    """
+    return get_position_folder_path(result_base_path, indp) + '/GL' + str(
+        gl_index)
+
 def get_gl_tiff_path(result_base_path, base_name, indp, gl_index):
-    return result_base_path + '/' + 'Pos' + str(indp) + '/GL' + str(
-        gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '.tiff'
+    """
+    Return path to the growthlane image stack.
+
+    :param result_base_path:
+    :param base_name:
+    :param indp:
+    :param gl_index:
+    :return:
+    """
+    return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '.tiff'
 
 
 def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index, color_index):
+    """
+    Return path to the kymo-graph image-stack.
+
+    :param result_base_path:
+    :param base_name:
+    :param indp:
+    :param gl_index:
+    :param color_index:
+    :return:
+    """
     gl_index = calculate_gl_output_index(gl_index)
-    return result_base_path + '/' + 'Pos' + str(indp) + '/GL' + str(
-        gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_Col' + str(
+    return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_Col' + str(
         color_index) + '_kymo.tiff'
 
 
