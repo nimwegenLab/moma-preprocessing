@@ -36,7 +36,7 @@ class TestPreproc_fun(TestCase):
         data_directory = self.test_data_base_path + '/16_thomas_20201229_glc_lac_1/MMStack/'
         directory_to_save = self.test_data_base_path + '/16_thomas_20201229_glc_lac_1/MMStack/result_no_flatfield/'
         positions = [0]
-        maxframe = 1
+        maxframe = 20
         dark_noise = 90
         gaussian_sigma = 5
         growthlane_length_threshold = 300
