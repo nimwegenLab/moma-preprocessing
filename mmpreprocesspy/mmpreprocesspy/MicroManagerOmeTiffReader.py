@@ -94,7 +94,7 @@ class MicroManagerOmeTiffReader(object):
 
             for channel_index in range(image_stack_current.shape[2]):
                 if np.all(image_stack_current[:,:,channel_index] == image_stack_previous[:,:,channel_index]):
-                    image_stack_current[:, :, channel_index] = np.zeros_like(image_stack_current[:, :, channel_index])
+                    image_stack_current[:, :, channel_index] = np.nan
             return image_stack_current
         else:
             raise ValueError('frame_index cannot be negative')
