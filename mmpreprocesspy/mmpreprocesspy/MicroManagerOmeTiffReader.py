@@ -53,6 +53,18 @@ class MicroManagerOmeTiffReader(object):
                        re.search('.*(MMStack).*ome.tif', f)]
         return image_files
 
+    def get_image_fast(self, frame=0, channel=0, plane=None, position=0):
+        """
+        This is to stay compatible with MMData.py
+
+        :param frame:
+        :param channel:
+        :param plane:
+        :param position:
+        :return:
+        """
+        return self.get_image(position, frame, channel)
+
     def get_image(self, position_index, frame_index, channel_index):
         """
         Get single image for the specified position, frame and channel.
@@ -69,19 +81,28 @@ class MicroManagerOmeTiffReader(object):
             return self._position_zarr[position_index][frame_index, :, :].astype(dtype=np.float).copy()
         return self._position_zarr[position_index][frame_index, channel_index].astype(dtype=np.float).copy()
 
-    def get_image_fast(self, frame=0, channel=0, plane=None, position=0):
+    def get_image_stack(self, position_index, frame_index):
         """
-        This is to stay compatible with MMData.py
+        Get image stack containing the different channels for the specified position and frame.
 
-        :param frame:
-        :param channel:
-        :param plane:
-        :param position:
+        :param position_index:
+        :param frame_index:
         :return:
         """
-        return self.get_image(position, frame, channel)
+        if frame_index == 0:
+            return self._get_image_stack_with_adapted_dimensions(position_index, frame_index)
+        elif frame_index > 0:
+            image_stack_current = self._get_image_stack_with_adapted_dimensions(position_index, frame_index)
+            image_stack_previous = self._get_image_stack_with_adapted_dimensions(position_index, frame_index - 1)
 
-    def get_image_stack(self, position_index, frame_index):
+            for channel_index in range(image_stack_current.shape[2]):
+                if np.all(image_stack_current[:,:,channel_index] == image_stack_previous[:,:,channel_index]):
+                    image_stack_current[:, :, channel_index] = np.zeros_like(image_stack_current[:, :, channel_index])
+            return image_stack_current
+        else:
+            raise ValueError('frame_index cannot be negative')
+
+    def _get_image_stack_with_adapted_dimensions(self, position_index, frame_index):
         """
         Get image stack containing the different channels for the specified position and frame.
 
