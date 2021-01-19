@@ -74,12 +74,9 @@ class MicroManagerOmeTiffReader(object):
         :param channel_index:
         :return:
         """
-        axes = self._position_series[position_index].axes
-        if axes == 'YX':
-            return self._position_zarr[position_index][:, :].astype(dtype=np.float).copy()
-        if axes == 'IYX':
-            return self._position_zarr[position_index][frame_index, :, :].astype(dtype=np.float).copy()
-        return self._position_zarr[position_index][frame_index, channel_index].astype(dtype=np.float).copy()
+        image_stack = self.get_image_stack(position_index, frame_index)
+        channel_image = image_stack[:, :, channel_index]
+        return channel_image
 
     def get_image_stack(self, position_index, frame_index):
         """
@@ -114,6 +111,11 @@ class MicroManagerOmeTiffReader(object):
             image_stack = self._position_zarr[position_index][frame_index, :].astype(dtype=np.float).copy()
             image_stack = np.expand_dims(image_stack, 2)  # return image only has 2 dimensions (no color); append color axis as it is expected by the preprocessing algorithm
             return image_stack
+        elif self._position_series[position_index].axes == 'YX':
+            image_stack = self._position_zarr[position_index][:, :].astype(dtype=np.float).copy()  # position contains only one frame, so ignore `frame_index`
+            image_stack = np.expand_dims(image_stack, 2)  # return image only has 2 dimensions (no color); append color axis as it is expected by the preprocessing algorithm
+            return image_stack
+            pass
         else:
             image_stack = self._position_zarr[position_index][frame_index, :].astype(dtype=np.float).copy()
             return np.moveaxis(image_stack, 0, -1)
