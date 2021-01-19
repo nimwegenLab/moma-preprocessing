@@ -65,6 +65,8 @@ class MicroManagerOmeTiffReader(object):
         axes = self._position_series[position_index].axes
         if axes == 'YX':
             return self._position_zarr[position_index][:, :].astype(dtype=np.float).copy()
+        if axes == 'IYX':
+            return self._position_zarr[position_index][frame_index, :, :].astype(dtype=np.float).copy()
         return self._position_zarr[position_index][frame_index, channel_index].astype(dtype=np.float).copy()
 
     def get_image_fast(self, frame=0, channel=0, plane=None, position=0):
@@ -87,8 +89,13 @@ class MicroManagerOmeTiffReader(object):
         :param frame_index:
         :return:
         """
-        image_stack = self._position_zarr[position_index][frame_index, :].astype(dtype=np.float).copy()
-        return np.moveaxis(image_stack, 0, -1)
+        if self._position_series[position_index].axes == 'IYX':
+            image_stack = self._position_zarr[position_index][frame_index, :].astype(dtype=np.float).copy()
+            image_stack = np.expand_dims(image_stack, 2)  # return image only has 2 dimensions (no color); append color axis as it is expected by the preprocessing algorithm
+            return image_stack
+        else:
+            image_stack = self._position_zarr[position_index][frame_index, :].astype(dtype=np.float).copy()
+            return np.moveaxis(image_stack, 0, -1)
 
     def get_channels(self):
         """
