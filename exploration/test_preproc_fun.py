@@ -131,14 +131,15 @@ class TestPreproc_fun(TestCase):
         maxframe = 8
         dark_noise = None
         gaussian_sigma = None
-        growthlane_length_threshold = 300
+        growthlane_length_threshold = 200
+        main_channel_angle = 0
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
 
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, minframe=minframe, maxframe=maxframe,
                                 growthlane_length_threshold=growthlane_length_threshold, flatfield_directory=flatfield_directory,
-                                dark_noise=dark_noise, gaussian_sigma=gaussian_sigma)
+                                main_channel_angle=main_channel_angle, dark_noise=dark_noise, gaussian_sigma=gaussian_sigma)
 
     def test__dataset_10_with_flatfield(self):
         from mmpreprocesspy import preproc_fun

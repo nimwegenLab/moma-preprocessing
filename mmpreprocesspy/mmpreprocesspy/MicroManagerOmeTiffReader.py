@@ -116,6 +116,9 @@ class MicroManagerOmeTiffReader(object):
             image_stack = np.expand_dims(image_stack, 2)  # return image only has 2 dimensions (no color); append color axis as it is expected by the preprocessing algorithm
             return image_stack
             pass
+        elif self._position_series[position_index].axes == 'CYX':
+            image_stack = self._position_zarr[position_index][:, :, :].astype(dtype=np.float).copy()
+            return np.moveaxis(image_stack, 0, -1)
         else:
             image_stack = self._position_zarr[position_index][frame_index, :].astype(dtype=np.float).copy()
             return np.moveaxis(image_stack, 0, -1)
