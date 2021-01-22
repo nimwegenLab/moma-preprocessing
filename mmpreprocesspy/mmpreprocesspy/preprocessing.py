@@ -24,13 +24,13 @@ def process_image(image, growthlane_length_threshold=0, main_channel_angle=None)
     main_channel_angle += angle
 
     # recalculate channel region boundary on rotated image
-    image_rot = skimage.transform.rotate(image, angle, cval=0)
-    region_list = find_channel_regions(image_rot, use_smoothing=True, minimum_required_growthlane_length=growthlane_length_threshold)
-    growthlane_rois, channel_centers = get_all_growthlane_rois(image_rot, region_list)
+    image_rotated = skimage.transform.rotate(image, angle, cval=0)
+    region_list = find_channel_regions(image_rotated, use_smoothing=True, minimum_required_growthlane_length=growthlane_length_threshold)
+    growthlane_rois, channel_centers = get_all_growthlane_rois(image_rotated, region_list)
     growthlane_rois = rotate_rois(image, growthlane_rois, main_channel_angle)
     growthlane_rois = remove_rois_not_fully_in_image(image, growthlane_rois)
 
-    return image_rot, main_channel_angle, channel_centers, growthlane_rois
+    return image_rotated, main_channel_angle, channel_centers, growthlane_rois
 
 
 def rotate_rois(image, growthlane_rois, main_channel_angle):
