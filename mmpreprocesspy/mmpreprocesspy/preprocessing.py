@@ -290,6 +290,64 @@ def find_rotation(image):
     return angle
 
 
+def find_channel_regions_using_fourierspace(image, threshold_factor=None, use_smoothing=False, minimum_required_growthlane_length=0):
+    calculate_relative_peak_values(image)
+    pass
+
+def calculate_relative_peak_values(image_orig):
+    image = image_orig.copy()
+    image = image - np.mean(image, axis=0)
+
+    if is_debugging():
+        # compare original image and manipulated on
+        import matplotlib.pyplot as plt
+        plt.imshow(image_orig)
+        plt.show()
+        plt.imshow(image)
+        plt.show()
+
+
+    vertical_ft = np.zeros_like(image, dtype=complex)
+    for col in range(image.shape[1]):
+        # image[:, col] -= np.mean(image, axis=0)
+        vertical_ft[:, col] = np.fft.fft(image[:, col])
+
+    spectral_power = np.abs(np.power(vertical_ft, 2))
+
+    if is_debugging():
+        # plot max value in the range of expected peak position
+        plt.plot(spectral_power[19,:])
+        plt.show()
+
+        plt.plot(spectral_power[19,:]/np.sum(spectral_power, axis=0))
+        plt.show()
+
+    if is_debugging():
+        # plot power spectrum at different positions of the channel
+        import matplotlib.pyplot as plt
+        positions = [100, 600, 1000]
+        colors = ['r','g', 'b', 'c']
+
+        fig, ax = plt.subplots(2, 1)
+        ax[0].imshow(np.log(spectral_power))
+        for ind, col_ind in enumerate(positions):
+            ax[0].axvline(col_ind, color=colors[ind])
+            # ax[1].plot(np.log(spectral_power[:, col_ind]), color=colors[ind])
+            ax[1].plot(spectral_power[0:50, col_ind], color=colors[ind])
+        # ax[1].set_xlim([15,25])
+        # ax[1].set_ylim([0, 200])
+        ax[1].axvline(19)
+        plt.show()
+
+
+    if is_debugging():
+        import matplotlib.pyplot as plt
+        # show spectrum
+        plt.imshow(np.log(spectral_power))
+        plt.show()
+
+    pass
+
 def find_channel_regions(image, threshold_factor=None, use_smoothing=False, minimum_required_growthlane_length=0):
     region_mask = find_plateaus(image)
     region_list = get_regions_from_mask(region_mask)

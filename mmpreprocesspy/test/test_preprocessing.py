@@ -377,6 +377,44 @@ class TestPreprocessing(TestCase):
                     self.assertAlmostEqual(expected, actual, delta=region_center_tolerance)
 
 
+    def test__find_channel_regions_using_fourierspace(self):
+        import tifffile as tff
+        from mmpreprocesspy import preprocessing
+        import matplotlib.pyplot as plt
+        import skimage
+
+        region_center_tolerance = 10
+
+        tests = self.get_tests__test__find_channel_regions()
+
+        for test in tests:
+            path = test['path']
+            rotation_angle = test['angle']
+            growthlane_length_threshold = test['glt']
+            region_centers = test['centers']
+
+            if test['name'] == 'dataset_16':
+                with self.subTest(test=test['name']):
+                    imdata = tff.imread(path)
+                    imdata = skimage.transform.rotate(imdata, rotation_angle)
+                    region_list = preprocessing.find_channel_regions_using_fourierspace(imdata, use_smoothing=True, minimum_required_growthlane_length=growthlane_length_threshold)
+
+                    # if not region_centers:  # output needed data for asserts, if it is not defined
+                    res = [region.start + region.width/2 for region in region_list]
+                    print(f"'centers': {res}")
+                    plt.imshow(imdata, cmap='gray')
+                    for ind, region in enumerate(region_list):
+                        plt.axvline(region.start, color='r')
+                        plt.axvline(region.end, color='g')
+                    plt.title(test['name'])
+                    plt.show()
+
+                    for ind, region in enumerate(region_list):
+                        expected = region_centers[ind]
+                        actual = region_horizontal_center = region.start + region.width/2
+                        self.assertAlmostEqual(expected, actual, delta=region_center_tolerance)
+
+
     def test__find_channels_in_region_dataset_10(self):
         from mmpreprocesspy import preprocessing
 
