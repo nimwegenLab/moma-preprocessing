@@ -30,7 +30,7 @@ def process_image(image, growthlane_length_threshold=0, main_channel_angle=None)
     growthlane_rois = rotate_rois(image, growthlane_rois, main_channel_angle)
     growthlane_rois = remove_rois_not_fully_in_image(image, growthlane_rois)
 
-    return image_rotated, main_channel_angle, channel_centers, growthlane_rois
+    return image_rotated, main_channel_angle, channel_centers, growthlane_rois, region_list
 
 
 def rotate_rois(image, growthlane_rois, main_channel_angle):

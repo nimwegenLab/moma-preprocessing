@@ -65,7 +65,7 @@ def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index):
     return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_kymo.tiff'
 
 
-def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxframe=None, flatfield_directory=None, dark_noise=None, gaussian_sigma=None, growthlane_length_threshold=0, main_channel_angle=None):
+def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxframe=None, flatfield_directory=None, dark_noise=None, gaussian_sigma=None, growthlane_length_threshold=0, main_channel_angle=None, normalization_mode=None):
     # create a micro-manager image object
     dataset = MicroManagerOmeTiffReader(data_folder)
 
@@ -144,6 +144,14 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         for frame_index, t in enumerate(range(minframe, maxframe)):
             image = dataset.get_image_fast(channel=phase_channel_index, frame=t, position=position_index)
             imageProcessor.determine_image_shift(image)
+
+            if normalization_mode == 1:
+                PhC_image = color_image_stack[:, :, 0]
+                # imageProcessor.normalize_image(PhC_image)
+                norm_ranges = imageProcessor.get_normalization_ranges(PhC_image, box_pts=11)
+
+                pass
+
             growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
 
             print(f"Shift of frame {t}: {imageProcessor.horizontal_shift:.2}, {imageProcessor.vertical_shift:.2}")
