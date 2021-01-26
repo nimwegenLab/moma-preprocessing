@@ -216,12 +216,14 @@ class TestPreproc_fun(TestCase):
         maxframe = 8
         dark_noise = 90
         gaussian_sigma = 5
+        growthlane_length_threshold = 200
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
 
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, minframe=minframe, maxframe=maxframe, flatfield_directory=flatfield_directory, dark_noise=dark_noise,
-                                gaussian_sigma=gaussian_sigma)
+                                gaussian_sigma=gaussian_sigma,
+                                growthlane_length_threshold=growthlane_length_threshold)
 
         self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
                                           title='test__dataset_12_with_flatfield')
@@ -235,12 +237,14 @@ class TestPreproc_fun(TestCase):
         maxframe = 8
         dark_noise = 90
         gaussian_sigma = 5
+        growthlane_length_threshold = 200
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
 
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
-                                gaussian_sigma=gaussian_sigma)
+                                gaussian_sigma=gaussian_sigma,
+                                growthlane_length_threshold=growthlane_length_threshold)
 
         self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
                                           title='test__dataset_12_no_flatfield')
@@ -259,7 +263,7 @@ class TestPreproc_fun(TestCase):
 
         preproc_fun.preproc_fun(data_directory, results_directory, positions=positions, maxframe=maxframe, growthlane_length_threshold=300)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(results_directory, f'Pos{positions[0]}_GL_index_initial.tiff'),
                                           title='test__dataset_11')
 
     def test__dataset_04(self):
@@ -269,14 +273,16 @@ class TestPreproc_fun(TestCase):
         directory_to_save = data_directory
         positions = [0]
         maxframe = 10
+        growthlane_length_threshold = 300
 
         results_directory = directory_to_save + '/result/'
         if os.path.isdir(results_directory):
             shutil.rmtree(results_directory)
 
-        preproc_fun.preproc_fun(data_directory, results_directory, positions=positions, maxframe=maxframe)
+        preproc_fun.preproc_fun(data_directory, results_directory, positions=positions, maxframe=maxframe,
+                                growthlane_length_threshold=growthlane_length_threshold)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(results_directory, f'Pos{positions[0]}_GL_index_initial.tiff'),
                                           title='test__dataset_04')
 
     def test__dataset_08(self):
@@ -286,14 +292,16 @@ class TestPreproc_fun(TestCase):
         directory_to_save = data_directory
         positions = [0]
         maxframe = 10
+        growthlane_length_threshold = 300
 
         results_directory = directory_to_save + '/result/'
         if os.path.isdir(results_directory):
             shutil.rmtree(results_directory)
 
-        preproc_fun.preproc_fun(data_directory, results_directory, positions=positions, maxframe=maxframe)
+        preproc_fun.preproc_fun(data_directory, results_directory, positions=positions, maxframe=maxframe,
+                                growthlane_length_threshold=growthlane_length_threshold)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(results_directory, f'Pos{positions[0]}_GL_index_initial.tiff'),
                                           title='test__dataset_08')
 
     def test__dataset_10(self):
@@ -307,15 +315,18 @@ class TestPreproc_fun(TestCase):
         maxframe = 8
         dark_noise = 90
         gaussian_sigma = 5
+        growthlane_length_threshold = 300
 
         results_directory = directory_to_save + '/result/'
         if os.path.isdir(results_directory):
             shutil.rmtree(results_directory)
 
-        preproc_fun.preproc_fun(data_directory, results_directory, positions, minframe=minframe, maxframe=maxframe, flatfield_directory=flatfield_directory, dark_noise=dark_noise,
-                                gaussian_sigma=gaussian_sigma)
+        preproc_fun.preproc_fun(data_directory, results_directory, positions, minframe=minframe, maxframe=maxframe,
+                                flatfield_directory=flatfield_directory, dark_noise=dark_noise,
+                                gaussian_sigma=gaussian_sigma,
+                                growthlane_length_threshold=growthlane_length_threshold)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(results_directory, f'Pos{positions[0]}_GL_index_initial.tiff'),
                                           title='test__dataset_10')
 
     def test__dataset_10__shift_is_determined_correctly(self):
@@ -332,13 +343,17 @@ class TestPreproc_fun(TestCase):
         maxframe = 610
         dark_noise = 90
         gaussian_sigma = 5
+        growthlane_length_threshold = 300
 
         results_directory = directory_to_save + '/result/'
         if os.path.isdir(results_directory):
             shutil.rmtree(results_directory)
 
-        preproc_fun.preproc_fun(data_directory, results_directory, positions, minframe=minframe, maxframe=maxframe, flatfield_directory=flatfield_directory, dark_noise=dark_noise,
-                                gaussian_sigma=gaussian_sigma)
+        preproc_fun.preproc_fun(data_directory, results_directory, positions, minframe=minframe, maxframe=maxframe,
+                                flatfield_directory=flatfield_directory,
+                                dark_noise=dark_noise,
+                                gaussian_sigma=gaussian_sigma,
+                                growthlane_length_threshold=growthlane_length_threshold)
 
     def test__get_gl_tiff_path(self):
         from mmpreprocesspy import preproc_fun
