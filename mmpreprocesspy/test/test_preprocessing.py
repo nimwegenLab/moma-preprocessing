@@ -193,7 +193,8 @@ class TestPreprocessing(TestCase):
             with self.subTest(test=test['name']):
                 if not test['dataregions'][0]:   # output information for setting up test, if test assert-data is not yet fully defined
                     region_list = preprocessing.find_channel_regions(imdata, use_smoothing=True,
-                                                                     minimum_required_growthlane_length=growthlane_length_threshold)
+                                                                     minimum_required_growthlane_length=growthlane_length_threshold,
+                                                                     roi_boundary_offset_at_mother_cell=20)
                     plt.imshow(imdata, cmap='gray')
                     for ind, region in enumerate(region_list):
                         plt.axvline(region.start, color='r')
@@ -368,7 +369,10 @@ class TestPreprocessing(TestCase):
             with self.subTest(test=test['name']):
                 imdata = tff.imread(path)
                 imdata = skimage.transform.rotate(imdata, rotation_angle)
-                region_list = preprocessing.find_channel_regions(imdata, use_smoothing=True, minimum_required_growthlane_length=growthlane_length_threshold)
+                region_list = preprocessing.find_channel_regions(imdata,
+                                                                 use_smoothing=True,
+                                                                 minimum_required_growthlane_length=growthlane_length_threshold,
+                                                                 roi_boundary_offset_at_mother_cell=20)
 
                 if not region_centers:  # output needed data for asserts, if it is not defined
                     res = [region.start + region.width/2 for region in region_list]
@@ -379,6 +383,15 @@ class TestPreprocessing(TestCase):
                         plt.axvline(region.end, color='g')
                     plt.title(test['name'])
                     plt.show()
+
+                if test['name'] == 'dataset_15':
+                    plt.imshow(imdata, cmap='gray')
+                    for ind, region in enumerate(region_list):
+                        plt.axvline(region.start, color='r')
+                        plt.axvline(region.end, color='g')
+                    plt.title(test['name'])
+                    plt.show()
+
 
                 for ind, region in enumerate(region_list):
                     expected = region_centers[ind]

@@ -65,7 +65,18 @@ def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index):
     return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_kymo.tiff'
 
 
-def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxframe=None, flatfield_directory=None, dark_noise=None, gaussian_sigma=None, growthlane_length_threshold=0, main_channel_angle=None):
+def preproc_fun(data_folder,
+                folder_to_save,
+                positions=None,
+                minframe=None,
+                maxframe=None,
+                flatfield_directory=None,
+                dark_noise=None,
+                gaussian_sigma=None,
+                growthlane_length_threshold=0,
+                main_channel_angle=None,
+                roi_boundary_offset_at_mother_cell=None):
+
     # create a micro-manager image object
     dataset = MicroManagerOmeTiffReader(data_folder)
 
@@ -81,8 +92,10 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
     if positions is None:
         nr_of_positions_in_data = len(dataset.get_position_names())
         positions = range(0, nr_of_positions_in_data)
-
     nrOfFrames = maxframe - minframe
+
+    if roi_boundary_offset_at_mother_cell is None:
+        roi_boundary_offset_at_mother_cell = 0
 
     # recover the basic experiment name
     base_name = dataset.get_first_tiff().split('.')[0]
@@ -115,6 +128,8 @@ def preproc_fun(data_folder, folder_to_save, positions=None, minframe=None, maxf
         imageProcessor.load_numpy_image_array(first_phc_image)
         imageProcessor.growthlane_length_threshold = growthlane_length_threshold
         imageProcessor.main_channel_angle = main_channel_angle
+        imageProcessor.roi_boundary_offset_at_mother_cell = roi_boundary_offset_at_mother_cell
+
         imageProcessor.process_image()
         channel_centers = imageProcessor.channel_centers
 

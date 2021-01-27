@@ -11,7 +11,7 @@ from skimage.filters import threshold_otsu
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
-def process_image(image, growthlane_length_threshold=0, main_channel_angle=None):
+def process_image(image, growthlane_length_threshold=0, main_channel_angle=None, roi_boundary_offset_at_mother_cell=0):
     if main_channel_angle == None:
         main_channel_angle = find_main_channel_orientation(image)
 
@@ -25,7 +25,9 @@ def process_image(image, growthlane_length_threshold=0, main_channel_angle=None)
 
     # recalculate channel region boundary on rotated image
     image_rotated = skimage.transform.rotate(image, angle, cval=0)
-    region_list = find_channel_regions(image_rotated, use_smoothing=True, minimum_required_growthlane_length=growthlane_length_threshold)
+    region_list = find_channel_regions(image_rotated, use_smoothing=True,
+                                       minimum_required_growthlane_length=growthlane_length_threshold,
+                                       roi_boundary_offset_at_mother_cell=roi_boundary_offset_at_mother_cell)
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rotated, region_list)
     growthlane_rois = rotate_rois(image, growthlane_rois, main_channel_angle)
     growthlane_rois = remove_rois_not_fully_in_image(image, growthlane_rois)
@@ -68,12 +70,12 @@ def filter_regions(region_list, minimum_required_growthlane_length):
     return new_region_list
 
 
-def refine_regions(rotated_image, region_list):
+def refine_regions(rotated_image, region_list, roi_boundary_offset_at_mother_cell=0):
     for region in region_list:
-        refine_region(rotated_image, region)
+        refine_region(rotated_image, region, roi_boundary_offset_at_mother_cell=roi_boundary_offset_at_mother_cell)
 
 
-def refine_region(rotated_image, region):
+def refine_region(rotated_image, region, roi_boundary_offset_at_mother_cell=0):
     """
     This method extends start and end-indexes of the channel areas, if necessary. It determines the maximum intensity in
     direction of the image columns in the channel region, which was determined using the FFT spectrum.
@@ -96,17 +98,17 @@ def refine_region(rotated_image, region):
     while np.any(projected_max_intensities[region.end:region.end + look_ahead_length] > threshold):
         region.end += 1
 
-    region = extend_region_at_mothercell(rotated_image, region)
+    region = extend_region_at_mothercell(rotated_image, region, roi_boundary_offset_at_mother_cell=roi_boundary_offset_at_mother_cell)
 
 
-def extend_region_at_mothercell(rotated_image, region, region_extension_length = 20, search_interval_length = 80):
+def extend_region_at_mothercell(rotated_image, region, roi_boundary_offset_at_mother_cell = 0, search_interval_length = 80):
     """
     This method figures out at what side of the region-interval the mother-cell is located.
     It then extends the region boundary in that direction by.
 
     :param rotated_image:
     :param region: region that will be extended
-    :param region_extension_length: the amount of pixels by which the region will be extended
+    :param roi_boundary_offset_at_mother_cell: the amount of pixels by which the region will be extended
     :param search_interval_length: length in pixel of the inteval for which we compare the summed intensities; in our images, the ROI image is brighter at the exit of the GL
     :return: the extended region
     """
@@ -116,9 +118,9 @@ def extend_region_at_mothercell(rotated_image, region, region_extension_length =
     sum_at_end = np.sum(projected_max_intensities[region.end - search_interval_length: region.end])
 
     if sum_at_start > sum_at_end:  # mother cell is located at region.end, so we extend there
-        region.end = region.end + region_extension_length
+        region.end = region.end + roi_boundary_offset_at_mother_cell
     elif sum_at_start < sum_at_end:  # mother cell is located at region.start, so we extend there
-        region.start = region.start - region_extension_length
+        region.start = region.start - roi_boundary_offset_at_mother_cell
 
     return region
 
@@ -290,11 +292,12 @@ def find_rotation(image):
     return angle
 
 
-def find_channel_regions(image, threshold_factor=None, use_smoothing=False, minimum_required_growthlane_length=0):
+def find_channel_regions(image, threshold_factor=None, use_smoothing=False, minimum_required_growthlane_length=0,
+                         roi_boundary_offset_at_mother_cell=0):
     region_mask = find_plateaus(image)
     region_list = get_regions_from_mask(region_mask)
     region_list = filter_regions(region_list, minimum_required_growthlane_length=minimum_required_growthlane_length)
-    refine_regions(image, region_list)
+    refine_regions(image, region_list, roi_boundary_offset_at_mother_cell=roi_boundary_offset_at_mother_cell)
     return region_list
 
 

@@ -78,19 +78,26 @@ class TestPreproc_fun(TestCase):
         data_directory = self.test_data_base_path + '/15_lis_20201119_VNG1040_AB2h_2h_1/MMStack/'
         directory_to_save = self.test_data_base_path + '/15_lis_20201119_VNG1040_AB2h_2h_1/MMStack/result_no_flatfield/'
         positions = [1]
-        maxframe = 1
+        maxframe = 3
         dark_noise = 90
         gaussian_sigma = 5
         main_channel_angle = 90
         # main_channel_angle = None
         growthlane_length_threshold = 300
+        roi_boundary_offset_at_mother_cell = 0
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
 
-        preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
-                                growthlane_length_threshold=growthlane_length_threshold, gaussian_sigma=gaussian_sigma,
-                                main_channel_angle=main_channel_angle)
+        preproc_fun.preproc_fun(data_directory,
+                                directory_to_save,
+                                positions,
+                                maxframe=maxframe,
+                                dark_noise=dark_noise,
+                                growthlane_length_threshold=growthlane_length_threshold,
+                                gaussian_sigma=gaussian_sigma,
+                                main_channel_angle=main_channel_angle,
+                                roi_boundary_offset_at_mother_cell=roi_boundary_offset_at_mother_cell)
 
         self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
                                           title='test__dataset_15_no_flatfield')

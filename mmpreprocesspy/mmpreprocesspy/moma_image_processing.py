@@ -30,6 +30,7 @@ class MomaImageProcessor(object):
         self._image_for_registration = None
         self._sr = StackReg(StackReg.TRANSLATION)
         self.growthlane_length_threshold = 0
+        self.roi_boundary_offset_at_mother_cell = 0
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -41,7 +42,8 @@ class MomaImageProcessor(object):
 
     def process_image(self):
         self.rotated_image, self.main_channel_angle, self.channel_centers, self.growthlane_rois = preprocessing.process_image(
-            self.image, self.growthlane_length_threshold, main_channel_angle=self.main_channel_angle)
+            self.image, self.growthlane_length_threshold, main_channel_angle=self.main_channel_angle,
+            roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
         self.reset_growthlane_roi_ids()
         self.get_image_registration_template()
 
