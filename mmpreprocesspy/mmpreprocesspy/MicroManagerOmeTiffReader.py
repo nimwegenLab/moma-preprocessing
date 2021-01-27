@@ -27,7 +27,6 @@ class MicroManagerOmeTiffReader(object):
         self.width = metadata['Width']
         self.channels = [c.strip(' ') for c in metadata['ChNames']]
         self.number_of_channels = len(self.channels)
-        self.number_of_frames = metadata['Frames']
         if 'InitialPositionList' in metadata:
             self._position_names = [c['Label'] for c in
                                     metadata['InitialPositionList']]  # this is for TIFF format from MicroManager 1
@@ -167,3 +166,12 @@ class MicroManagerOmeTiffReader(object):
 
         return self.tiff.filename
 
+    def get_number_of_frames(self):
+        """
+        Return the number of frames in the tiff,
+
+        :return: number of frames
+        """
+
+        position_index = 0
+        return self._position_zarr[position_index].shape[0]  # since all our our positions have the same number of frames, just return the number of frames for the first position.
