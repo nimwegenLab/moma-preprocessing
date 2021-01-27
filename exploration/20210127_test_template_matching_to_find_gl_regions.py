@@ -20,7 +20,7 @@ class TestPreproc_fun(TestCase):
 
         tests = self.get_tests__test__find_channel_regions()
 
-        for test in tests:
+        for test in [tests[0]]:
             path = os.path.join(test_data_base_path, test['path'])
             rotation_angle = test['angle']
             growthlane_length_threshold = test['glt']
@@ -106,6 +106,12 @@ class TestPreproc_fun(TestCase):
 
     def get_template_configs(self):
         configs = []
+        configs.append({'name': 'dataset_17',
+                        'template_path': './data/20210127_test_template_matching_to_find_gl_regions/16_thomas_20201229_glc_lac_1_MMStack.ome-1___template_v01_2.tif',
+                        'gl_regions': [[310, 860], [1120, 1690]],
+                        'first_gl_position': 95,
+                        'gl_spacing': 105.75,
+                        })
         configs.append({'name': 'dataset_16',
                         'template_path': './data/20210127_test_template_matching_to_find_gl_regions/16_thomas_20201229_glc_lac_1_MMStack.ome-1___template_v01.tif',
                         'gl_regions': [[310, 860], [1120, 1690]],
@@ -116,16 +122,16 @@ class TestPreproc_fun(TestCase):
 
     def get_tests__test__find_channel_regions(self):
         tests = []
+        tests.append({'name': 'dataset_17',
+                      'path': "./17_lis_20201218_VNG40_AB6min_2h_1_1/MMStack/20201218_VNG40_AB6min_2h_1_1_MMStack.ome.tif",
+                      'angle': 91,
+                      'glt': 200,
+                      'centers': [538, 1343]})
         tests.append({'name': 'dataset_16',
                       'path': "./16_thomas_20201229_glc_lac_1/MMStack/20201229_glc_lac_1_MMStack.ome.tif",
                       'angle': 90,
                       'glt': 200,
                       'centers': [435.0, 1415.0]})
-        # tests.append({'name': 'dataset_16',
-        #               'path': "./resources/data__test_preprocessing_py/16_thomas__20201229_glc_lac_1_MMStack__Pos0__rotated.tif",
-        #               'angle': 0,
-        #               'glt': 200,
-        #               'centers': [538, 1343]})
         # tests.append({'name': 'dataset_15',
         #               'path': "./resources/data__test_preprocessing_py/15_lis__20201119_VNG1040_AB2h_2h_1_MMStack.ome.tif",
         #               'angle': 90,
