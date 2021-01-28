@@ -44,9 +44,9 @@ class test_MicroManagerOmeTiffReader(TestCase):
                     for ind, periodicity in enumerate(periodicty_of_nonzero_frame):
                         channel_ind = channel_inds_with_missing_frames[ind]
                         if (frame_index % periodicity) != 0:
-                            self.assertTrue(not np.any(current_frame[:, :, channel_ind]), msg='image data is non-zero')  # frames that are multiples of periodicity should be non-zero
+                            self.assertTrue(np.all(np.isnan(current_frame[:, :, channel_ind])), msg='image data is not all NaN')  # frames that are not multiples of periodicity should all NaNs
                         else:
-                            self.assertTrue(np.any(current_frame[:, :, channel_ind]), msg='image data is zero')  # frames that are not multiples of periodicity should be zero
+                            self.assertFalse(np.any(np.isnan(current_frame[:, :, channel_ind])), msg='image data contains NaN')  # frames that are multiples of periodicity should not have NaN values
 
 
     def get_test_data___test__get_image_stack__returns_zero_images_repeating_frames(self):
