@@ -12,6 +12,7 @@ class TestPreproc_fun(TestCase):
         import matplotlib.pyplot as plt
         import skimage
         from skimage.feature import match_template
+        from skimage.transform import rotate
         import numpy as np
 
         test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
@@ -20,7 +21,7 @@ class TestPreproc_fun(TestCase):
 
         tests = self.get_tests__test__find_channel_regions()
 
-        for test in [tests[1]]:
+        for test in tests:
             path = os.path.join(test_data_base_path, test['path'])
             rotation_angle = test['angle']
             growthlane_length_threshold = test['glt']
@@ -39,18 +40,13 @@ class TestPreproc_fun(TestCase):
                     current_stack = dataset.get_image_stack(frame_index=frame_index,
                                                             position_index=position_index)
                     imdata = current_stack[:, :, 0]
-                    imdata = skimage.transform.rotate(imdata, rotation_angle)
+                    imdata = rotate(imdata, rotation_angle)
 
                     gl_regions = self.get_gl_regions(imdata, template_config)
 
                     # self.inspect_template_config(template_config)
 
-                    plt.imshow(min_max_normalize(imdata), cmap='gray', vmin=0, vmax=0.2)
-                    for region in gl_regions:
-                        plt.axvline(region.start, color='r', linewidth=0.5)
-                        plt.axvline(region.end, color='g', linewidth=0.5)
-                    plt.title(f"{test['name']}, position: {position_index}")
-                    plt.show()
+                    self.show_gl_regions_on_image(gl_regions, imdata, position_index, test)
 
                     # plt.imshow(imdata)
                     # plt.title(f"{test['name']}, position: {position_index}")
@@ -82,6 +78,16 @@ class TestPreproc_fun(TestCase):
                     # plt.show()
 
                     pass
+
+    def show_gl_regions_on_image(self, gl_regions, imdata, position_index, test):
+        import matplotlib.pyplot as plt
+
+        plt.imshow(min_max_normalize(imdata), cmap='gray', vmin=0, vmax=0.2)
+        for region in gl_regions:
+            plt.axvline(region.start, color='r', linewidth=0.5)
+            plt.axvline(region.end, color='g', linewidth=0.5)
+        plt.title(f"{test['name']}, position: {position_index}")
+        plt.show()
 
     def get_gl_regions(self, image, template_config):
         from skimage.feature import match_template
@@ -144,12 +150,6 @@ class TestPreproc_fun(TestCase):
                         'template_path': './data/20210127_test_template_matching_to_find_gl_regions/16_thomas_20201229_glc_lac_1_MMStack.ome-1___template_v01_2.tif',
                         'gl_regions': [[30, 565], [840, 1410]],
                         'first_gl_position': 52,
-                        'gl_spacing': 105.75,
-                        })
-        configs.append({'name': 'dataset_16',
-                        'template_path': './data/20210127_test_template_matching_to_find_gl_regions/16_thomas_20201229_glc_lac_1_MMStack.ome-1___template_v01.tif',
-                        'gl_regions': [[310, 860], [1120, 1690]],
-                        'first_gl_position': 95,
                         'gl_spacing': 105.75,
                         })
         return configs
