@@ -20,7 +20,7 @@ class TestPreproc_fun(TestCase):
 
         tests = self.get_tests__test__find_channel_regions()
 
-        for test in [tests[0]]:
+        for test in [tests[1]]:
             path = os.path.join(test_data_base_path, test['path'])
             rotation_angle = test['angle']
             growthlane_length_threshold = test['glt']
@@ -41,48 +41,69 @@ class TestPreproc_fun(TestCase):
                     imdata = current_stack[:, :, 0]
                     imdata = skimage.transform.rotate(imdata, rotation_angle)
 
-                    self.get_gl_regions(imdata, template_config)
-
-                    plt.imshow(imdata)
-                    plt.title(f"{test['name']}, position: {position_index}")
-                    plt.show()
-
-                    template_image = tff.imread(template_config['template_path'])
-
-                    # plt.imshow(template)
-                    # plt.show()
+                    gl_regions = self.get_gl_regions(imdata, template_config)
 
                     # self.inspect_template_config(template_config)
 
-                    normalized_cross_correlation = match_template(imdata, template_image, pad_input=True)
-
-                    plt.imshow(normalized_cross_correlation)
+                    plt.imshow(min_max_normalize(imdata), cmap='gray', vmin=0, vmax=0.2)
+                    for region in gl_regions:
+                        plt.axvline(region.start, color='r', linewidth=0.5)
+                        plt.axvline(region.end, color='g', linewidth=0.5)
                     plt.title(f"{test['name']}, position: {position_index}")
                     plt.show()
 
-                    plt.plot(np.mean(normalized_cross_correlation, axis=0), color='r', label='mean proj.')
-                    plt.plot(np.max(normalized_cross_correlation, axis=0), color='g', label='max proj.')
-                    plt.legend()
-                    plt.title(f"{test['name']}, position: {position_index}")
-                    plt.show()
-
-                    plt.plot(np.mean(normalized_cross_correlation, axis=1), color='r', label='mean proj.')
-                    plt.plot(np.max(normalized_cross_correlation, axis=1), color='g', label='max proj.')
-                    plt.legend()
-                    plt.title(f"{test['name']}, position: {position_index}")
-                    plt.show()
+                    # plt.imshow(imdata)
+                    # plt.title(f"{test['name']}, position: {position_index}")
+                    # plt.show()
+                    #
+                    # template_image = tff.imread(template_config['template_path'])
+                    #
+                    # # plt.imshow(template)
+                    # # plt.show()
+                    #
+                    # # self.inspect_template_config(template_config)
+                    #
+                    # normalized_cross_correlation = match_template(imdata, template_image, pad_input=True)
+                    #
+                    # plt.imshow(normalized_cross_correlation)
+                    # plt.title(f"{test['name']}, position: {position_index}")
+                    # plt.show()
+                    #
+                    # plt.plot(np.mean(normalized_cross_correlation, axis=0), color='r', label='mean proj.')
+                    # plt.plot(np.max(normalized_cross_correlation, axis=0), color='g', label='max proj.')
+                    # plt.legend()
+                    # plt.title(f"{test['name']}, position: {position_index}")
+                    # plt.show()
+                    #
+                    # plt.plot(np.mean(normalized_cross_correlation, axis=1), color='r', label='mean proj.')
+                    # plt.plot(np.max(normalized_cross_correlation, axis=1), color='g', label='max proj.')
+                    # plt.legend()
+                    # plt.title(f"{test['name']}, position: {position_index}")
+                    # plt.show()
 
                     pass
 
     def get_gl_regions(self, image, template_config):
         from skimage.feature import match_template
         import tifffile as tff
+        import numpy as np
+        from mmpreprocesspy.data_region import DataRegion
 
         template_image = tff.imread(template_config['template_path'])
 
         normalized_cross_correlation = match_template(image, template_image, pad_input=True)
 
-        pass
+        max_correlation_ind = np.argmax(np.max(normalized_cross_correlation, axis=0))
+
+        template_gl_regions = np.array(template_config['gl_regions'])
+        template_gl_regions = template_gl_regions - (template_image.shape[1] // 2)
+        gl_regions = []
+        for template_gl_region in template_gl_regions:
+            gl_region_in_image = max_correlation_ind + template_gl_region
+            gl_regions.append(DataRegion(start=gl_region_in_image[0],
+                                         end=gl_region_in_image[1],
+                                         width=gl_region_in_image[1] - gl_region_in_image[0]))
+        return gl_regions
 
     def inspect_template_config(self, template_config):
         import tifffile as tff
@@ -97,13 +118,12 @@ class TestPreproc_fun(TestCase):
         gl_positions = np.floor(first_gl_position + np.arange(range_max) * gl_spacing).astype(dtype=np.int)
         gl_positions = gl_positions[gl_positions < template_image.shape[0]]  # refine valid positions
 
-        normalized_template = (template_image - np.min(template_image)) / (np.max(template_image) - np.min(template_image))
-        plt.imshow(normalized_template, cmap='gray', vmin=0, vmax=0.5)
+        plt.imshow(min_max_normalize(template_image), cmap='gray', vmin=0, vmax=0.5)
         for regions in template_config['gl_regions']:
             plt.axvline(regions[0], color='r', linestyle='--', linewidth=1)
             plt.axvline(regions[1], color='g', linestyle='--', linewidth=1)
-        # for gl_position in gl_positions:
-        #     plt.axhline(gl_position, color='gray', linestyle='--', linewidth=0.5)
+        for gl_position in gl_positions:
+            plt.axhline(gl_position, color='gray', linestyle='--', linewidth=0.5)
         plt.show()
 
         import json
@@ -219,4 +239,8 @@ class TestPreproc_fun(TestCase):
         #               'glt': 300,
         #               'centers': [660]})
         return tests
+
+def min_max_normalize(imdata):
+    import numpy as np
+    return (imdata - np.min(imdata)) / (np.max(imdata) - np.min(imdata))
 
