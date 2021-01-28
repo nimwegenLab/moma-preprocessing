@@ -27,13 +27,13 @@ class TestPreproc_fun(TestCase):
             region_centers = test['centers']
 
             with self.subTest(test=test['name']):
+                template_config = self.load_gl_detection_template(test['gl_detection_template'])
+
                 print(f'path: {path}')
                 dataset = MicroManagerOmeTiffReader(path)
                 frame_index = 0  # work with first frame of each position
                 position_index = 0
                 pos_ind_range = range(0, 4)
-
-                template_config = self.get_correct_template_config(test['name'])
 
                 for position_index in pos_ind_range:
                     current_stack = dataset.get_image_stack(frame_index=frame_index,
@@ -41,18 +41,20 @@ class TestPreproc_fun(TestCase):
                     imdata = current_stack[:, :, 0]
                     imdata = skimage.transform.rotate(imdata, rotation_angle)
 
+                    self.get_gl_regions(imdata, template_config)
+
                     plt.imshow(imdata)
                     plt.title(f"{test['name']}, position: {position_index}")
                     plt.show()
 
-                    template = tff.imread(template_config['template_path'])
+                    template_image = tff.imread(template_config['template_path'])
 
                     # plt.imshow(template)
                     # plt.show()
 
-                    self.inspect_template_config(template_config)
+                    # self.inspect_template_config(template_config)
 
-                    normalized_cross_correlation = match_template(imdata, template, pad_input=True)
+                    normalized_cross_correlation = match_template(imdata, template_image, pad_input=True)
 
                     plt.imshow(normalized_cross_correlation)
                     plt.title(f"{test['name']}, position: {position_index}")
@@ -72,7 +74,14 @@ class TestPreproc_fun(TestCase):
 
                     pass
 
-    def get_gl_regions(self, image, template_image):
+    def get_gl_regions(self, image, template_config):
+        from skimage.feature import match_template
+        import tifffile as tff
+
+        template_image = tff.imread(template_config['template_path'])
+
+        normalized_cross_correlation = match_template(image, template_image, pad_input=True)
+
         pass
 
     def inspect_template_config(self, template_config):
@@ -88,25 +97,30 @@ class TestPreproc_fun(TestCase):
         gl_positions = np.floor(first_gl_position + np.arange(range_max) * gl_spacing).astype(dtype=np.int)
         gl_positions = gl_positions[gl_positions < template_image.shape[0]]  # refine valid positions
 
-        plt.imshow(template_image)
+        normalized_template = (template_image - np.min(template_image)) / (np.max(template_image) - np.min(template_image))
+        plt.imshow(normalized_template, cmap='gray', vmin=0, vmax=0.5)
         for regions in template_config['gl_regions']:
-            plt.axvline(regions[0], color='r')
-            plt.axvline(regions[1], color='g')
-        for gl_position in gl_positions:
-            plt.axhline(gl_position, color='k', linestyle='--')
+            plt.axvline(regions[0], color='r', linestyle='--', linewidth=1)
+            plt.axvline(regions[1], color='g', linestyle='--', linewidth=1)
+        # for gl_position in gl_positions:
+        #     plt.axhline(gl_position, color='gray', linestyle='--', linewidth=0.5)
         plt.show()
+
+        import json
+        print(json.dumps(template_config, indent=2))
 
         pass
 
-    def get_correct_template_config(self, dataset_name):
+    def load_gl_detection_template(self, gl_detection_template):
         configs = self.get_template_configs()
         for config in configs:
-            if config['name'] == dataset_name:
+            if config['name'] == gl_detection_template:
                 return config
 
     def get_template_configs(self):
         configs = []
-        configs.append({'name': 'dataset_17',
+
+        configs.append({'name': 'template__thomas_20201229_glc_lac_1',
                         'template_path': './data/20210127_test_template_matching_to_find_gl_regions/16_thomas_20201229_glc_lac_1_MMStack.ome-1___template_v01_2.tif',
                         'gl_regions': [[30, 565], [840, 1410]],
                         'first_gl_position': 52,
@@ -126,12 +140,14 @@ class TestPreproc_fun(TestCase):
                       'path': "./17_lis_20201218_VNG40_AB6min_2h_1_1/MMStack/20201218_VNG40_AB6min_2h_1_1_MMStack.ome.tif",
                       'angle': 91,
                       'glt': 200,
-                      'centers': [538, 1343]})
+                      'centers': [538, 1343],
+                      'gl_detection_template': 'template__thomas_20201229_glc_lac_1'})
         tests.append({'name': 'dataset_16',
                       'path': "./16_thomas_20201229_glc_lac_1/MMStack/20201229_glc_lac_1_MMStack.ome.tif",
                       'angle': 90,
                       'glt': 200,
-                      'centers': [435.0, 1415.0]})
+                      'centers': [435.0, 1415.0],
+                      'gl_detection_template': 'template__thomas_20201229_glc_lac_1'})
         # tests.append({'name': 'dataset_15',
         #               'path': "./resources/data__test_preprocessing_py/15_lis__20201119_VNG1040_AB2h_2h_1_MMStack.ome.tif",
         #               'angle': 90,
