@@ -108,8 +108,8 @@ class TestPreproc_fun(TestCase):
         configs = []
         configs.append({'name': 'dataset_17',
                         'template_path': './data/20210127_test_template_matching_to_find_gl_regions/16_thomas_20201229_glc_lac_1_MMStack.ome-1___template_v01_2.tif',
-                        'gl_regions': [[310, 860], [1120, 1690]],
-                        'first_gl_position': 95,
+                        'gl_regions': [[30, 565], [840, 1410]],
+                        'first_gl_position': 52,
                         'gl_spacing': 105.75,
                         })
         configs.append({'name': 'dataset_16',
