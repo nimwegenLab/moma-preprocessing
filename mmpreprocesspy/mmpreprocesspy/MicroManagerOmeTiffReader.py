@@ -9,7 +9,8 @@ class MicroManagerOmeTiffReader(object):
 
     def __init__(self, path):
         if not os.path.exists(path):
-            raise FileExistsError('file does not exist')
+            self.tiff = object()  # set this to an object, so that the call to `del self.tiff` in `self.__del__()` does not fail
+            raise FileExistsError(f'path does not exist: {path}')
         if os.path.isdir(path):
             path_orig = path
             path = self.get_first_tiff_in_path(path)
