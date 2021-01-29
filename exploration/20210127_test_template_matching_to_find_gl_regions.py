@@ -21,7 +21,7 @@ class TestPreproc_fun(TestCase):
 
         tests = self.get_tests__test__find_channel_regions()
 
-        for test in tests:
+        for test in [tests[0]]:
             path = os.path.join(test_data_base_path, test['path'])
             rotation_angle = test['angle']
             growthlane_length_threshold = test['glt']
@@ -46,7 +46,14 @@ class TestPreproc_fun(TestCase):
 
                     # self.inspect_template_config(template_config)
 
-                    self.show_gl_regions_on_image(gl_regions, imdata, position_index, test)
+                    self.show_gl_regions_on_image(gl_regions,
+                                                  imdata,
+                                                  position_index,
+                                                  test,
+                                                  cmap='gray', vmin=0, vmax=1.0)
+
+                    print('stop')
+                    pass
 
                     # plt.imshow(imdata)
                     # plt.title(f"{test['name']}, position: {position_index}")
@@ -79,10 +86,10 @@ class TestPreproc_fun(TestCase):
 
                     pass
 
-    def show_gl_regions_on_image(self, gl_regions, imdata, position_index, test):
+    def show_gl_regions_on_image(self, gl_regions, imdata, position_index, test, **kwargs):
         import matplotlib.pyplot as plt
 
-        plt.imshow(min_max_normalize(imdata), cmap='gray', vmin=0, vmax=0.2)
+        plt.imshow(min_max_normalize(imdata), **kwargs)
         for region in gl_regions:
             plt.axvline(region.start, color='r', linewidth=0.5)
             plt.axvline(region.end, color='g', linewidth=0.5)
