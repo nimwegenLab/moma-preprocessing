@@ -42,6 +42,11 @@ class TestPreproc_fun(TestCase):
                     imdata = current_stack[:, :, 0]
                     imdata = rotate(imdata, rotation_angle)
 
+
+                    # plt.imshow(min_max_normalize(imdata))
+                    # plt.title(f"{test['name']}, position: {position_index}")
+                    # plt.show()
+
                     gl_regions = self.get_gl_regions(imdata, template_config)
 
                     # self.inspect_template_config(template_config)
@@ -66,7 +71,16 @@ class TestPreproc_fun(TestCase):
                     #
                     # # self.inspect_template_config(template_config)
                     #
-                    # normalized_cross_correlation = match_template(imdata, template_image, pad_input=True)
+                    # normalized_cross_correlation = match_template(imdata, template_image, pad_input=False)
+                    #
+                    # fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+                    # ax[0].imshow(imdata)
+                    # ax[0].set_title('input image')
+                    # ax[1].imshow(template_image)
+                    # ax[1].set_title('mask')
+                    # ax[2].imshow(normalized_cross_correlation)
+                    # ax[2].set_title('cross-correlation output')
+                    # plt.show()
                     #
                     # plt.imshow(normalized_cross_correlation)
                     # plt.title(f"{test['name']}, position: {position_index}")
@@ -159,52 +173,82 @@ class TestPreproc_fun(TestCase):
                         'first_gl_position': 52,
                         'gl_spacing': 105.75,
                         })
+        configs.append({'name': '17_lis_20201218_VNG40_AB6min_2h_1_1__template_v000',
+                        'template_path': './data/20210127_test_template_matching_to_find_gl_regions/17_lis_20201218_VNG40_AB6min_2h_1_1__template_v000.tif',
+                        'gl_regions': [[40, 610], [888, 1417]],
+                        'first_gl_position': 51,
+                        'gl_spacing': 105.75,
+                        })
+        configs.append({'name': '13_20200128_glcIPTG_glc_1_MMStack__template__left_side__v000',
+                        'template_path': './data/20210127_test_template_matching_to_find_gl_regions/13_20200128_glcIPTG_glc_1_MMStack__template__left_side__v000.tif',
+                        'gl_regions': [[27, 333]],
+                        'first_gl_position': 58,
+                        'gl_spacing': 105.75,
+                        })
+        configs.append({'name': '12_theo_20190816_glc_spcm_1_MMStack_2__template_v00',
+                        'template_path': './data/20210127_test_template_matching_to_find_gl_regions/12_theo_20190816_glc_spcm_1_MMStack_2__template_v00.tif',
+                        'gl_regions': [[40, 422]],
+                        'first_gl_position': 38,
+                        'gl_spacing': 72.8,
+                        })
+        configs.append({'name': '11_20190910_glc_spcm_1_MMStack__template_v00',
+                        'template_path': './data/20210127_test_template_matching_to_find_gl_regions/11_20190910_glc_spcm_1_MMStack__template_v00.tif',
+                        'gl_regions': [[342, 894], [1180, 1732]],
+                        'first_gl_position': 45,
+                        'gl_spacing': 106.71,
+                        })
         return configs
 
     def get_tests__test__find_channel_regions(self):
         tests = []
-        tests.append({'name': 'dataset_17',
-                      'path': "./17_lis_20201218_VNG40_AB6min_2h_1_1/MMStack/20201218_VNG40_AB6min_2h_1_1_MMStack.ome.tif",
-                      'angle': 91,
-                      'glt': 200,
-                      'centers': [538, 1343],
-                      'gl_detection_template': 'template__thomas_20201229_glc_lac_1'})
-        tests.append({'name': 'dataset_16',
-                      'path': "./16_thomas_20201229_glc_lac_1/MMStack/20201229_glc_lac_1_MMStack.ome.tif",
-                      'angle': 90,
-                      'glt': 200,
-                      'centers': [435.0, 1415.0],
-                      'gl_detection_template': 'template__thomas_20201229_glc_lac_1'})
-        # tests.append({'name': 'dataset_15',
-        #               'path': "./resources/data__test_preprocessing_py/15_lis__20201119_VNG1040_AB2h_2h_1_MMStack.ome.tif",
+        # tests.append({'name': 'dataset_17',
+        #               'path': "./17_lis_20201218_VNG40_AB6min_2h_1_1/MMStack/20201218_VNG40_AB6min_2h_1_1_MMStack.ome.tif",
+        #               'angle': 91,
+        #               'glt': 200,
+        #               'centers': [538, 1343],
+        #               'gl_detection_template': '17_lis_20201218_VNG40_AB6min_2h_1_1__template_v000'})
+        # tests.append({'name': 'dataset_16',
+        #               'path': "./16_thomas_20201229_glc_lac_1/MMStack/20201229_glc_lac_1_MMStack.ome.tif",
         #               'angle': 90,
         #               'glt': 200,
-        #               'centers': [573, 1409]})
+        #               'centers': [435.0, 1415.0],
+        #               'gl_detection_template': 'template__thomas_20201229_glc_lac_1'})
+        # tests.append({'name': 'dataset_15',
+        #               'path': "./15_lis_20201119_VNG1040_AB2h_2h_1/MMStack/20201119_VNG1040_AB2h_2h_1_MMStack.ome.tif",
+        #               'angle': 90,
+        #               'glt': 200,
+        #               'centers': [573, 1409],
+        #               'gl_detection_template': '17_lis_20201218_VNG40_AB6min_2h_1_1__template_v000'})
         # tests.append({'name': 'dataset_14',
-        #               'path': "./resources/data__test_preprocessing_py/14_thomas_20201228_glc_ara_1__Pos0__rotated.tif",
-        #               'angle': -.5,
+        #               'path': "./14_thomas_20201228_glc_ara_1/MMStack/20201228_glc_ara_1_MMStack.ome.tif",
+        #               'angle': 90-.5,
         #               'glt': 300,
-        #               'centers': [489, 1315]})
+        #               'centers': [489, 1315],
+        #               'gl_detection_template': 'template__thomas_20201229_glc_lac_1'})
         # tests.append({'name': 'dataset_13',
-        #               'path': "./resources/data__test_preprocessing_py/13_20200128_glcIPTG_glc_1__MMStack.ome.tif",
+        #               'path': "./13_20200128_glcIPTG_glc_1/MMStack/RawData/measurement/20200128_glcIPTG_glc_1_MMStack.ome.tif",
         #               'angle': 0,
         #               'glt': 200,
-        #               'centers': [465, 752]})
+        #               'centers': [465, 752],
+        #               'gl_detection_template': '13_20200128_glcIPTG_glc_1_MMStack__template__left_side__v000'})
         # tests.append({'name': 'dataset_12',
-        #               'path': "./resources/data__test_preprocessing_py/12_20190816_Theo_MMStack.ome.tif",
+        #               'path': "./12_20190816_Theo/MMStack/20190816_glc_spcm_1_MMStack.ome.tif",
         #               'angle': 0,
         #               'glt': 200,
-        #               'centers': [526]})
+        #               'centers': [526],
+        #               'gl_detection_template': '12_theo_20190816_glc_spcm_1_MMStack_2__template_v00'})
         # tests.append({'name': 'dataset_11',
-        #               'path': "./resources/data__test_preprocessing_py/11_20190910_glc_spcm_1_MMStack.ome.tif",
-        #               'angle': 0,
+        #               'path': "./11_20190910_glc_spcm_1/MMStack/20190910_glc_spcm_1_MMStack.ome.tif",
+        #               'angle': .5,
         #               'glt': 300,
-        #               'centers': [518, 1355]})
-        # tests.append({'name': 'dataset_10',
-        #               'path': "./resources/data__test_preprocessing_py/10_20190424_hi2_hi3_med2_rplN_glu_gly.ome.tif",
-        #               'angle': 0,
-        #               'glt': 300,
-        #               'centers': [392, 1249]})
+        #               'centers': [518, 1355],
+        #               'gl_detection_template': '11_20190910_glc_spcm_1_MMStack__template_v00'})
+        tests.append({'name': 'dataset_10',
+                      'path': "./10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement/20190424_hi2_hi3_med2_rplN_4_MMStack.ome.tif",
+                      'angle': 0,
+                      'glt': 300,
+                      'centers': [392, 1249],
+                       'gl_detection_template': 'template__thomas_20201229_glc_lac_1'})
         # tests.append({'name': 'dataset_9',
         #               'path': "./resources/data__test_preprocessing_py/09_20190325_hi1_hi2_med1_rpmB_glu_gly_pl_chr_1.tif",
         #               'angle': 0,
