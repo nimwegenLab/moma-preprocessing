@@ -208,15 +208,6 @@ class TestPreprocessing(TestCase):
                     region_list = [DataRegion(start=entry[0], end=entry[1], width=entry[1] - entry[0])
                                    for entry in test['dataregions']]
 
-                if test['name'] == 'dataset_12':
-                    plt.imshow(imdata, cmap='gray')
-                    for ind, region in enumerate(region_list):
-                        plt.axvline(region.start, color='r')
-                        plt.axvline(region.end, color='g')
-                    plt.title(test['name'])
-                    plt.show()
-
-
                 growthlane_rois, channel_centers = preprocessing.get_all_growthlane_rois(imdata, region_list)
                 growthlane_rois = preprocessing.rotate_rois(imdata, growthlane_rois, 0)
                 growthlane_rois = preprocessing.remove_rois_not_fully_in_image(imdata, growthlane_rois)
@@ -383,15 +374,6 @@ class TestPreprocessing(TestCase):
                         plt.axvline(region.end, color='g')
                     plt.title(test['name'])
                     plt.show()
-
-                if test['name'] == 'dataset_15':
-                    plt.imshow(imdata, cmap='gray')
-                    for ind, region in enumerate(region_list):
-                        plt.axvline(region.start, color='r')
-                        plt.axvline(region.end, color='g')
-                    plt.title(test['name'])
-                    plt.show()
-
 
                 for ind, region in enumerate(region_list):
                     expected = region_centers[ind]

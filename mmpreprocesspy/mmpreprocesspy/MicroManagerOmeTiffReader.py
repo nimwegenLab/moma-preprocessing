@@ -9,7 +9,8 @@ class MicroManagerOmeTiffReader(object):
 
     def __init__(self, path):
         if not os.path.exists(path):
-            raise FileExistsError('file does not exist')
+            self.tiff = object()  # set this to an object, so that the call to `del self.tiff` in `self.__del__()` does not fail
+            raise FileExistsError(f'path does not exist: {path}')
         if os.path.isdir(path):
             path_orig = path
             path = self.get_first_tiff_in_path(path)
@@ -27,7 +28,6 @@ class MicroManagerOmeTiffReader(object):
         self.width = metadata['Width']
         self.channels = [c.strip(' ') for c in metadata['ChNames']]
         self.number_of_channels = len(self.channels)
-        self.number_of_frames = metadata['Frames']
         if 'InitialPositionList' in metadata:
             self._position_names = [c['Label'] for c in
                                     metadata['InitialPositionList']]  # this is for TIFF format from MicroManager 1
@@ -167,3 +167,12 @@ class MicroManagerOmeTiffReader(object):
 
         return self.tiff.filename
 
+    def get_number_of_frames(self):
+        """
+        Return the number of frames in the tiff,
+
+        :return: number of frames
+        """
+
+        position_index = 0
+        return self._position_zarr[position_index].shape[0]  # since all our our positions have the same number of frames, just return the number of frames for the first position.

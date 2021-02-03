@@ -7,6 +7,33 @@ from unittest import TestCase
 class TestPreproc_fun(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
+    def test__dataset_20_with_flatfield(self):
+        from mmpreprocesspy import preproc_fun
+
+        path = os.path.join(self.test_data_base_path, '20__theo__20210122')
+        data_directory = os.path.join(path, '20210122_glu_lac_1')
+        flatfield_directory = os.path.join(path, '20210122_flatField')
+        output_directory = os.path.join(path, 'output_with_flatfield')
+
+        positions = [0]
+        maxframe = 1
+        dark_noise = 90
+        gaussian_sigma = 5
+        main_channel_angle = 90
+        # main_channel_angle = None
+        growthlane_length_threshold = 200
+
+        if os.path.isdir(output_directory):
+            shutil.rmtree(output_directory)
+
+        preproc_fun.preproc_fun(data_directory, output_directory, positions, flatfield_directory=flatfield_directory,
+                                maxframe=maxframe, dark_noise=dark_noise,
+                                growthlane_length_threshold=growthlane_length_threshold, gaussian_sigma=gaussian_sigma,
+                                main_channel_angle=main_channel_angle)
+
+        self.read_and_show_gl_index_image(os.path.join(output_directory, f'Pos{positions[0]}_GL_index_initial.tiff'),
+                                          title='test__dataset_20_with_flatfield')
+
     def test__dataset_19_no_flatfield(self):
         from mmpreprocesspy import preproc_fun
 
