@@ -79,7 +79,7 @@ class TestPreproc_fun(TestCase):
                                           title='test__dataset_17_no_flatfield')
 
 
-    def test__dataset_16_no_flatfield_with_gl_detection_template(self):
+    def test__dataset_16_no_flatfield_using_gl_detection_template(self):
         from mmpreprocesspy import preproc_fun
 
         data_directory = self.test_data_base_path + '/16_thomas_20201229_glc_lac_1/MMStack/'
@@ -283,6 +283,29 @@ class TestPreproc_fun(TestCase):
 
         self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
                                           title='test__dataset_12_with_flatfield')
+
+    def test__dataset_12_no_flatfield_using_gl_detection_template(self):
+        from mmpreprocesspy import preproc_fun
+
+        data_directory = self.test_data_base_path + '/12_20190816_Theo/MMStack/'
+        directory_to_save = self.test_data_base_path + '/12_20190816_Theo/MMStack/result_no_flatfield_using_gl_detection_template/'
+        gl_detection_template_path = './data/test_preproc_fun/12_theo_20190816_glc_spcm_1_MMStack_2__template_v00.json'
+        positions = [0]
+        maxframe = 3
+        dark_noise = 90
+        gaussian_sigma = 5
+        growthlane_length_threshold = 200
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
+                                gaussian_sigma=gaussian_sigma,
+                                growthlane_length_threshold=growthlane_length_threshold,
+                                gl_detection_template_path=gl_detection_template_path)
+
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+                                          title='test__dataset_12_no_flatfield_using_gl_detection_template')
 
     def test__dataset_12_no_flatfield(self):
         from mmpreprocesspy import preproc_fun
