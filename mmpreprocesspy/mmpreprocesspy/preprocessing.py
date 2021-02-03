@@ -11,7 +11,7 @@ from skimage.filters import threshold_otsu
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
-def process_image(image, growthlane_length_threshold=0, main_channel_angle=None, roi_boundary_offset_at_mother_cell=0):
+def get_rotated_image(image, main_channel_angle=None):
     if main_channel_angle == None:
         main_channel_angle = find_main_channel_orientation(image)
 
@@ -25,15 +25,17 @@ def process_image(image, growthlane_length_threshold=0, main_channel_angle=None,
 
     # recalculate channel region boundary on rotated image
     image_rotated = skimage.transform.rotate(image, angle, cval=0)
+
+    return image_rotated, main_channel_angle
+
+def get_gl_regions(image_rotated, growthlane_length_threshold=0, roi_boundary_offset_at_mother_cell=0):
     region_list = find_channel_regions(image_rotated, use_smoothing=True,
                                        minimum_required_growthlane_length=growthlane_length_threshold,
                                        roi_boundary_offset_at_mother_cell=roi_boundary_offset_at_mother_cell)
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rotated, region_list)
     growthlane_rois = rotate_rois(image, growthlane_rois, main_channel_angle)
     growthlane_rois = remove_rois_not_fully_in_image(image, growthlane_rois)
-
-    return image_rotated, main_channel_angle, channel_centers, growthlane_rois
-
+    return channel_centers, growthlane_rois
 
 def rotate_rois(image, growthlane_rois, main_channel_angle):
     rotation_center = (np.int0(image.shape[1]/2), np.int0(image.shape[0]/2))
