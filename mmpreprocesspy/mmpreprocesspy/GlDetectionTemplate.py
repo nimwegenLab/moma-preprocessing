@@ -1,5 +1,8 @@
+import os
 import json
 from dataclasses import dataclass
+import numpy as np
+import tifffile as tff
 
 
 @dataclass
@@ -28,6 +31,7 @@ class GlDetectionTemplate(object):
     config_dict = None
 
     def load_config(self, config_path):
+        self.config_path = config_path
         with open(config_path) as fp:
             self.config_dict = json.load(fp)
 
@@ -38,6 +42,14 @@ class GlDetectionTemplate(object):
     @property
     def nr_of_gl_region(self) -> int:
         return len(self.config_dict['gl_regions'])
+
+    @property
+    def absolute_image_path(self):
+        return os.path.normpath(os.path.join(os.path.dirname(self.config_path), self.config_dict['template_image_path']))
+
+    @property
+    def template_image(self) -> np.ndarray:
+        return tff.imread(self.absolute_image_path)
 
     def get_gl_region_in_micron(self, index: int) -> GlRegion:
         region = GlRegion()
