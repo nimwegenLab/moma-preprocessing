@@ -18,7 +18,6 @@ class MomaImageProcessor(object):
         self.image = None
         self.rotated_image = None
         self.main_channel_angle = None
-        self.channel_centers = None
         self.growthlane_rois = []
         self.template = None
         self.hor_mid = None
@@ -43,7 +42,7 @@ class MomaImageProcessor(object):
     def process_image(self):
         self.rotated_image, self.main_channel_angle = preprocessing.get_rotated_image(
             self.image, main_channel_angle=self.main_channel_angle)
-        self.channel_centers, self.growthlane_rois = preprocessing.get_gl_regions(image_rotated,
+        self.growthlane_rois = preprocessing.get_gl_regions(image_rotated,
                        growthlane_length_threshold=self.growthlane_length_threshold,
                        roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
         self.reset_growthlane_roi_ids()

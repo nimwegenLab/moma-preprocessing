@@ -131,7 +131,6 @@ def preproc_fun(data_folder,
         imageProcessor.roi_boundary_offset_at_mother_cell = roi_boundary_offset_at_mother_cell
 
         imageProcessor.process_image()
-        channel_centers = imageProcessor.channel_centers
 
         # store GL index image
         if not os.path.exists(os.path.dirname(folder_to_save)):
@@ -142,10 +141,6 @@ def preproc_fun(data_folder,
 
         # create empty kymographs to fill
         kymographs = [np.zeros((roi.length, nrOfFrames, len(colors))) for roi in imageProcessor.growthlane_rois]
-        metadataK = {'channels': len(colors), 'slices': 1, 'frames': len(channel_centers), 'hyperstack': True,
-                     'loop': False}
-
-        frame_counter = np.zeros(len(channel_centers))  # stores per growthlane, the number of processed images
 
         # initialize list of images to hold the final GL crop images
         nr_of_timesteps = maxframe - minframe
