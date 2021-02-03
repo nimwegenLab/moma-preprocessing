@@ -81,6 +81,11 @@ class MicroManagerOmeTiffReader(object):
     def get_image_stack(self, position_index, frame_index):
         """
         Get image stack containing the different channels for the specified position and frame.
+        For frame indexes >0, we check if the image returned by `_get_image_stack_with_adapted_dimensions`
+        is the same as the previous image. If so, we return an all-NaN image for the corresponding channel.
+        We do this, because we assume that in this case no image was recorded for the corresponding time-step
+        in the corresponding channel. This is because the tifffile package (that we use as backend)
+        returns the closest existing previous frame for frames that were not recorded.
 
         :param position_index:
         :param frame_index:
