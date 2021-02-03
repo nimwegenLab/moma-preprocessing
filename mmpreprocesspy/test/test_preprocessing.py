@@ -35,7 +35,7 @@ class TestPreprocessing(TestCase):
         imdata = tff.imread(path)
         imdata = skimage.transform.rotate(imdata, rotation_angle)
 
-        preprocessing.get_gl_rois_using_template(imdata, template)
+        gl_rois = preprocessing.get_gl_rois_using_template(imdata, template)
 
         pass
 

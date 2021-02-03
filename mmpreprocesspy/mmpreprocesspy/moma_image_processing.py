@@ -30,6 +30,7 @@ class MomaImageProcessor(object):
         self._sr = StackReg(StackReg.TRANSLATION)
         self.growthlane_length_threshold = 0
         self.roi_boundary_offset_at_mother_cell = 0
+        self.gl_detection_template = None
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -42,9 +43,19 @@ class MomaImageProcessor(object):
     def process_image(self):
         self.rotated_image, self.main_channel_angle = preprocessing.get_rotated_image(
             self.image, main_channel_angle=self.main_channel_angle)
-        self.growthlane_rois = preprocessing.get_gl_regions(image_rotated,
-                       growthlane_length_threshold=self.growthlane_length_threshold,
-                       roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
+
+        if gl_detection_template:
+            self.growthlane_rois = preprocessing.get_gl_rois_using_template(image_rotated,
+                                                     gl_detection_template,
+                                                     roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
+        else:
+            self.growthlane_rois = preprocessing.get_gl_regions(image_rotated,
+                           growthlane_length_threshold=self.growthlane_length_threshold,
+                           roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
+
+        self.growthlane_rois = preprocessing.rotate_rois(self.image, self.growthlane_rois, self.main_channel_angle)
+        self.growthlane_rois = preprocessing.remove_rois_not_fully_in_image(self.image, self.growthlane_rois)
+
         self.reset_growthlane_roi_ids()
         self.get_image_registration_template()
 

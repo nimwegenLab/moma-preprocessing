@@ -38,8 +38,6 @@ def get_gl_regions(image_rotated, growthlane_length_threshold=0, roi_boundary_of
                                        minimum_required_growthlane_length=growthlane_length_threshold,
                                        roi_boundary_offset_at_mother_cell=roi_boundary_offset_at_mother_cell)
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rotated, region_list)
-    growthlane_rois = rotate_rois(image, growthlane_rois, main_channel_angle)
-    growthlane_rois = remove_rois_not_fully_in_image(image, growthlane_rois)
     return growthlane_rois
 
 def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetectionTemplate, roi_boundary_offset_at_mother_cell=0):
@@ -62,30 +60,25 @@ def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetection
         plt.imshow(normalized_cross_correlation)
         plt.show()
 
-    plt.imshow(image_rotated)
+    gl_rois = []
+    # plt.imshow(image_rotated)
     for region in gl_detection_template.get_gl_regions_in_pixel():
         gl_region_start, gl_region_end = calculate_gl_region(region, horizontal_index_of_max_correlation, gl_detection_template.template_image.shape)
-        plt.axvline(gl_region_start, color='r', linewidth=0.5, linestyle='--')
-        plt.axvline(gl_region_end, color='g', linewidth=0.5, linestyle='--')
+        # plt.axvline(gl_region_start, color='r', linewidth=0.5, linestyle='--')
+        # plt.axvline(gl_region_end, color='g', linewidth=0.5, linestyle='--')
         vertical_gl_centers = calculate_vertical_gl_centers(region, vertical_index_of_max_correlation,
                                                             gl_detection_template.template_image.shape,
                                                             image_rotated.shape)
-        for ind in vertical_gl_centers:
-            plt.axhline(ind, color='k', linewidth=0.5, linestyle='--')
-        # print(f"{mincol}, {maxcol}")
+        # for ind in vertical_gl_centers:
+        #     plt.axhline(ind, color='k', linewidth=0.5, linestyle='--')
         rois_in_region = get_growthlane_rois(vertical_gl_centers, gl_region_start, gl_region_end)
-        pass
-    plt.show()
+        gl_rois += rois_in_region
+        # print('pause')
+    # plt.show()
 
     # region = get_gl_rois_using_template(template_config, coordinate_of_max_correlation)
 
-    # for
-
-    raise NotImplementedError()
-    growthlane_rois = rotate_rois(image, growthlane_rois, main_channel_angle)
-    growthlane_rois = remove_rois_not_fully_in_image(image, growthlane_rois)
-
-    return growthlane_rois
+    return gl_rois
 
 
 def calculate_vertical_gl_centers(gl_region,
