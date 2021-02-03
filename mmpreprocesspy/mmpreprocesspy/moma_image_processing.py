@@ -10,6 +10,7 @@ import cv2 as cv
 import mmpreprocesspy.dev_auxiliary_functions as aux
 # import matplotlib.pyplot as plt
 from pystackreg import StackReg
+import matplotlib.pyplot as plt
 
 class MomaImageProcessor(object):
     """ MomaImageProcessor encapsulates the processing of a Mothermachine image. """
@@ -44,12 +45,12 @@ class MomaImageProcessor(object):
         self.rotated_image, self.main_channel_angle = preprocessing.get_rotated_image(
             self.image, main_channel_angle=self.main_channel_angle)
 
-        if gl_detection_template:
-            self.growthlane_rois = preprocessing.get_gl_rois_using_template(image_rotated,
-                                                     gl_detection_template,
+        if self.gl_detection_template:
+                self.growthlane_rois = preprocessing.get_gl_rois_using_template(self.rotated_image,
+                                                     self.gl_detection_template,
                                                      roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
         else:
-            self.growthlane_rois = preprocessing.get_gl_regions(image_rotated,
+            self.growthlane_rois = preprocessing.get_gl_regions(self.rotated_image,
                            growthlane_length_threshold=self.growthlane_length_threshold,
                            roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
 

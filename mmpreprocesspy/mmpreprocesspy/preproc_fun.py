@@ -12,6 +12,7 @@ import skimage.transform
 from mmpreprocesspy.MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
 from mmpreprocesspy.image_preprocessing import ImagePreprocessor
 from mmpreprocesspy.moma_image_processing import MomaImageProcessor
+from mmpreprocesspy.GlDetectionTemplate import GlDetectionTemplate
 import cv2 as cv
 
 
@@ -75,7 +76,8 @@ def preproc_fun(data_folder,
                 gaussian_sigma=None,
                 growthlane_length_threshold=0,
                 main_channel_angle=None,
-                roi_boundary_offset_at_mother_cell=None):
+                roi_boundary_offset_at_mother_cell=None,
+                gl_detection_template_path=None):
 
     # create a micro-manager image object
     dataset = MicroManagerOmeTiffReader(data_folder)
@@ -125,6 +127,10 @@ def preproc_fun(data_folder,
 
         # Process first image to find ROIs, etc.
         imageProcessor = MomaImageProcessor()
+        if gl_detection_template_path:
+            gl_detection_template = GlDetectionTemplate()
+            gl_detection_template.load_config(gl_detection_template_path)
+            imageProcessor.gl_detection_template = gl_detection_template
         imageProcessor.load_numpy_image_array(first_phc_image)
         imageProcessor.growthlane_length_threshold = growthlane_length_threshold
         imageProcessor.main_channel_angle = main_channel_angle

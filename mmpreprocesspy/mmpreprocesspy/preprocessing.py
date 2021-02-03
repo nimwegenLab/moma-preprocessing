@@ -13,6 +13,7 @@ import tifffile as tff
 import numpy as np
 from mmpreprocesspy.data_region import DataRegion
 from mmpreprocesspy.GlDetectionTemplate import GlDetectionTemplate, GlRegion
+import matplotlib.pyplot as plt
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
@@ -55,26 +56,26 @@ def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetection
     horizontal_index_of_max_correlation = np.argmax(np.max(normalized_cross_correlation, axis=0))
     vertical_index_of_max_correlation = np.argmax(np.max(normalized_cross_correlation, axis=1))
 
-    if is_debugging():
-        import matplotlib.pyplot as plt
-        plt.imshow(normalized_cross_correlation)
-        plt.show()
+    # if is_debugging():
+    #     import matplotlib.pyplot as plt
+    #     plt.imshow(normalized_cross_correlation)
+    #     plt.show()
 
     gl_rois = []
-    # plt.imshow(image_rotated)
+    plt.imshow(image_rotated)
     for region in gl_detection_template.get_gl_regions_in_pixel():
         gl_region_start, gl_region_end = calculate_gl_region(region, horizontal_index_of_max_correlation, gl_detection_template.template_image.shape)
-        # plt.axvline(gl_region_start, color='r', linewidth=0.5, linestyle='--')
-        # plt.axvline(gl_region_end, color='g', linewidth=0.5, linestyle='--')
+        plt.axvline(gl_region_start, color='r', linewidth=0.5, linestyle='--')
+        plt.axvline(gl_region_end, color='g', linewidth=0.5, linestyle='--')
         vertical_gl_centers = calculate_vertical_gl_centers(region, vertical_index_of_max_correlation,
                                                             gl_detection_template.template_image.shape,
                                                             image_rotated.shape)
-        # for ind in vertical_gl_centers:
-        #     plt.axhline(ind, color='k', linewidth=0.5, linestyle='--')
+        for ind in vertical_gl_centers:
+            plt.axhline(ind, color='k', linewidth=0.5, linestyle='--')
         rois_in_region = get_growthlane_rois(vertical_gl_centers, gl_region_start, gl_region_end)
         gl_rois += rois_in_region
         # print('pause')
-    # plt.show()
+    plt.show()
 
     # region = get_gl_rois_using_template(template_config, coordinate_of_max_correlation)
 
