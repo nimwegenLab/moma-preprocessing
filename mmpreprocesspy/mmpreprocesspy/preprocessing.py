@@ -79,6 +79,8 @@ def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetection
 
     # region = get_gl_rois_using_template(template_config, coordinate_of_max_correlation)
 
+    gl_rois = fix_roi_ids(gl_rois)
+
     return gl_rois
 
 
