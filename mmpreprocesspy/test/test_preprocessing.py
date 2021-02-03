@@ -502,7 +502,7 @@ class TestPreprocessing(TestCase):
         matrix = preprocessing.get_rotation_matrix(rotation_angle, rotation_center)
 
         image_array = cv.warpAffine(image_array, matrix, (image_array.shape[1], image_array.shape[0]))
-        dev_aux.show_image(image_array)
+        # dev_aux.show_image(image_array)
 
     def test_get_translation_matrix(self):
         from mmpreprocesspy import preprocessing
