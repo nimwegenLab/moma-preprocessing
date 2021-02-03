@@ -62,42 +62,29 @@ def calculate_vertical_gl_centers(gl_region,
                                   template_image_shape,
                                   image_shape):
     vertical_index_of_max_correlation_shifted = vertical_index_of_max_correlation_shifted - (
-                template_image_shape[0] // 2)
+                template_image_shape[0] / 2)
     seed_gl_center = vertical_index_of_max_correlation_shifted + gl_region.first_gl_position_from_top
-    seed_gl_center_orig = seed_gl_center
     gl_centers = []
-    gl_centers.append(seed_gl_center)
-    # add valid gl centers before seed center
-    new_gl_center = seed_gl_center - gl_region.gl_spacing_vertical
-    while new_gl_center > 0:
+    gl_centers.append(int(seed_gl_center))
+
+    # calculate and add valid vertical centers before seed center
+    for shift_factor in range(1, 100):
+        new_gl_center = int(seed_gl_center - gl_region.gl_spacing_vertical * shift_factor)
+        if new_gl_center < 0: break
         gl_centers.append(new_gl_center)
-        new_gl_center = new_gl_center - gl_region.gl_spacing_vertical
-    # add valid gl centers after seed center
-    new_gl_center = seed_gl_center + gl_region.gl_spacing_vertical
-    while new_gl_center < image_shape[0]:
+
+    # calculate and add valid vertical centers after seed center
+    for shift_factor in range(1, 100):
+        new_gl_center = int(seed_gl_center + gl_region.gl_spacing_vertical * shift_factor)
+        if new_gl_center > image_shape[0]: break
         gl_centers.append(new_gl_center)
-        new_gl_center = new_gl_center + gl_region.gl_spacing_vertical
 
     gl_centers.sort()
     return gl_centers
-    # return gl_region.start + vertical_index_of_max_correlation_shifted, gl_region.end + vertical_index_of_max_correlation_shifted
 
 def calculate_gl_region(gl_region, horizontal_index_of_max_correlation, template_image_shape):
-    horizontal_index_of_max_correlation = horizontal_index_of_max_correlation - (template_image_shape[1] // 2)
-    return gl_region.start + horizontal_index_of_max_correlation, gl_region.end + horizontal_index_of_max_correlation
-
-def get_gl_regions_templated(template_config, max_correlation_ind):
-    template_image = tff.imread(template_config['template_path'])
-
-    template_gl_regions = np.array(template_config['gl_regions'])
-    template_gl_regions = template_gl_regions - (template_image.shape[1] // 2)
-    gl_regions = []
-    for template_gl_region in template_gl_regions:
-        gl_region_in_image = max_correlation_ind + template_gl_region
-        gl_regions.append(DataRegion(start=gl_region_in_image[0],
-                                     end=gl_region_in_image[1],
-                                     width=gl_region_in_image[1] - gl_region_in_image[0]))
-    return gl_regions
+    horizontal_index_of_max_correlation = horizontal_index_of_max_correlation - (template_image_shape[1] / 2)
+    return int(gl_region.start + horizontal_index_of_max_correlation), int(gl_region.end + horizontal_index_of_max_correlation)
 
 def rotate_rois(image, growthlane_rois, main_channel_angle):
     rotation_center = (np.int0(image.shape[1]/2), np.int0(image.shape[0]/2))

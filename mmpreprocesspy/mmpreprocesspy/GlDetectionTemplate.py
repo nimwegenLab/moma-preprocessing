@@ -63,11 +63,11 @@ class GlDetectionTemplate(object):
     def get_gl_region_in_pixel(self, index: int) -> GlRegion:
         pixel_size = self.config_dict['pixel_size_micron']
         region = GlRegion()
-        region.start = int(self.config_dict['gl_regions'][index]['horizontal_range'][0] / pixel_size)
-        region.end = int(self.config_dict['gl_regions'][index]['horizontal_range'][1] / pixel_size)
+        region.start = self.config_dict['gl_regions'][index]['horizontal_range'][0] / pixel_size
+        region.end = self.config_dict['gl_regions'][index]['horizontal_range'][1] / pixel_size
         region.width = region.end - region.start
-        region.gl_spacing_vertical = int(self.config_dict['gl_regions'][index]['gl_spacing_vertical'] / pixel_size)
-        region.first_gl_position_from_top = int(self.config_dict['gl_regions'][index]['first_gl_position_from_top'] / pixel_size)
+        region.gl_spacing_vertical = self.config_dict['gl_regions'][index]['gl_spacing_vertical'] / pixel_size
+        region.first_gl_position_from_top = self.config_dict['gl_regions'][index]['first_gl_position_from_top'] / pixel_size
         return region
 
     def get_gl_regions_in_pixel(self):

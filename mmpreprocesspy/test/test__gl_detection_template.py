@@ -92,4 +92,4 @@ class TestGlDetectionTemplate(TestCase):
         return path
 
 def to_pixel(micron_value, pixel_size):
-    return int(micron_value / pixel_size)
+    return micron_value / pixel_size
