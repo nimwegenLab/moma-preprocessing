@@ -3,6 +3,7 @@ from unittest import TestCase
 # import matplotlib.pyplot as plt
 import mmpreprocesspy.dev_auxiliary_functions as dev_aux
 from mmpreprocesspy.data_region import DataRegion
+from mmpreprocesspy.GlDetectionTemplate import GlDetectionTemplate
 import numpy as np
 import skimage.transform
 from skimage.io import imread
@@ -12,6 +13,38 @@ from parameterized import parameterized
 
 class TestPreprocessing(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
+
+    def test__get_gl_regions_using_template(self):
+        import os
+        from mmpreprocesspy import preprocessing
+        import tifffile as tff
+        import skimage
+
+
+        template_path = os.path.join(os.path.dirname(__file__), 'resources/data__test_preprocessing_py/gl_detection_templates/16_thomas_thomas_20201229_glc_lac_1.json')
+        template = GlDetectionTemplate()
+        template.load_config(template_path)
+        test = self.support__get_test_dataset_by_name('dataset_16')
+
+        path = test['path']
+        rotation_angle = test['angle']
+        growthlane_length_threshold = test['glt']
+        region_centers = test['centers']
+        expected_vertical_positions = test['roi_vertical_positions']
+
+        imdata = tff.imread(path)
+        imdata = skimage.transform.rotate(imdata, rotation_angle)
+
+        preprocessing.get_gl_rois_using_template(imdata, template)
+
+        pass
+
+    def support__get_test_dataset_by_name(self, dataset_name):
+        datasets = self.get_tests__test__get_all_growthlane_rois()
+        for dataset in datasets:
+            if dataset['name'] == dataset_name:
+                return dataset
+        raise ValueError(f'dataset_name was not found: {dataset_name}')
 
     def get_tests__test__get_all_growthlane_rois(self):
         tests = []

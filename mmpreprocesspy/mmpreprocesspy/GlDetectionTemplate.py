@@ -69,3 +69,9 @@ class GlDetectionTemplate(object):
         region.gl_spacing_vertical = int(self.config_dict['gl_regions'][index]['gl_spacing_vertical'] / pixel_size)
         region.first_gl_position_from_top = int(self.config_dict['gl_regions'][index]['first_gl_position_from_top'] / pixel_size)
         return region
+
+    def get_gl_regions_in_pixel(self):
+        regions = []
+        for index in range(len(self.config_dict['gl_regions'])):
+            regions.append(self.get_gl_region_in_pixel(index))
+        return regions

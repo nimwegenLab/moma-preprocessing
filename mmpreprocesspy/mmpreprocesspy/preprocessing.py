@@ -8,6 +8,11 @@ from mmpreprocesspy.roi import Roi
 from mmpreprocesspy.rotated_roi import RotatedRoi
 from scipy.signal import savgol_filter, find_peaks
 from skimage.filters import threshold_otsu
+from skimage.feature import match_template
+import tifffile as tff
+import numpy as np
+from mmpreprocesspy.data_region import DataRegion
+from mmpreprocesspy.GlDetectionTemplate import GlDetectionTemplate, GlRegion
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
@@ -35,7 +40,95 @@ def get_gl_regions(image_rotated, growthlane_length_threshold=0, roi_boundary_of
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rotated, region_list)
     growthlane_rois = rotate_rois(image, growthlane_rois, main_channel_angle)
     growthlane_rois = remove_rois_not_fully_in_image(image, growthlane_rois)
-    return channel_centers, growthlane_rois
+    return growthlane_rois
+
+def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetectionTemplate, roi_boundary_offset_at_mother_cell=0):
+    # if is_debugging():
+    #     import matplotlib.pyplot as plt
+    #     plt.imshow(image_rotated)
+    #     plt.show()
+
+    # if is_debugging():
+    #     import matplotlib.pyplot as plt
+    #     plt.imshow(gl_detection_template.template_image)
+    #     plt.show()
+
+    normalized_cross_correlation = match_template(image_rotated, gl_detection_template.template_image, pad_input=True)
+    horizontal_index_of_max_correlation = np.argmax(np.max(normalized_cross_correlation, axis=0))
+    vertical_index_of_max_correlation = np.argmax(np.max(normalized_cross_correlation, axis=1))
+
+    if is_debugging():
+        import matplotlib.pyplot as plt
+        plt.imshow(normalized_cross_correlation)
+        plt.show()
+
+    plt.imshow(image_rotated)
+    for region in gl_detection_template.get_gl_regions_in_pixel():
+        gl_region_start, gl_region_end = calculate_gl_region(region, horizontal_index_of_max_correlation, gl_detection_template.template_image.shape)
+        plt.axvline(gl_region_start, color='r', linewidth=0.5, linestyle='--')
+        plt.axvline(gl_region_end, color='g', linewidth=0.5, linestyle='--')
+        vertical_gl_centers = calculate_vertical_gl_centers(region, vertical_index_of_max_correlation,
+                                                            gl_detection_template.template_image.shape,
+                                                            image_rotated.shape)
+        for ind in vertical_gl_centers:
+            plt.axhline(ind, color='k', linewidth=0.5, linestyle='--')
+        # print(f"{mincol}, {maxcol}")
+        rois_in_region = get_growthlane_rois(vertical_gl_centers, gl_region_start, gl_region_end)
+        pass
+    plt.show()
+
+    # region = get_gl_rois_using_template(template_config, coordinate_of_max_correlation)
+
+    # for
+
+    raise NotImplementedError()
+    growthlane_rois = rotate_rois(image, growthlane_rois, main_channel_angle)
+    growthlane_rois = remove_rois_not_fully_in_image(image, growthlane_rois)
+
+    return growthlane_rois
+
+
+def calculate_vertical_gl_centers(gl_region,
+                                  vertical_index_of_max_correlation_shifted,
+                                  template_image_shape,
+                                  image_shape):
+    vertical_index_of_max_correlation_shifted = vertical_index_of_max_correlation_shifted - (
+                template_image_shape[0] // 2)
+    seed_gl_center = vertical_index_of_max_correlation_shifted + gl_region.first_gl_position_from_top
+    seed_gl_center_orig = seed_gl_center
+    gl_centers = []
+    gl_centers.append(seed_gl_center)
+    # add valid gl centers before seed center
+    new_gl_center = seed_gl_center - gl_region.gl_spacing_vertical
+    while new_gl_center > 0:
+        gl_centers.append(new_gl_center)
+        new_gl_center = new_gl_center - gl_region.gl_spacing_vertical
+    # add valid gl centers after seed center
+    new_gl_center = seed_gl_center + gl_region.gl_spacing_vertical
+    while new_gl_center < image_shape[0]:
+        gl_centers.append(new_gl_center)
+        new_gl_center = new_gl_center + gl_region.gl_spacing_vertical
+
+    gl_centers.sort()
+    return gl_centers
+    # return gl_region.start + vertical_index_of_max_correlation_shifted, gl_region.end + vertical_index_of_max_correlation_shifted
+
+def calculate_gl_region(gl_region, horizontal_index_of_max_correlation, template_image_shape):
+    horizontal_index_of_max_correlation = horizontal_index_of_max_correlation - (template_image_shape[1] // 2)
+    return gl_region.start + horizontal_index_of_max_correlation, gl_region.end + horizontal_index_of_max_correlation
+
+def get_gl_regions_templated(template_config, max_correlation_ind):
+    template_image = tff.imread(template_config['template_path'])
+
+    template_gl_regions = np.array(template_config['gl_regions'])
+    template_gl_regions = template_gl_regions - (template_image.shape[1] // 2)
+    gl_regions = []
+    for template_gl_region in template_gl_regions:
+        gl_region_in_image = max_correlation_ind + template_gl_region
+        gl_regions.append(DataRegion(start=gl_region_in_image[0],
+                                     end=gl_region_in_image[1],
+                                     width=gl_region_in_image[1] - gl_region_in_image[0]))
+    return gl_regions
 
 def rotate_rois(image, growthlane_rois, main_channel_angle):
     rotation_center = (np.int0(image.shape[1]/2), np.int0(image.shape[0]/2))
