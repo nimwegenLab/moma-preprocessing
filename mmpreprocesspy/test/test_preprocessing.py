@@ -21,7 +21,7 @@ class TestPreprocessing(TestCase):
         import skimage
 
 
-        template_path = os.path.join(os.path.dirname(__file__), 'resources/data__test_preprocessing_py/gl_detection_templates/16_thomas_thomas_20201229_glc_lac_1.json')
+        template_path = os.path.join(os.path.dirname(__file__), 'resources/data__test_preprocessing_py/gl_detection_templates/16_thomas_20201229_glc_lac_1.json')
         template = GlDetectionTemplate()
         template.load_config(template_path)
         test = self.support__get_test_dataset_by_name('dataset_16')

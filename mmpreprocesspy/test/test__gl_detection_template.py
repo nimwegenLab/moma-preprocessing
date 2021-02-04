@@ -105,7 +105,7 @@ class TestGlDetectionTemplate(TestCase):
 
     def support__get_full_path_to_config(self):
         import os
-        relative_config_path = './resources/data__test__gl_detection_template/16_thomas_thomas_20201229_glc_lac_1.json'
+        relative_config_path = './resources/data__test__gl_detection_template/16_thomas_20201229_glc_lac_1.json'
         path = os.path.join(os.path.dirname(__file__), relative_config_path)
         return path
 

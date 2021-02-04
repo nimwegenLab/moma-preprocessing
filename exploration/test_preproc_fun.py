@@ -84,7 +84,7 @@ class TestPreproc_fun(TestCase):
 
         data_directory = self.test_data_base_path + '/16_thomas_20201229_glc_lac_1/MMStack/'
         directory_to_save = self.test_data_base_path + '/16_thomas_20201229_glc_lac_1/MMStack/result_no_flatfield_with_gl_detection_template/'
-        gl_detection_template_path = './data/test_preproc_fun/16_thomas_thomas_20201229_glc_lac_1.json'
+        gl_detection_template_path = './data/test_preproc_fun/16_thomas_20201229_glc_lac_1.json'
         positions = [0]
         maxframe = 1
         dark_noise = 90
