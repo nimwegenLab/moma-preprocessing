@@ -65,6 +65,8 @@ print("Growthlane length threshold (glt):")
 print(args.growthlanelengththreshold)
 print("roi_boundary_offset_at_mother_cell:")
 print(args.roi_boundary_offset_at_mother_cell)
+print("gl_detection_template_path:")
+print(args.gl_detection_template_path)
 
 # parse position argument; IMPORTANT: this only works for a single position argument
 res = re.match('Pos[0]*(\d+)', args.positions)
