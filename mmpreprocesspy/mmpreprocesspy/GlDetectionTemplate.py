@@ -1,5 +1,8 @@
+import os
 import json
 from dataclasses import dataclass
+import numpy as np
+import tifffile as tff
 
 
 @dataclass
@@ -28,6 +31,7 @@ class GlDetectionTemplate(object):
     config_dict = None
 
     def load_config(self, config_path):
+        self.config_path = config_path
         with open(config_path) as fp:
             self.config_dict = json.load(fp)
 
@@ -38,6 +42,14 @@ class GlDetectionTemplate(object):
     @property
     def nr_of_gl_region(self) -> int:
         return len(self.config_dict['gl_regions'])
+
+    @property
+    def absolute_image_path(self):
+        return self._get_absolute_path(self.config_path, self.config_dict['template_image_path'])
+
+    @property
+    def template_image(self) -> np.ndarray:
+        return tff.imread(self.absolute_image_path)
 
     def get_gl_region_in_micron(self, index: int) -> GlRegion:
         region = GlRegion()
@@ -51,9 +63,20 @@ class GlDetectionTemplate(object):
     def get_gl_region_in_pixel(self, index: int) -> GlRegion:
         pixel_size = self.config_dict['pixel_size_micron']
         region = GlRegion()
-        region.start = int(self.config_dict['gl_regions'][index]['horizontal_range'][0] / pixel_size)
-        region.end = int(self.config_dict['gl_regions'][index]['horizontal_range'][1] / pixel_size)
+        region.start = self.config_dict['gl_regions'][index]['horizontal_range'][0] / pixel_size
+        region.end = self.config_dict['gl_regions'][index]['horizontal_range'][1] / pixel_size
         region.width = region.end - region.start
-        region.gl_spacing_vertical = int(self.config_dict['gl_regions'][index]['gl_spacing_vertical'] / pixel_size)
-        region.first_gl_position_from_top = int(self.config_dict['gl_regions'][index]['first_gl_position_from_top'] / pixel_size)
+        region.gl_spacing_vertical = self.config_dict['gl_regions'][index]['gl_spacing_vertical'] / pixel_size
+        region.first_gl_position_from_top = self.config_dict['gl_regions'][index]['first_gl_position_from_top'] / pixel_size
         return region
+
+    def get_gl_regions_in_pixel(self):
+        regions = []
+        for index in range(len(self.config_dict['gl_regions'])):
+            regions.append(self.get_gl_region_in_pixel(index))
+        return regions
+
+    def _get_absolute_path(self, config_path, template_image_path):
+        if os.path.isabs(template_image_path):
+            return template_image_path
+        return os.path.normpath(os.path.join(os.path.dirname(config_path), template_image_path))  # construct absolute path from path to the config files; we assume the image-location is given relative to the location of the template config-file

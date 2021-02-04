@@ -10,6 +10,7 @@ import cv2 as cv
 import mmpreprocesspy.dev_auxiliary_functions as aux
 # import matplotlib.pyplot as plt
 from pystackreg import StackReg
+import matplotlib.pyplot as plt
 
 class MomaImageProcessor(object):
     """ MomaImageProcessor encapsulates the processing of a Mothermachine image. """
@@ -18,7 +19,6 @@ class MomaImageProcessor(object):
         self.image = None
         self.rotated_image = None
         self.main_channel_angle = None
-        self.channel_centers = None
         self.growthlane_rois = []
         self.template = None
         self.hor_mid = None
@@ -31,6 +31,7 @@ class MomaImageProcessor(object):
         self._sr = StackReg(StackReg.TRANSLATION)
         self.growthlane_length_threshold = 0
         self.roi_boundary_offset_at_mother_cell = 0
+        self.gl_detection_template = None
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -41,9 +42,21 @@ class MomaImageProcessor(object):
         self.image = np.array(image_base, dtype=np.uint16)
 
     def process_image(self):
-        self.rotated_image, self.main_channel_angle, self.channel_centers, self.growthlane_rois = preprocessing.process_image(
-            self.image, self.growthlane_length_threshold, main_channel_angle=self.main_channel_angle,
-            roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
+        self.rotated_image, self.main_channel_angle = preprocessing.get_rotated_image(
+            self.image, main_channel_angle=self.main_channel_angle)
+
+        if self.gl_detection_template:
+                self.growthlane_rois = preprocessing.get_gl_rois_using_template(self.rotated_image,
+                                                     self.gl_detection_template,
+                                                     roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
+        else:
+            self.growthlane_rois = preprocessing.get_gl_regions(self.rotated_image,
+                           growthlane_length_threshold=self.growthlane_length_threshold,
+                           roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
+
+        self.growthlane_rois = preprocessing.rotate_rois(self.image, self.growthlane_rois, self.main_channel_angle)
+        self.growthlane_rois = preprocessing.remove_rois_not_fully_in_image(self.image, self.growthlane_rois)
+
         self.reset_growthlane_roi_ids()
         self.get_image_registration_template()
 

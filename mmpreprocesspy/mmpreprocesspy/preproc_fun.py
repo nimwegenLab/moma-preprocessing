@@ -12,6 +12,7 @@ import skimage.transform
 from mmpreprocesspy.MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
 from mmpreprocesspy.image_preprocessing import ImagePreprocessor
 from mmpreprocesspy.moma_image_processing import MomaImageProcessor
+from mmpreprocesspy.GlDetectionTemplate import GlDetectionTemplate
 import cv2 as cv
 
 
@@ -75,7 +76,8 @@ def preproc_fun(data_folder,
                 gaussian_sigma=None,
                 growthlane_length_threshold=0,
                 main_channel_angle=None,
-                roi_boundary_offset_at_mother_cell=None):
+                roi_boundary_offset_at_mother_cell=None,
+                gl_detection_template_path=None):
 
     # create a micro-manager image object
     dataset = MicroManagerOmeTiffReader(data_folder)
@@ -125,13 +127,16 @@ def preproc_fun(data_folder,
 
         # Process first image to find ROIs, etc.
         imageProcessor = MomaImageProcessor()
+        if gl_detection_template_path:
+            gl_detection_template = GlDetectionTemplate()
+            gl_detection_template.load_config(gl_detection_template_path)
+            imageProcessor.gl_detection_template = gl_detection_template
         imageProcessor.load_numpy_image_array(first_phc_image)
         imageProcessor.growthlane_length_threshold = growthlane_length_threshold
         imageProcessor.main_channel_angle = main_channel_angle
         imageProcessor.roi_boundary_offset_at_mother_cell = roi_boundary_offset_at_mother_cell
 
         imageProcessor.process_image()
-        channel_centers = imageProcessor.channel_centers
 
         # store GL index image
         if not os.path.exists(os.path.dirname(folder_to_save)):
@@ -142,10 +147,6 @@ def preproc_fun(data_folder,
 
         # create empty kymographs to fill
         kymographs = [np.zeros((roi.length, nrOfFrames, len(colors))) for roi in imageProcessor.growthlane_rois]
-        metadataK = {'channels': len(colors), 'slices': 1, 'frames': len(channel_centers), 'hyperstack': True,
-                     'loop': False}
-
-        frame_counter = np.zeros(len(channel_centers))  # stores per growthlane, the number of processed images
 
         # initialize list of images to hold the final GL crop images
         nr_of_timesteps = maxframe - minframe

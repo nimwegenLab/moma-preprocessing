@@ -15,6 +15,52 @@ class TestGlDetectionTemplate(TestCase):
         sut = self.support__get_sut_with_config()
         self.assertEquals(sut.pixel_size, 0.065)
 
+    def test__absolute_image_path__returns_correct_image(self):
+        import os
+        import json
+
+        path = self.support__get_full_path_to_config()
+        with open(path) as fp:
+            config_deserialized = json.load(fp)
+        expected_path = os.path.normpath(os.path.join(os.path.dirname(path), config_deserialized['template_image_path']))
+
+        sut = self.support__get_sut_with_config()
+        actual_path = sut.absolute_image_path
+        self.assertEqual(actual_path, expected_path)
+
+    def test____get_absolute_path__returns_absolute_path_for_absolute_image_path(self):
+        sut = self.support__get_sut_with_config()
+        config_path = '/absolute/path/to/config_file.json'
+        expected_absolute_image_path = '/absolute/path/to/image'
+        actual = sut._get_absolute_path(config_path, expected_absolute_image_path)
+        self.assertEqual(actual, expected_absolute_image_path)
+
+    def test____get_absolute_path__returns_correct_absolute_path_for_relative_image_path(self):
+        import os
+        sut = self.support__get_sut_with_config()
+        config_path = '/absolute/path/to/config_file.json'
+        relative_image_path = './relative/path/to/image'
+        expected_absolute_image_path = os.path.normpath(os.path.join(os.path.dirname(config_path), relative_image_path))
+
+        actual = sut._get_absolute_path(config_path, relative_image_path)
+
+        self.assertEqual(actual, expected_absolute_image_path)
+
+    def test__template_image__returns_correct_image(self):
+        import os
+        import json
+        import tifffile as tff
+        import numpy as np
+        path = self.support__get_full_path_to_config()
+        with open(path) as fp:
+            config_deserialized = json.load(fp)
+        image_path = os.path.join(os.path.dirname(path), config_deserialized['template_image_path'])
+        expected_image = tff.imread(image_path)
+
+        sut = self.support__get_sut_with_config()
+
+        np.testing.assert_equal(sut.template_image, expected_image)
+
     def test__nr_of_gl_regions__is_correct(self):
         sut = self.support__get_sut_with_config()
         actual = sut.nr_of_gl_region
@@ -64,4 +110,4 @@ class TestGlDetectionTemplate(TestCase):
         return path
 
 def to_pixel(micron_value, pixel_size):
-    return int(micron_value / pixel_size)
+    return micron_value / pixel_size

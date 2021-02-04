@@ -22,6 +22,15 @@ class test_MicroManagerOmeTiffReader(TestCase):
 
 
     def test__get_image_stack__returns_zero_images_repeating_frames(self):
+        """
+        This test checks the correct behavior of MicroManagerOmeTiffReader.get_image_stack
+        for datasets that contain missing frames. This can be the case, when e.g. for fluorescence
+        channel we only record an image for every X frame to reduce photo-toxicity.
+
+        In this case MicroManagerOmeTiffReader.get_image_stack should return an all-NaN image (this is what we test).
+        :return:
+        """
+
         from mmpreprocesspy.MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
 
         test_configs = self.get_test_data___test__get_image_stack__returns_zero_images_repeating_frames()
@@ -43,10 +52,10 @@ class test_MicroManagerOmeTiffReader(TestCase):
 
                     for ind, periodicity in enumerate(periodicty_of_nonzero_frame):
                         channel_ind = channel_inds_with_missing_frames[ind]
-                        if (frame_index % periodicity) != 0:
-                            self.assertTrue(np.all(np.isnan(current_frame[:, :, channel_ind])), msg='image data is not all NaN')  # frames that are not multiples of periodicity should all NaNs
+                        if (frame_index % periodicity) == 0:
+                            self.assertFalse(np.any(current_frame[:, :, channel_ind] == np.nan), msg='image data contans nan values')  # frames that are multiples of periodicity should not contain nans
                         else:
-                            self.assertFalse(np.any(np.isnan(current_frame[:, :, channel_ind])), msg='image data contains NaN')  # frames that are multiples of periodicity should not have NaN values
+                            self.assertTrue(np.all(np.isnan(current_frame[:, :, channel_ind])), msg='image is not all nan')
 
 
     def get_test_data___test__get_image_stack__returns_zero_images_repeating_frames(self):
