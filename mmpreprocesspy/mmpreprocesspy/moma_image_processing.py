@@ -20,10 +20,6 @@ class MomaImageProcessor(object):
         self.rotated_image = None
         self.main_channel_angle = None
         self.growthlane_rois = []
-        self.template = None
-        self.hor_mid = None
-        self.hor_width = None
-        self.mid_row = None
         self.vertical_shift = None
         self.horizontal_shift = None
         self.gl_orientation_search_area = 80  # TODO: this is a MM specific parameter; should be made configurable
