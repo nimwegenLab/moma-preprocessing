@@ -28,6 +28,24 @@ class TestGlDetectionTemplate(TestCase):
         actual_path = sut.absolute_image_path
         self.assertEqual(actual_path, expected_path)
 
+    def test____get_absolute_path__returns_absolute_path_for_absolute_image_path(self):
+        sut = self.support__get_sut_with_config()
+        config_path = '/absolute/path/to/config_file.json'
+        expected_absolute_image_path = '/absolute/path/to/image'
+        actual = sut._get_absolute_path(config_path, expected_absolute_image_path)
+        self.assertEqual(actual, expected_absolute_image_path)
+
+    def test____get_absolute_path__returns_correct_absolute_path_for_relative_image_path(self):
+        import os
+        sut = self.support__get_sut_with_config()
+        config_path = '/absolute/path/to/config_file.json'
+        relative_image_path = './relative/path/to/image'
+        expected_absolute_image_path = os.path.normpath(os.path.join(os.path.dirname(config_path), relative_image_path))
+
+        actual = sut._get_absolute_path(config_path, relative_image_path)
+
+        self.assertEqual(actual, expected_absolute_image_path)
+
     def test__template_image__returns_correct_image(self):
         import os
         import json

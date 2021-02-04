@@ -45,7 +45,7 @@ class GlDetectionTemplate(object):
 
     @property
     def absolute_image_path(self):
-        return os.path.normpath(os.path.join(os.path.dirname(self.config_path), self.config_dict['template_image_path']))
+        return self._get_absolute_path(self.config_path, self.config_dict['template_image_path'])
 
     @property
     def template_image(self) -> np.ndarray:
@@ -75,3 +75,8 @@ class GlDetectionTemplate(object):
         for index in range(len(self.config_dict['gl_regions'])):
             regions.append(self.get_gl_region_in_pixel(index))
         return regions
+
+    def _get_absolute_path(self, config_path, template_image_path):
+        if os.path.isabs(template_image_path):
+            return template_image_path
+        return os.path.normpath(os.path.join(os.path.dirname(config_path), template_image_path))  # construct absolute path from path to the config files; we assume the image-location is given relative to the location of the template config-file
