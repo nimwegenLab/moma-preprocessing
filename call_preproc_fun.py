@@ -35,6 +35,8 @@ parser.add_argument("-glt", "--growthlanelengththreshold", type=int,
                     help="minimum length to be considered as a growth-lane")
 parser.add_argument("-roioffsetmc", "--roi_boundary_offset_at_mother_cell", type=int,
                     help="shift the detected position of the ROI at the location of the mother-cell")
+parser.add_argument("-gldtp", "--gl_detection_template_path", type=str,
+                    help="")
 args = parser.parse_args()
 
 # overwrite sys.stdout and sys.stderr for logging
@@ -71,5 +73,6 @@ posval = [posval]
 
 preproc_fun(args.input, args.output, positions=posval, minframe=args.timeframeminimum, maxframe=args.timeframemaximum,
             flatfield_directory=args.flatfieldpath, growthlane_length_threshold=args.growthlanelengththreshold,
-            main_channel_angle=args.rotation, roi_boundary_offset_at_mother_cell=args.roi_boundary_offset_at_mother_cell)
+            main_channel_angle=args.rotation, roi_boundary_offset_at_mother_cell=args.roi_boundary_offset_at_mother_cell,
+            gl_detection_template_path=args.gl_detection_template_path)
 
