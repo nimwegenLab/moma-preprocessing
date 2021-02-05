@@ -28,6 +28,7 @@ class MomaImageProcessor(object):
         self.growthlane_length_threshold = 0
         self.roi_boundary_offset_at_mother_cell = 0
         self.gl_detection_template = None
+        self.gl_regions = None
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -42,13 +43,13 @@ class MomaImageProcessor(object):
             self.image, main_channel_angle=self.main_channel_angle)
 
         if self.gl_detection_template:
-                self.growthlane_rois = preprocessing.get_gl_rois_using_template(self.rotated_image,
-                                                     self.gl_detection_template,
-                                                     roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
+            self.growthlane_rois, self.gl_regions = preprocessing.get_gl_rois_using_template(self.rotated_image,
+                                                                                             self.gl_detection_template,
+                                                                                             roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
         else:
-            self.growthlane_rois = preprocessing.get_gl_regions(self.rotated_image,
-                           growthlane_length_threshold=self.growthlane_length_threshold,
-                           roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
+            self.growthlane_rois, self.gl_regions = preprocessing.get_gl_regions(self.rotated_image,
+                                                                                 growthlane_length_threshold=self.growthlane_length_threshold,
+                                                                                 roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
 
         self.growthlane_rois = preprocessing.rotate_rois(self.image, self.growthlane_rois, self.main_channel_angle)
         self.growthlane_rois = preprocessing.remove_rois_not_fully_in_image(self.image, self.growthlane_rois)
@@ -98,3 +99,17 @@ class MomaImageProcessor(object):
 
         return preprocessing.get_translation_matrix(self.horizontal_shift, self.vertical_shift)
 
+    def normalize_image(self, image):
+        """
+        This method registers the input `image` and rotates it, so that the
+        GL regions are correctly positioned on the resulting image.
+
+        :param unmodified_image:
+        :return:
+        """
+
+        imageProcessor.determine_image_shift(original_image)
+        shifted_image = imageProcessor._translate_image(original_image)
+        shifted_image = imageProcessor._rotate_image(shifted_image)
+
+        pass

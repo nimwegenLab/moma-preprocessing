@@ -38,23 +38,25 @@ def get_gl_regions(image_rotated, growthlane_length_threshold=0, roi_boundary_of
                                        minimum_required_growthlane_length=growthlane_length_threshold,
                                        roi_boundary_offset_at_mother_cell=roi_boundary_offset_at_mother_cell)
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rotated, region_list)
-    return growthlane_rois
+    return growthlane_rois, region_list
 
 def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetectionTemplate, roi_boundary_offset_at_mother_cell=0):
     normalized_cross_correlation = match_template(image_rotated, gl_detection_template.template_image, pad_input=True)
     horizontal_index_of_max_correlation = np.argmax(np.max(normalized_cross_correlation, axis=0))
     vertical_index_of_max_correlation = np.argmax(np.max(normalized_cross_correlation, axis=1))
 
+    gl_regions = []
     gl_rois = []
     for region in gl_detection_template.get_gl_regions_in_pixel():
         gl_region_start, gl_region_end = calculate_gl_region(region, horizontal_index_of_max_correlation, gl_detection_template.template_image.shape)
+        gl_regions.append(DataRegion(start=gl_region_start, end=gl_region_end, width=gl_region_end-gl_region_start))
         vertical_gl_centers = calculate_vertical_gl_centers(region, vertical_index_of_max_correlation,
                                                             gl_detection_template.template_image.shape,
                                                             image_rotated.shape)
         rois_in_region = get_growthlane_rois(vertical_gl_centers, gl_region_start, gl_region_end)
         gl_rois += rois_in_region
     gl_rois = fix_roi_ids(gl_rois)
-    return gl_rois
+    return gl_rois, gl_regions
 
 
 def calculate_vertical_gl_centers(gl_region,
@@ -384,6 +386,9 @@ def is_debugging():
         return True
     except ImportError:
         return False
+
+def debug_env():
+    import matplotlib.pyplot as plt
 
 def filter_date_regions_by_width(region_list, minimum_region_width):
     """

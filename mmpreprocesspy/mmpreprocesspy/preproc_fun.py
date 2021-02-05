@@ -179,6 +179,12 @@ def preproc_fun(data_folder,
                 color_image_stack_corr = np.append(color_image_stack_corr, color_image_stack[:, :, 1:], 2)  # append original channel values
                 color_image_stack = color_image_stack_corr
 
+
+            # if normalization_mode is 1:
+            #     phc_image = color_image_stack[:, :, 0]
+            #     imageProcessor.get_registered_image()
+            #     pass
+
             append_gl_roi_images(frame_index, growthlane_rois, gl_image_dict, color_image_stack)
             append_to_kymo_graph(frame_index, growthlane_rois, kymo_image_dict, color_image_stack)
 
