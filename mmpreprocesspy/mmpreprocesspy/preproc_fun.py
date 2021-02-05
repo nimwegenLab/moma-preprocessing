@@ -179,6 +179,9 @@ def preproc_fun(data_folder,
                 color_image_stack_corr = np.append(color_image_stack_corr, color_image_stack[:, :, 1:], 2)  # append original channel values
                 color_image_stack = color_image_stack_corr
 
+            phc_image = color_image_stack[:, :, 0]
+            image_normalized, normalization_range = imageProcessor.normalize_image(phc_image)
+            color_image_stack[:, :, 0] = image_normalized
 
             # if normalization_mode is 1:
             #     phc_image = color_image_stack[:, :, 0]
