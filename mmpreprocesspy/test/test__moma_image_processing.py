@@ -61,12 +61,8 @@ class test_MomaImageProcessor(TestCase):
 
         # shifted_image = imageProcessor.get_registered_image(original_image)
 
+        image_normalized, normalization_range = imageProcessor.normalize_image(original_image)
 
-        imageProcessor.determine_image_shift(original_image)
-        shifted_image = imageProcessor._translate_image(original_image)
-        shifted_image = imageProcessor._rotate_image(shifted_image)
-
-        imageProcessor.normalize_image(shifted_image)
 
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots(1, 2, figsize=(5, 10))

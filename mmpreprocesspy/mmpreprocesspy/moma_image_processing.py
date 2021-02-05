@@ -11,6 +11,15 @@ import mmpreprocesspy.dev_auxiliary_functions as aux
 # import matplotlib.pyplot as plt
 from pystackreg import StackReg
 import matplotlib.pyplot as plt
+from scipy.signal import find_peaks
+
+def is_debugging():
+    try:
+        import pydevd
+        return True
+    except ImportError:
+        return False
+
 
 class MomaImageProcessor(object):
     """ MomaImageProcessor encapsulates the processing of a Mothermachine image. """
@@ -108,8 +117,84 @@ class MomaImageProcessor(object):
         :return:
         """
 
-        imageProcessor.determine_image_shift(original_image)
-        shifted_image = imageProcessor._translate_image(original_image)
-        shifted_image = imageProcessor._rotate_image(shifted_image)
+        offset = 100
 
-        pass
+        original_image = image
+
+        self.determine_image_shift(image)
+        image_registered = self._translate_image(image)
+        image_registered = self._rotate_image(image_registered)
+
+        if is_debugging():
+            import matplotlib.pyplot as plt
+            fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+            ax[0].imshow(original_image, cmap='gray')
+            ax[1].imshow(image_registered, cmap='gray')
+            for region in self.gl_regions:
+                ax[1].axvline(region.start+offset, color='r')
+                ax[1].axvline(region.end-offset, color='g')
+                pass
+            plt.show()
+
+        intensity_profiles = []
+        for region in self.gl_regions:
+            intensity_profile_region = image_registered[:, region.start+offset:region.end-offset]
+            intensity_profiles.append(np.mean(intensity_profile_region, axis=1))
+
+        if is_debugging():
+            for ind, profile in enumerate(intensity_profiles):
+                plt.plot(profile, label=f'region {ind}')
+            plt.legend()
+            plt.show()
+
+        min_vals, max_vals = [], []
+        for ind, profile in enumerate(intensity_profiles):
+            min_val, max_val = self.get_pdms_and_empty_channel_intensities(profile)
+            min_vals.append(min_val)
+            max_vals.append(max_val)
+
+        if is_debugging():
+            for ind, profile in enumerate(intensity_profiles):
+                plt.plot(profile, label=f'region {ind}')
+                plt.scatter(np.argwhere(profile == min_vals[ind]), min_vals[ind], color='r')
+                plt.scatter(np.argwhere(profile == max_vals[ind]), max_vals[ind], color='g')
+            plt.legend()
+            plt.show()
+
+        min_reference_value = np.min(min_vals)
+        max_reference_value = np.max(max_vals)
+        image_normalized = self._normalize_image_with_min_and_max_values(image, min_reference_value, max_reference_value)
+        normalization_range = (min_reference_value, max_reference_value)
+        return image_normalized, normalization_range
+
+    def get_pdms_and_empty_channel_intensities(self, intensity_profile):
+        # df_means_smoothed = pd.DataFrame(df_means.apply(lambda x: smooth(x, box_pts)))
+        # intensity_profile = self.smooth(x, box_pts)
+        mean_peak_inds = find_peaks(intensity_profile, distance=25)[0]
+        mean_peak_vals = intensity_profile[mean_peak_inds]
+
+        if is_debugging():
+            plt.plot(intensity_profile)
+            plt.scatter(mean_peak_inds, mean_peak_vals)
+            plt.show()
+
+        min = mean_peak_vals.min()
+        max = mean_peak_vals.max()
+        range = (max - min)
+        lim1 = min + range * 1 / 4
+        lim2 = min + range * 3 / 4
+
+        pdms_peak_vals = mean_peak_vals[mean_peak_vals < lim1]
+        empty_peak_vals = mean_peak_vals[mean_peak_vals > lim2]
+
+        pdms_peak_min_value = pdms_peak_vals.max()
+        empty_peak_max_value = empty_peak_vals.max()
+        return pdms_peak_min_value, empty_peak_max_value
+
+    def _normalize_image_with_min_and_max_values(self, image, pdms_intensity, empty_intensity):
+        return (image - pdms_intensity) / (empty_intensity - pdms_intensity)
+
+    def smooth(self, y, box_pts):
+        box = np.ones(box_pts)/box_pts
+        y_smooth = np.convolve(y, box, mode='same')
+        return y_smooth

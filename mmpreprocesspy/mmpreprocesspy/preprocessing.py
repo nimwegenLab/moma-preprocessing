@@ -387,9 +387,6 @@ def is_debugging():
     except ImportError:
         return False
 
-def debug_env():
-    import matplotlib.pyplot as plt
-
 def filter_date_regions_by_width(region_list, minimum_region_width):
     """
     Filters removes data regions from region_list with width < minimum_region_width.
