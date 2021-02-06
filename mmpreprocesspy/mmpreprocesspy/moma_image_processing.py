@@ -127,27 +127,27 @@ class MomaImageProcessor(object):
         image_registered = self._translate_image(image)
         image_registered = self._rotate_image(image_registered)
 
-        if is_debugging():
-            import matplotlib.pyplot as plt
-            fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-            ax[0].imshow(original_image, cmap='gray')
-            ax[1].imshow(image_registered, cmap='gray')
-            for region in self.gl_regions:
-                ax[1].axvline(region.start+offset, color='r')
-                ax[1].axvline(region.end-offset, color='g')
-                pass
-            plt.show()
+        # if is_debugging():
+        #     import matplotlib.pyplot as plt
+        #     fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+        #     ax[0].imshow(original_image, cmap='gray')
+        #     ax[1].imshow(image_registered, cmap='gray')
+        #     for region in self.gl_regions:
+        #         ax[1].axvline(region.start+offset, color='r')
+        #         ax[1].axvline(region.end-offset, color='g')
+        #         pass
+        #     plt.show()
 
         intensity_profiles = []
         for region in self.gl_regions:
             intensity_profile_region = image_registered[:, region.start+offset:region.end-offset]
             intensity_profiles.append(np.mean(intensity_profile_region, axis=1))
 
-        if is_debugging():
-            for ind, profile in enumerate(intensity_profiles):
-                plt.plot(profile, label=f'region {ind}')
-            plt.legend()
-            plt.show()
+        # if is_debugging():
+        #     for ind, profile in enumerate(intensity_profiles):
+        #         plt.plot(profile, label=f'region {ind}')
+        #     plt.legend()
+        #     plt.show()
 
         min_vals, max_vals = [], []
         for ind, profile in enumerate(intensity_profiles):
@@ -155,13 +155,13 @@ class MomaImageProcessor(object):
             min_vals.append(min_val)
             max_vals.append(max_val)
 
-        if is_debugging():
-            for ind, profile in enumerate(intensity_profiles):
-                plt.plot(profile, label=f'region {ind}')
-                plt.scatter(np.argwhere(profile == min_vals[ind]), min_vals[ind], color='r')
-                plt.scatter(np.argwhere(profile == max_vals[ind]), max_vals[ind], color='g')
-            plt.legend()
-            plt.show()
+        # if is_debugging():
+        #     for ind, profile in enumerate(intensity_profiles):
+        #         plt.plot(profile, label=f'region {ind}')
+        #         plt.scatter(np.argwhere(profile == min_vals[ind]), min_vals[ind], color='r')
+        #         plt.scatter(np.argwhere(profile == max_vals[ind]), max_vals[ind], color='g')
+        #     plt.legend()
+        #     plt.show()
 
         min_reference_value = np.min(min_vals)
         max_reference_value = np.max(max_vals)
@@ -175,8 +175,6 @@ class MomaImageProcessor(object):
                                                          position_nr,
                                                          frame_nr,
                                                          output_path)
-
-
 
         return image_normalized, normalization_range
 
@@ -197,8 +195,8 @@ class MomaImageProcessor(object):
                                                     position_nr,
                                                     frame_nr,
                                                     output_path):
-        print("stop")
-
+        # print("stop")
+        #
         # df_means_smoothed = pd.DataFrame(df_means.apply(lambda x: smooth(x, box_pts)))
         # intensity_profile = self.smooth(x, box_pts)
         for region_ind, intensity_profile in enumerate(intensity_profiles):

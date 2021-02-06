@@ -61,7 +61,7 @@ class test_MomaImageProcessor(TestCase):
 
         # shifted_image = imageProcessor.get_registered_image(original_image)
 
-        output_path = os.path.join(os.path.dirname(__file__), 'resources/data__test__moma_image_processing/outptut')
+        output_path = os.path.join(os.path.dirname(__file__), 'resources/data__test__moma_image_processing/output')
         frame_nr = 0
         position = 0
         image_normalized, normalization_range = imageProcessor.normalize_image_and_save_log_data(original_image,
