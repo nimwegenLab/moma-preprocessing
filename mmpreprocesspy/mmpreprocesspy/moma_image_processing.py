@@ -1,4 +1,5 @@
 import os
+import csv
 import operator
 import skimage
 from mmpreprocesspy import preprocessing
@@ -167,19 +168,34 @@ class MomaImageProcessor(object):
         image_normalized = self._normalize_image_with_min_and_max_values(image, min_reference_value, max_reference_value)
         normalization_range = (min_reference_value, max_reference_value)
 
+        self.save_normaliation_range_to_csv_log(normalization_range, position_nr, frame_nr, output_path)
+
         self.plot_and_save_intensity_profiles_with_peaks(intensity_profiles,
                                                          normalization_range,
-                                                         frame_nr,
                                                          position_nr,
+                                                         frame_nr,
                                                          output_path)
 
+
+
         return image_normalized, normalization_range
+
+    def save_normaliation_range_to_csv_log(self,
+                                           normalization_range,
+                                           position_nr,
+                                           frame_nr,
+                                           output_path):
+        path = os.path.join(output_path, f'intensity_normalization_ranges_pos_{position_nr}.csv')
+        with open(path, mode='w') as normalization_ranges_file:
+            employee_writer = csv.writer(normalization_ranges_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            employee_writer.writerow([frame_nr, np.round(normalization_range[0], decimals=2), np.round(normalization_range[1], decimals=2)])
+        pass
 
     def plot_and_save_intensity_profiles_with_peaks(self,
                                                     intensity_profiles,
                                                     normalization_range,
-                                                    frame_nr,
                                                     position_nr,
+                                                    frame_nr,
                                                     output_path):
         print("stop")
 
@@ -212,9 +228,9 @@ class MomaImageProcessor(object):
             plt.scatter(empty_peak_inds, empty_peak_vals, color='g')
 
             if normalization_range[0] in intensity_profile:
-                plt.scatter(np.argwhere(intensity_profile == normalization_range[0]), normalization_range[0], color='k')
+                plt.scatter(np.argwhere(intensity_profile == normalization_range[0]), normalization_range[0], color='k', label='norm min')
             if normalization_range[1] in intensity_profile:
-                plt.scatter(np.argwhere(intensity_profile == normalization_range[1]), normalization_range[1], color='k')
+                plt.scatter(np.argwhere(intensity_profile == normalization_range[1]), normalization_range[1], color='k', label='norm max')
 
             plt.axhline(np.median(pdms_peak_vals), linestyle='--', color='r', label='pdms median')
             plt.axhline(np.median(empty_peak_vals), linestyle='--', color='g', label='empty median')
