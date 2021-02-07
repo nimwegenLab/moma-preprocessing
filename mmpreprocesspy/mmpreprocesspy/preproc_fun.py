@@ -26,6 +26,19 @@ def get_position_folder_path(result_base_path, indp):
     """
     return result_base_path + '/' + 'Pos' + str(indp) + '/'
 
+def get_normalization_log_folder_path(result_base_path, indp):
+    """
+    Return the path to the folder, where we will save log-data about how the
+    was calcuatedd and performed normalization.
+
+    :param result_base_path:
+    :param indp:
+    :return:
+    """
+    folder_path = os.path.normpath(os.path.join(result_base_path, 'Pos' + str(indp) + '_normalization_log'))
+    os.makedirs(folder_path, exist_ok=True)
+    return folder_path
+
 def get_gl_folder_path(result_base_path, indp, gl_index):
     """
     Return path to the folder containing the growthlane and kymo image stacks.
@@ -77,7 +90,8 @@ def preproc_fun(data_folder,
                 growthlane_length_threshold=0,
                 main_channel_angle=None,
                 roi_boundary_offset_at_mother_cell=None,
-                gl_detection_template_path=None):
+                gl_detection_template_path=None,
+                normalization_config_path=None):
 
     # create a micro-manager image object
     dataset = MicroManagerOmeTiffReader(data_folder)
@@ -178,6 +192,17 @@ def preproc_fun(data_folder,
                 color_image_stack_corr = np.append(color_image_stack[:, :, 0, np.newaxis], corrected_colors, 2)  # append corrected channel values
                 color_image_stack_corr = np.append(color_image_stack_corr, color_image_stack[:, :, 1:], 2)  # append original channel values
                 color_image_stack = color_image_stack_corr
+
+            if normalization_config_path:
+                phc_image = color_image_stack[:, :, 0]
+                output_path = get_normalization_log_folder_path(folder_to_save, position_index)
+                image_normalized, normalization_range = imageProcessor.normalize_image_and_save_log_data(phc_image, frame_index, position_index, output_path)
+                color_image_stack[:, :, 0] = image_normalized
+
+            # if normalization_mode is 1:
+            #     phc_image = color_image_stack[:, :, 0]
+            #     imageProcessor.get_registered_image()
+            #     pass
 
             append_gl_roi_images(frame_index, growthlane_rois, gl_image_dict, color_image_stack)
             append_to_kymo_graph(frame_index, growthlane_rois, kymo_image_dict, color_image_stack)

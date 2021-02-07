@@ -37,6 +37,8 @@ parser.add_argument("-roioffsetmc", "--roi_boundary_offset_at_mother_cell", type
                     help="shift the detected position of the ROI at the location of the mother-cell")
 parser.add_argument("-gldtp", "--gl_detection_template_path", type=str,
                     help="")
+parser.add_argument("-normconfpath", "--normalization_config_path", type=str,
+                    help="")
 args = parser.parse_args()
 
 # overwrite sys.stdout and sys.stderr for logging
@@ -67,6 +69,9 @@ print("roi_boundary_offset_at_mother_cell:")
 print(args.roi_boundary_offset_at_mother_cell)
 print("gl_detection_template_path:")
 print(args.gl_detection_template_path)
+print("normalization_config_path:")
+print(args.normalization_config_path)
+
 
 # parse position argument; IMPORTANT: this only works for a single position argument
 res = re.match('Pos[0]*(\d+)', args.positions)
@@ -76,5 +81,6 @@ posval = [posval]
 preproc_fun(args.input, args.output, positions=posval, minframe=args.timeframeminimum, maxframe=args.timeframemaximum,
             flatfield_directory=args.flatfieldpath, growthlane_length_threshold=args.growthlanelengththreshold,
             main_channel_angle=args.rotation, roi_boundary_offset_at_mother_cell=args.roi_boundary_offset_at_mother_cell,
-            gl_detection_template_path=args.gl_detection_template_path)
+            gl_detection_template_path=args.gl_detection_template_path,
+            normalization_config_path=args.normalization_config_path)
 
