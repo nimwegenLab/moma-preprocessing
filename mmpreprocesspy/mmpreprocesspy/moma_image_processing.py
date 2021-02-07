@@ -173,7 +173,7 @@ class MomaImageProcessor(object):
         image_normalized = self._normalize_image_with_min_and_max_values(image, min_reference_value, max_reference_value)
         normalization_range = (min_reference_value, max_reference_value)
 
-        self.save_normaliation_range_to_csv_log(normalization_range, position_nr, frame_nr, output_path)
+        self.save_normalization_range_to_csv_log(normalization_range, position_nr, frame_nr, output_path)
 
         self.save_image_with_region_indicators(image_registered,
                                                offset,
@@ -189,13 +189,13 @@ class MomaImageProcessor(object):
 
         return image_normalized, normalization_range
 
-    def save_normaliation_range_to_csv_log(self,
-                                           normalization_range,
-                                           position_nr,
-                                           frame_nr,
-                                           output_path):
+    def save_normalization_range_to_csv_log(self,
+                                            normalization_range,
+                                            position_nr,
+                                            frame_nr,
+                                            output_path):
         path = os.path.join(output_path, f'intensity_normalization_ranges_pos_{position_nr}.csv')
-        with open(path, mode='w') as normalization_ranges_file:
+        with open(path, mode='a') as normalization_ranges_file:
             employee_writer = csv.writer(normalization_ranges_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([frame_nr, np.round(normalization_range[0], decimals=2), np.round(normalization_range[1], decimals=2)])
         pass
