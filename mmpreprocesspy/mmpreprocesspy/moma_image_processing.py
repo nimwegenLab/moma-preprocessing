@@ -218,6 +218,8 @@ class MomaImageProcessor(object):
                 plt.axvline(region.start+offset, color='r')
                 plt.axvline(region.end-offset, color='g')
 
+            plt.title(f'region indicators: pos {position_nr}, frame {frame_nr}')
+
             figure_canvas_handle = plt.gcf().canvas
             result = self.convert_figure_to_numpy_array(figure_canvas_handle)
             self._gl_region_indicator_images.append(result)
@@ -262,7 +264,7 @@ class MomaImageProcessor(object):
             empty_peak_vals = mean_peak_vals[mean_peak_vals > lim2]
 
             # plt.ioff()
-            plt.plot(intensity_profile, label=f'region {region_ind}')
+            plt.plot(intensity_profile)
             plt.scatter(mean_peak_inds, mean_peak_vals)
 
             sorter = np.argsort(intensity_profile)
@@ -273,16 +275,19 @@ class MomaImageProcessor(object):
             plt.scatter(pdms_peak_inds, pdms_peak_vals, color='r')
             plt.scatter(empty_peak_inds, empty_peak_vals, color='g')
 
-            if normalization_range[0] in intensity_profile:
-                plt.scatter(np.argwhere(intensity_profile == normalization_range[0]), normalization_range[0], color='k', label='norm min')
+            plt.axhline(np.median(pdms_peak_vals), linestyle='--', color='r', label='pdms median')
+            plt.axhline(np.median(empty_peak_vals), linestyle='--', color='g', label='empty median')
+
+            if normalization_range[0] == np.median(pdms_peak_vals):
+                plt.axhline(np.median(pdms_peak_vals), color='k', linestyle='--', label='norm min')
             if normalization_range[1] in intensity_profile:
                 plt.scatter(np.argwhere(intensity_profile == normalization_range[1]), normalization_range[1], color='k', label='norm max')
 
-            plt.axhline(np.median(pdms_peak_vals), linestyle='--', color='r', label='pdms median')
-            plt.axhline(np.median(empty_peak_vals), linestyle='--', color='g', label='empty median')
+            plt.ylim([0, np.max(empty_peak_vals) + 0.1 * np.max(empty_peak_vals)])
             plt.ylabel('intensity [a.u.]')
             plt.xlabel('vertical position [px]')
             plt.legend(loc='center right')
+            plt.title(f'intensity profile: pos {position_nr}, frame {frame_nr}, region {region_ind}')
             # plt.show()
 
             figure_canvas_handle = plt.gcf().canvas
@@ -318,7 +323,7 @@ class MomaImageProcessor(object):
         pdms_peak_vals = mean_peak_vals[mean_peak_vals < lim1]
         empty_peak_vals = mean_peak_vals[mean_peak_vals > lim2]
 
-        pdms_peak_min_value = pdms_peak_vals.max()
+        pdms_peak_min_value = np.median(pdms_peak_vals)
         empty_peak_max_value = empty_peak_vals.max()
         return pdms_peak_min_value, empty_peak_max_value
 

@@ -90,7 +90,8 @@ def preproc_fun(data_folder,
                 growthlane_length_threshold=0,
                 main_channel_angle=None,
                 roi_boundary_offset_at_mother_cell=None,
-                gl_detection_template_path=None):
+                gl_detection_template_path=None,
+                normalization_config_path=None):
 
     # create a micro-manager image object
     dataset = MicroManagerOmeTiffReader(data_folder)
@@ -192,10 +193,11 @@ def preproc_fun(data_folder,
                 color_image_stack_corr = np.append(color_image_stack_corr, color_image_stack[:, :, 1:], 2)  # append original channel values
                 color_image_stack = color_image_stack_corr
 
-            phc_image = color_image_stack[:, :, 0]
-            output_path = get_normalization_log_folder_path(folder_to_save, position_index)
-            image_normalized, normalization_range = imageProcessor.normalize_image_and_save_log_data(phc_image, frame_index, position_index, output_path)
-            color_image_stack[:, :, 0] = image_normalized
+            if normalization_config_path:
+                phc_image = color_image_stack[:, :, 0]
+                output_path = get_normalization_log_folder_path(folder_to_save, position_index)
+                image_normalized, normalization_range = imageProcessor.normalize_image_and_save_log_data(phc_image, frame_index, position_index, output_path)
+                color_image_stack[:, :, 0] = image_normalized
 
             # if normalization_mode is 1:
             #     phc_image = color_image_stack[:, :, 0]
