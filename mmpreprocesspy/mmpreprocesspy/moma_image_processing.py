@@ -14,6 +14,9 @@ import mmpreprocesspy.dev_auxiliary_functions as aux
 from pystackreg import StackReg
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
+from tifffile import TiffWriter
+import tifffile as tff
+
 
 def is_debugging():
     try:
@@ -40,6 +43,9 @@ class MomaImageProcessor(object):
         self.roi_boundary_offset_at_mother_cell = 0
         self.gl_detection_template = None
         self.gl_regions = None
+        self._gl_region_indicator_images = []
+        self._intensity_profiles = [[], []]  # we assume that at max. we will have two regions: one to each side of the main channel
+        self.image_save_fequency = 2
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -128,7 +134,6 @@ class MomaImageProcessor(object):
         image_registered = self._rotate_image(image_registered)
 
         # if is_debugging():
-        #     import matplotlib.pyplot as plt
         #     fig, ax = plt.subplots(1, 2, figsize=(10, 5))
         #     ax[0].imshow(original_image, cmap='gray')
         #     ax[1].imshow(image_registered, cmap='gray')
@@ -170,6 +175,12 @@ class MomaImageProcessor(object):
 
         self.save_normaliation_range_to_csv_log(normalization_range, position_nr, frame_nr, output_path)
 
+        self.save_image_with_region_indicators(image_registered,
+                                               offset,
+                                               position_nr,
+                                               frame_nr,
+                                               output_path)
+
         self.plot_and_save_intensity_profiles_with_peaks(intensity_profiles,
                                                          normalization_range,
                                                          position_nr,
@@ -189,12 +200,49 @@ class MomaImageProcessor(object):
             employee_writer.writerow([frame_nr, np.round(normalization_range[0], decimals=2), np.round(normalization_range[1], decimals=2)])
         pass
 
+    def convert_figure_to_numpy_array(self, canvas):
+        canvas.draw()
+        data = np.frombuffer(canvas.tostring_rgb(), dtype=np.uint8)
+        image = data.reshape(canvas.get_width_height()[::-1] + (3,))
+        return image
+
+    def save_image_with_region_indicators(self,
+                                          image_registered,
+                                          offset,
+                                          position_nr,
+                                          frame_nr,
+                                          output_path):
+            # plt.imshow(original_image, cmap='gray')
+            plt.imshow(image_registered, cmap='gray')
+            for region in self.gl_regions:
+                plt.axvline(region.start+offset, color='r')
+                plt.axvline(region.end-offset, color='g')
+
+            figure_canvas_handle = plt.gcf().canvas
+            result = self.convert_figure_to_numpy_array(figure_canvas_handle)
+            self._gl_region_indicator_images.append(result)
+            plt.close(plt.gcf())
+
+            if frame_nr % self.image_save_fequency == 0:
+                image_to_save = np.array(self._gl_region_indicator_images)
+                tff.imwrite(os.path.join(output_path, f'region_indiator_images__pos_{position_nr}.tif'), image_to_save)
+
+            # with TiffWriter(output_path+'temp.ome.tif', bigtiff=True) as tif:
+            #     options = dict(tile=(256, 256), compression='jpeg')
+            #     tif.write(result, subifds=2, **options)
+
+            # plt.imshow(result)
+            # plt.show()
+            # plt.show()
+            # plt.savefig(os.path.join(output_path, f'region_indicator_pos_{position_nr}__frame_{frame_nr:04}.png'), bbox_inches='tight')
+
     def plot_and_save_intensity_profiles_with_peaks(self,
                                                     intensity_profiles,
                                                     normalization_range,
                                                     position_nr,
                                                     frame_nr,
                                                     output_path):
+
         # print("stop")
         #
         # df_means_smoothed = pd.DataFrame(df_means.apply(lambda x: smooth(x, box_pts)))
@@ -237,8 +285,18 @@ class MomaImageProcessor(object):
             plt.legend(loc='center right')
             # plt.show()
 
-            plt.savefig(os.path.join(output_path, f'intensity_profile_pos_{position_nr}__frame_{frame_nr:04}__region_{region_ind}.png'), bbox_inches='tight')
+            figure_canvas_handle = plt.gcf().canvas
+            result = self.convert_figure_to_numpy_array(figure_canvas_handle)
+            self._intensity_profiles[region_ind].append(result)
             plt.close(plt.gcf())
+
+            if frame_nr % self.image_save_fequency == 0:
+                image_to_save = np.array(self._intensity_profiles[region_ind])
+                path = os.path.join(output_path, f'intensity_profile__pos_{position_nr}__region_{region_ind}.tif')
+                tff.imwrite(path, image_to_save)
+
+            # plt.savefig(os.path.join(output_path, f'intensity_profile__pos_{position_nr}__frame_{frame_nr:04}__region_{region_ind}.png'), bbox_inches='tight')
+            # plt.close(plt.gcf())
 
     def get_pdms_and_empty_channel_intensities(self, intensity_profile):
         # df_means_smoothed = pd.DataFrame(df_means.apply(lambda x: smooth(x, box_pts)))
@@ -246,10 +304,10 @@ class MomaImageProcessor(object):
         mean_peak_inds = find_peaks(intensity_profile, distance=25)[0]
         mean_peak_vals = intensity_profile[mean_peak_inds]
 
-        if is_debugging():
-            plt.plot(intensity_profile)
-            plt.scatter(mean_peak_inds, mean_peak_vals)
-            plt.show()
+        # if is_debugging():
+        #     plt.plot(intensity_profile)
+        #     plt.scatter(mean_peak_inds, mean_peak_vals)
+        #     plt.show()
 
         min = mean_peak_vals.min()
         max = mean_peak_vals.max()
