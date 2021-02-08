@@ -38,9 +38,31 @@ class MicroManagerOmeTiffReader(object):
             raise LookupError(
                 "TIFF metadata contains no entry for either 'InitialPositionList' or 'StagePositions'")
         self.number_of_positions = len(self._position_names)
+        self._position_index_lut = self.generate_position_index_lut()
 
     def __del__(self):
         del self.tiff
+
+    def generate_position_index_lut(self):
+        """
+        Returns a look-up table (LUT) that maps the position-number as stored inside the
+        MicroManager OME-TIFF to the corresponding index of the image stack in self._position_series
+        and self._position_zarr.
+
+        :return: LUT
+        """
+
+        try:
+            self._position_numbers = []
+            for name in self._position_names:
+                self._position_numbers.append(int(re.match('Pos[0]*(\d+)', name)[1]))
+        except TypeError:  # TypeError is raised if the regex does not match, which happens for flat-fields.
+            self._position_numbers = list(range(len(self._position_names))) # In that case generate a one-to-one mapping
+
+        position_index_lut = dict()
+        for index_in_zarr_array, position_number in enumerate(self._position_numbers):
+            position_index_lut[position_number] = index_in_zarr_array
+        return position_index_lut
 
     def get_first_tiff_in_path(self, dir_path):
         tiffs = self.get_all_tiffs(dir_path)
@@ -104,6 +126,14 @@ class MicroManagerOmeTiffReader(object):
         else:
             raise ValueError('frame_index cannot be negative')
 
+    def get_position_series(self, position_index):
+        index = self._position_index_lut[position_index]
+        return self._position_series[index]
+
+    def get_position_zarr(self, position_index):
+        index = self._position_index_lut[position_index]
+        return self._position_zarr[index]
+
     def _get_image_stack_with_adapted_dimensions(self, position_index, frame_index):
         """
         Get image stack containing the different channels for the specified position and frame.
@@ -112,20 +142,24 @@ class MicroManagerOmeTiffReader(object):
         :param frame_index:
         :return:
         """
-        if self._position_series[position_index].axes == 'IYX':
-            image_stack = self._position_zarr[position_index][frame_index, :].astype(dtype=np.float).copy()
+
+        position_series = self.get_position_series(position_index)
+        position_zarr = self.get_position_zarr(position_index)
+
+        if position_series.axes == 'IYX':
+            image_stack = position_zarr[frame_index, :].astype(dtype=np.float).copy()
             image_stack = np.expand_dims(image_stack, 2)  # return image only has 2 dimensions (no color); append color axis as it is expected by the preprocessing algorithm
             return image_stack
-        elif self._position_series[position_index].axes == 'YX':
-            image_stack = self._position_zarr[position_index][:, :].astype(dtype=np.float).copy()  # position contains only one frame, so ignore `frame_index`
+        elif position_series.axes == 'YX':
+            image_stack = position_zarr[:, :].astype(dtype=np.float).copy()  # position contains only one frame, so ignore `frame_index`
             image_stack = np.expand_dims(image_stack, 2)  # return image only has 2 dimensions (no color); append color axis as it is expected by the preprocessing algorithm
             return image_stack
             pass
-        elif self._position_series[position_index].axes == 'CYX':
-            image_stack = self._position_zarr[position_index][:, :, :].astype(dtype=np.float).copy()
+        elif position_series.axes == 'CYX':
+            image_stack = position_zarr[:, :, :].astype(dtype=np.float).copy()
             return np.moveaxis(image_stack, 0, -1)
         else:
-            image_stack = self._position_zarr[position_index][frame_index, :].astype(dtype=np.float).copy()
+            image_stack = position_zarr[frame_index, :].astype(dtype=np.float).copy()
             return np.moveaxis(image_stack, 0, -1)
 
     def get_channels(self):
@@ -179,5 +213,5 @@ class MicroManagerOmeTiffReader(object):
         :return: number of frames
         """
 
-        position_index = 0
-        return self._position_zarr[position_index].shape[0]  # since all our our positions have the same number of frames, just return the number of frames for the first position.
+        position_zarr = self.get_position_zarr(position_index = 0)
+        return position_zarr.shape[0]  # since all our our positions have the same number of frames, just return the number of frames for the first position.

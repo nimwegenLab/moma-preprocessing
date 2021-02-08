@@ -27,7 +27,7 @@ class TestImagePreprocessor(TestCase):
         nr_of_colors = len(dataset.get_channels())
         image_stack = np.zeros((dataset.height, dataset.width, nr_of_colors))
         for color in range(1, nr_of_colors):
-            image_stack[:, :, color] = dataset.get_image_fast(channel=color, frame=0, position=0)
+            image_stack[:, :, color] = dataset.get_image_fast(channel=color, frame=0, position=6)
 
         images_to_correct = image_stack[:, :, 1:]
         processed_stack = preprocessor.process_image_stack(images_to_correct)
