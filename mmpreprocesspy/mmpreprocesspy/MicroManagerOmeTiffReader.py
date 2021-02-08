@@ -38,9 +38,31 @@ class MicroManagerOmeTiffReader(object):
             raise LookupError(
                 "TIFF metadata contains no entry for either 'InitialPositionList' or 'StagePositions'")
         self.number_of_positions = len(self._position_names)
+        self._position_index_lut = self.generate_position_index_lut()
 
     def __del__(self):
         del self.tiff
+
+    def generate_position_index_lut(self):
+        """
+        Returns a look-up table (LUT) that maps the position-number as stored inside the
+        MicroManager OME-TIFF to the corresponding index of the image stack in self._position_series
+        and self._position_zarr.
+
+        :return: LUT
+        """
+
+        try:
+            self._position_numbers = []
+            for name in self._position_names:
+                self._position_numbers.append(re.match('Pos[0]*(\d+)', name)[1])
+        except TypeError:  # TypeError is raised if the regex does not match, which happens for flat-fields.
+            self._position_numbers = list(range(len(self._position_names))) # In that case generate a one-to-one mapping
+
+        position_index_lut = dict()
+        for index_in_zarr_array, position_number in enumerate(self._position_numbers):
+            position_index_lut[position_number] = index_in_zarr_array
+        return position_index_lut
 
     def get_first_tiff_in_path(self, dir_path):
         tiffs = self.get_all_tiffs(dir_path)
