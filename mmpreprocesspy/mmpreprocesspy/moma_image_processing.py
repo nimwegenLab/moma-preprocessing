@@ -36,7 +36,6 @@ class MomaImageProcessor(object):
         self.growthlane_rois = []
         self.vertical_shift = None
         self.horizontal_shift = None
-        self.gl_orientation_search_area = 80  # TODO: this is a MM specific parameter; should be made configurable
         self._image_for_registration = None
         self._sr = StackReg(StackReg.TRANSLATION)
         self.growthlane_length_threshold = 0
