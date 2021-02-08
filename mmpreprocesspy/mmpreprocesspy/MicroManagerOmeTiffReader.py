@@ -55,7 +55,7 @@ class MicroManagerOmeTiffReader(object):
         try:
             self._position_numbers = []
             for name in self._position_names:
-                self._position_numbers.append(re.match('Pos[0]*(\d+)', name)[1])
+                self._position_numbers.append(int(re.match('Pos[0]*(\d+)', name)[1]))
         except TypeError:  # TypeError is raised if the regex does not match, which happens for flat-fields.
             self._position_numbers = list(range(len(self._position_names))) # In that case generate a one-to-one mapping
 
@@ -127,10 +127,12 @@ class MicroManagerOmeTiffReader(object):
             raise ValueError('frame_index cannot be negative')
 
     def get_position_series(self, position_index):
-        return self._position_series[position_index]
+        index = self._position_index_lut[position_index]
+        return self._position_series[index]
 
     def get_position_zarr(self, position_index):
-        return self._position_zarr[position_index]
+        index = self._position_index_lut[position_index]
+        return self._position_zarr[index]
 
     def _get_image_stack_with_adapted_dimensions(self, position_index, frame_index):
         """
