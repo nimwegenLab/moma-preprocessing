@@ -47,14 +47,16 @@ def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetection
 
     gl_regions = []
     gl_rois = []
+    parent_gl_region_id = 0
     for region in gl_detection_template.get_gl_regions_in_pixel():
         gl_region_start, gl_region_end = calculate_gl_region(region, horizontal_index_of_max_correlation, gl_detection_template.template_image.shape)
         gl_regions.append(DataRegion(start=gl_region_start, end=gl_region_end, width=gl_region_end-gl_region_start))
         vertical_gl_centers = calculate_vertical_gl_centers(region, vertical_index_of_max_correlation,
                                                             gl_detection_template.template_image.shape,
                                                             image_rotated.shape)
-        rois_in_region = get_growthlane_rois(vertical_gl_centers, gl_region_start, gl_region_end)
+        rois_in_region = get_growthlane_rois(vertical_gl_centers, gl_region_start, gl_region_end, parent_gl_region_id)
         gl_rois += rois_in_region
+        parent_gl_region_id += 1
     gl_rois = fix_roi_ids(gl_rois)
     return gl_rois, gl_regions
 
@@ -265,11 +267,13 @@ def get_all_growthlane_rois(rotated_image, region_list):
     """Gets the growthlane ROIs from all growthlane regions that were found in the image."""
     growthlane_rois = []
     channel_centers = []
+    parent_gl_region_id = 0
     for gl_region in region_list:
         channel_region_image = rotated_image[:, gl_region.start:gl_region.end]
         centers = get_gl_center_positions_in_growthlane_region(channel_region_image)
-        growthlane_rois += get_growthlane_rois(centers, gl_region.start, gl_region.end)
+        growthlane_rois += get_growthlane_rois(centers, gl_region.start, gl_region.end, parent_gl_region_id)
         channel_centers += centers
+        parent_gl_region_id += 1
     growthlane_rois = fix_roi_ids(growthlane_rois)
     return growthlane_rois, channel_centers
 
@@ -458,7 +462,7 @@ def fft_align(im0, im1, pixlim=None):
     return t0, t1
 
 
-def get_growthlane_rois(channel_centers, mincol, maxcol):
+def get_growthlane_rois(channel_centers, mincol, maxcol, parent_gl_region_id):
     """
     Returns ROIs for individual GLs at the positions of `channel_centers`.
     :param channel_centers:
@@ -470,7 +474,7 @@ def get_growthlane_rois(channel_centers, mincol, maxcol):
     roi_height = get_mean_distance_between_growthlanes(channel_centers)
     for id, center in enumerate(channel_centers):
         roi = get_roi(center, roi_height, mincol, maxcol)
-        growthlaneRois.append(GrowthlaneRoi(roi, id))
+        growthlaneRois.append(GrowthlaneRoi(roi, id, parent_gl_region_id))
     return growthlaneRois
 
 

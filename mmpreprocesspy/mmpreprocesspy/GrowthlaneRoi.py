@@ -4,9 +4,10 @@ import numpy as np
 class GrowthlaneRoi(object):
     """ Represents the growth-lane present inside a Mother-machine image. """
 
-    def __init__(self, roi=None, id=None):
+    def __init__(self, roi=None, id=None, parent_gl_region_id=None):
         self.roi = roi
         self.id = id
+        self.parent_gl_region_id = parent_gl_region_id
         self.exit_location: GrowthlaneExitLocation = None
 
     def get_oriented_roi_image(self, image):
