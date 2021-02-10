@@ -125,6 +125,7 @@ class MomaImageProcessor(object):
         """
 
         offset = 100
+        box_pts = 11  # number of point to average over
 
         original_image = phc_image
 
@@ -142,10 +143,14 @@ class MomaImageProcessor(object):
         #         pass
         #     plt.show()
 
+        intensity_profiles_unprocessed = []
         intensity_profiles = []
         for region in self.gl_regions:
             intensity_profile_region = image_registered[:, region.start+offset:region.end-offset]
-            intensity_profiles.append(np.mean(intensity_profile_region, axis=1))
+            intensity_profile_unprocessed = np.mean(intensity_profile_region, axis=1)
+            intensity_profiles_unprocessed.append(intensity_profile_unprocessed)
+            intensity_profile_processed = self.smooth(intensity_profile_unprocessed, box_pts=box_pts)
+            intensity_profiles.append(intensity_profile_processed)
 
         # if is_debugging():
         #     for ind, profile in enumerate(intensity_profiles):
@@ -182,6 +187,7 @@ class MomaImageProcessor(object):
                                                output_path)
 
         self.plot_and_save_intensity_profiles_with_peaks(intensity_profiles,
+                                                         intensity_profiles_unprocessed,
                                                          normalization_ranges,
                                                          position_nr,
                                                          frame_nr,
@@ -254,46 +260,34 @@ class MomaImageProcessor(object):
 
     def plot_and_save_intensity_profiles_with_peaks(self,
                                                     intensity_profiles,
+                                                    intensity_profiles_unprocessed,
                                                     normalization_ranges,
                                                     position_nr,
                                                     frame_nr,
                                                     output_path):
 
-        # print("stop")
-        #
-        # df_means_smoothed = pd.DataFrame(df_means.apply(lambda x: smooth(x, box_pts)))
-        # intensity_profile = self.smooth(x, box_pts)
         for region_ind, intensity_profile in enumerate(intensity_profiles):
 
+            intensity_profile_unprocessed = intensity_profiles_unprocessed[region_ind]
             normalization_range = normalization_ranges[region_ind]
             mean_peak_inds = find_peaks(intensity_profile, distance=25)[0]
             mean_peak_vals = intensity_profile[mean_peak_inds]
 
-            min = mean_peak_vals.min()
-            max = mean_peak_vals.max()
-            range = (max - min)
-            lim1 = min + range * 1 / 4
-            lim2 = min + range * 3 / 4
-
-            pdms_peak_vals = mean_peak_vals[mean_peak_vals < lim1]
-            empty_peak_vals = mean_peak_vals[mean_peak_vals > lim2]
-
-            # plt.ioff()
-            plt.plot(intensity_profile)
+            plt.plot(intensity_profile_unprocessed, 'gray', label='profile')
+            plt.plot(intensity_profile, label='smoothed')
             plt.scatter(mean_peak_inds, mean_peak_vals)
 
-            plt.axhline(normalization_range[0], linestyle='--', color='k', label='norm min')
-            plt.axhline(normalization_range[1], linestyle='--', color='k', label='norm max')
+            plt.axhline(normalization_range[0], linestyle='--', color='k')
+            plt.axhline(normalization_range[1], linestyle='--', color='k', label='norm range')
 
-            plt.scatter(np.argwhere(intensity_profile == normalization_range[0]), normalization_range[0], color='k',
-                        label='norm min')
+            plt.scatter(np.argwhere(intensity_profile == normalization_range[0]), normalization_range[0], color='k')
             plt.scatter(np.argwhere(intensity_profile == normalization_range[1]), normalization_range[1], color='k',
-                        label='norm max')
+                        label='norm values')
 
-            plt.ylim([0, np.max(empty_peak_vals) + 0.1 * np.max(empty_peak_vals)])
+            plt.ylim([0, 1.1 * np.max(intensity_profile_unprocessed)])
             plt.ylabel('intensity [a.u.]')
             plt.xlabel('vertical position [px]')
-            plt.legend(loc='center right')
+            # plt.legend(loc='center right')
             plt.title(f'intensity profile: pos {position_nr}, frame {frame_nr}, region {region_ind}')
             # plt.show()
 
