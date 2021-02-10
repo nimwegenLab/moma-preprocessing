@@ -7,6 +7,7 @@ from PIL import Image
 import numpy as np
 from mmpreprocesspy.GrowthlaneRoi import GrowthlaneExitLocation
 from mmpreprocesspy.preprocessing import get_growthlane_rois
+from mmpreprocesspy.support import saturate_image
 from skimage.feature import match_template
 import cv2 as cv
 import mmpreprocesspy.dev_auxiliary_functions as aux
@@ -201,12 +202,15 @@ class MomaImageProcessor(object):
                                           position_nr,
                                           frame_nr,
                                           output_path):
+            image_registered_orig = image_registered
+            image_registered = saturate_image(image_registered, 0.1, 0.3)
             plt.imshow(image_registered, cmap='gray')
             for region in self.gl_regions:
                 plt.axvline(region.start+offset, color='r')
                 plt.axvline(region.end-offset, color='g')
 
             plt.title(f'region indicators: pos {position_nr}, frame {frame_nr}')
+            # plt.show()
 
             figure_canvas_handle = plt.gcf().canvas
             result = self.convert_figure_to_numpy_array(figure_canvas_handle)
@@ -263,7 +267,6 @@ class MomaImageProcessor(object):
     def get_pdms_and_empty_channel_intensities(self, intensity_profile):
         mean_peak_inds = find_peaks(intensity_profile, distance=25)[0]
         mean_peak_vals = intensity_profile[mean_peak_inds]
-
         return mean_peak_vals.min(), mean_peak_vals.max()
 
     def smooth(self, y, box_pts):

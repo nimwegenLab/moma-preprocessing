@@ -13,6 +13,7 @@ from mmpreprocesspy.MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
 from mmpreprocesspy.image_preprocessing import ImagePreprocessor
 from mmpreprocesspy.moma_image_processing import MomaImageProcessor
 from mmpreprocesspy.GlDetectionTemplate import GlDetectionTemplate
+from mmpreprocesspy.support import saturate_image
 import cv2 as cv
 
 
@@ -356,6 +357,7 @@ def initialize_kymo_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, i
 def store_gl_index_image(growthlane_rois, full_frame_image, path):
     """ Draw the growthlane ROIs and indices onto the image and save it. """
     font = cv.FONT_HERSHEY_SIMPLEX
+    full_frame_image = saturate_image(full_frame_image, 0.1, 0.3)
     normalized_image = cv.normalize(full_frame_image, None, 0, 255, cv.NORM_MINMAX)
     final_image = np.array(normalized_image, dtype=np.uint8)
 
