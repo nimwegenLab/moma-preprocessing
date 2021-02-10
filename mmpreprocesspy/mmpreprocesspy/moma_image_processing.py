@@ -153,13 +153,10 @@ class MomaImageProcessor(object):
         #     plt.legend()
         #     plt.show()
 
-        min_vals, max_vals = [], []
         normalization_ranges = []
         for ind, profile in enumerate(intensity_profiles):
             min_val, max_val = self.get_pdms_and_empty_channel_intensities(profile)
             normalization_ranges.append((min_val, max_val))
-            min_vals.append(min_val)
-            max_vals.append(max_val)
 
         self.set_gl_roi_normalization_ranges(growthlane_rois, normalization_ranges)
 
@@ -185,12 +182,10 @@ class MomaImageProcessor(object):
                                                output_path)
 
         self.plot_and_save_intensity_profiles_with_peaks(intensity_profiles,
-                                                         normalization_range,
+                                                         normalization_ranges,
                                                          position_nr,
                                                          frame_nr,
                                                          output_path)
-
-        return image_normalized, normalization_range
 
     def set_gl_roi_normalization_ranges(self, gl_rois, normalization_ranges):
         for roi in gl_rois:
@@ -259,7 +254,7 @@ class MomaImageProcessor(object):
 
     def plot_and_save_intensity_profiles_with_peaks(self,
                                                     intensity_profiles,
-                                                    normalization_range,
+                                                    normalization_ranges,
                                                     position_nr,
                                                     frame_nr,
                                                     output_path):
@@ -270,6 +265,7 @@ class MomaImageProcessor(object):
         # intensity_profile = self.smooth(x, box_pts)
         for region_ind, intensity_profile in enumerate(intensity_profiles):
 
+            normalization_range = normalization_ranges[region_ind]
             mean_peak_inds = find_peaks(intensity_profile, distance=25)[0]
             mean_peak_vals = intensity_profile[mean_peak_inds]
 
@@ -286,21 +282,13 @@ class MomaImageProcessor(object):
             plt.plot(intensity_profile)
             plt.scatter(mean_peak_inds, mean_peak_vals)
 
-            sorter = np.argsort(intensity_profile)
-            pdms_peak_inds = sorter[np.searchsorted(intensity_profile, pdms_peak_vals, sorter=sorter)]
-            sorter = np.argsort(intensity_profile)
-            empty_peak_inds = sorter[np.searchsorted(intensity_profile, empty_peak_vals, sorter=sorter)]
+            plt.axhline(normalization_range[0], linestyle='--', color='k', label='norm min')
+            plt.axhline(normalization_range[1], linestyle='--', color='k', label='norm max')
 
-            plt.scatter(pdms_peak_inds, pdms_peak_vals, color='r')
-            plt.scatter(empty_peak_inds, empty_peak_vals, color='g')
-
-            plt.axhline(np.median(pdms_peak_vals), linestyle='--', color='r', label='pdms median')
-            plt.axhline(np.median(empty_peak_vals), linestyle='--', color='g', label='empty median')
-
-            if normalization_range[0] == np.median(pdms_peak_vals):
-                plt.axhline(np.median(pdms_peak_vals), color='k', linestyle='--', label='norm min')
-            if normalization_range[1] in intensity_profile:
-                plt.scatter(np.argwhere(intensity_profile == normalization_range[1]), normalization_range[1], color='k', label='norm max')
+            plt.scatter(np.argwhere(intensity_profile == normalization_range[0]), normalization_range[0], color='k',
+                        label='norm min')
+            plt.scatter(np.argwhere(intensity_profile == normalization_range[1]), normalization_range[1], color='k',
+                        label='norm max')
 
             plt.ylim([0, np.max(empty_peak_vals) + 0.1 * np.max(empty_peak_vals)])
             plt.ylabel('intensity [a.u.]')
@@ -323,28 +311,10 @@ class MomaImageProcessor(object):
             # plt.close(plt.gcf())
 
     def get_pdms_and_empty_channel_intensities(self, intensity_profile):
-        # df_means_smoothed = pd.DataFrame(df_means.apply(lambda x: smooth(x, box_pts)))
-        # intensity_profile = self.smooth(x, box_pts)
         mean_peak_inds = find_peaks(intensity_profile, distance=25)[0]
         mean_peak_vals = intensity_profile[mean_peak_inds]
 
-        # if is_debugging():
-        #     plt.plot(intensity_profile)
-        #     plt.scatter(mean_peak_inds, mean_peak_vals)
-        #     plt.show()
-
-        min = mean_peak_vals.min()
-        max = mean_peak_vals.max()
-        range = (max - min)
-        lim1 = min + range * 1 / 4
-        lim2 = min + range * 3 / 4
-
-        pdms_peak_vals = mean_peak_vals[mean_peak_vals < lim1]
-        empty_peak_vals = mean_peak_vals[mean_peak_vals > lim2]
-
-        pdms_peak_min_value = np.median(pdms_peak_vals)
-        empty_peak_max_value = empty_peak_vals.max()
-        return pdms_peak_min_value, empty_peak_max_value
+        return mean_peak_vals.min(), mean_peak_vals.max()
 
     def _normalize_image_with_min_and_max_values(self, image, pdms_intensity, empty_intensity):
         return (image - pdms_intensity) / (empty_intensity - pdms_intensity)
