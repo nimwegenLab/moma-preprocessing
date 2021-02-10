@@ -15,7 +15,7 @@ from mmpreprocesspy.moma_image_processing import MomaImageProcessor
 from mmpreprocesspy.GlDetectionTemplate import GlDetectionTemplate
 from mmpreprocesspy.support import saturate_image
 import cv2 as cv
-
+import csv
 
 def get_position_folder_path(result_base_path, indp):
     """
@@ -63,6 +63,19 @@ def get_gl_tiff_path(result_base_path, base_name, indp, gl_index):
     :return:
     """
     return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '.tiff'
+
+
+def get_gl_csv_path(result_base_path, base_name, indp, gl_index):
+    """
+    Return path to the growthlane image stack.
+
+    :param result_base_path:
+    :param base_name:
+    :param indp:
+    :param gl_index:
+    :return:
+    """
+    return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '.csv'
 
 
 def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index):
@@ -167,6 +180,7 @@ def preproc_fun(data_folder,
         nr_of_timesteps = maxframe - minframe
         nr_of_color_channels = len(colors)
         gl_image_path_dict = get_gl_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
+        gl_csv_path_dict = get_gl_image_csv_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
         gl_image_dict = get_gl_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels, gl_image_path_dict)
         kymo_image_path_dict = get_kymo_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
         kymo_image_dict = get_kymo_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels, kymo_image_path_dict)
@@ -206,6 +220,7 @@ def preproc_fun(data_folder,
 
             append_gl_roi_images(frame_index, growthlane_rois, gl_image_dict, color_image_stack)
             append_to_kymo_graph(frame_index, growthlane_rois, kymo_image_dict, color_image_stack)
+            append_gl_csv(frame_index, growthlane_rois, gl_csv_path_dict)
 
         finalize_memmap_images(growthlane_rois, gl_image_dict)
         finalize_memmap_images(growthlane_rois, kymo_image_dict)
@@ -239,6 +254,13 @@ def get_gl_image_image_paths(growthlane_rois, folder_to_save, base_name, positio
     gl_image_paths = {}
     for gl_roi in growthlane_rois:
         gl_image_paths[gl_roi.id] = get_gl_tiff_path(folder_to_save, base_name, position_ind, calculate_gl_output_index(gl_roi.id))
+    return gl_image_paths
+
+
+def get_gl_image_csv_paths(growthlane_rois, folder_to_save, base_name, position_ind):
+    gl_image_paths = {}
+    for gl_roi in growthlane_rois:
+        gl_image_paths[gl_roi.id] = get_gl_csv_path(folder_to_save, base_name, position_ind, calculate_gl_output_index(gl_roi.id))
     return gl_image_paths
 
 
@@ -289,21 +311,32 @@ def remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image
     return growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict
 
 
-def append_gl_roi_images(time_index, growthlane_rois, gl_image_dict, color_image_stack):
+def append_gl_csv(frame_index, growthlane_rois, gl_csv_path_dict):
+    for ind, gl_roi in enumerate(growthlane_rois):
+        path = gl_csv_path_dict[ind]
+        with open(path, mode='a') as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            if frame_index == 0:  # write header, if we are at the first frame
+                csv_writer.writerow(['frame', 'norm_range_min', 'norm_range_max'])
+            range = gl_roi.normalization_range
+            csv_writer.writerow([frame_index, np.round(range[0], decimals=2), np.round(range[1], decimals=2)])
+
+
+def append_gl_roi_images(frame_index, growthlane_rois, gl_image_dict, color_image_stack):
     z_index = 0
     nr_of_colors = color_image_stack.shape[2]
     for gl_roi in growthlane_rois:
-        gl_image_dict[gl_roi.id][time_index, z_index, ...] = gl_roi.get_oriented_roi_image(np.moveaxis(color_image_stack, -1, 0))
+        gl_image_dict[gl_roi.id][frame_index, z_index, ...] = gl_roi.get_oriented_roi_image(np.moveaxis(color_image_stack, -1, 0))
 
 
-def append_to_kymo_graph(time_index, growthlane_rois, kymo_image_dict, color_image_stack):
+def append_to_kymo_graph(frame_index, growthlane_rois, kymo_image_dict, color_image_stack):
     stack_time_index = 0  # kymo-graph does not have a time-index
     z_index = 0
     nr_of_colors = color_image_stack.shape[2]
     for gl_roi in growthlane_rois:
         gl_roi_crop = gl_roi.get_oriented_roi_image(np.moveaxis(color_image_stack, -1, 0))
         for color_index in range(0, nr_of_colors):  # add remaining channels
-            kymo_image_dict[gl_roi.id][stack_time_index, z_index, color_index, :, time_index] = get_kymo_graph_slice(gl_roi_crop[color_index, ...])
+            kymo_image_dict[gl_roi.id][stack_time_index, z_index, color_index, :, frame_index] = get_kymo_graph_slice(gl_roi_crop[color_index, ...])
 
 
 def get_kymo_graph_slice(gl_roi_crop):
