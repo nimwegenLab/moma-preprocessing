@@ -10,7 +10,6 @@ from mmpreprocesspy.preprocessing import get_growthlane_rois
 from skimage.feature import match_template
 import cv2 as cv
 import mmpreprocesspy.dev_auxiliary_functions as aux
-# import matplotlib.pyplot as plt
 from pystackreg import StackReg
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
@@ -88,7 +87,6 @@ class MomaImageProcessor(object):
         self.vertical_shift = -translation_matrix[1][2]
 
     def get_registered_image(self, image_to_register):
-        # registered_image = self._transform_image(image_to_register)
         registered_image = self._rotate_image(image_to_register)
         registered_image = self._translate_image(registered_image)
         return registered_image
@@ -124,7 +122,7 @@ class MomaImageProcessor(object):
         :return:
         """
 
-        offset = 100
+        offset = 100  # offset to both sides of the actual region range; this reduces the range where we will calculate the averaged profile by 2*offset
         box_pts = 11  # number of point to average over
 
         original_image = phc_image
@@ -132,16 +130,6 @@ class MomaImageProcessor(object):
         self.determine_image_shift(phc_image)
         image_registered = self._translate_image(phc_image)
         image_registered = self._rotate_image(image_registered)
-
-        # if is_debugging():
-        #     fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-        #     ax[0].imshow(original_image, cmap='gray')
-        #     ax[1].imshow(image_registered, cmap='gray')
-        #     for region in self.gl_regions:
-        #         ax[1].axvline(region.start+offset, color='r')
-        #         ax[1].axvline(region.end-offset, color='g')
-        #         pass
-        #     plt.show()
 
         intensity_profiles_unprocessed = []
         intensity_profiles = []
@@ -152,31 +140,12 @@ class MomaImageProcessor(object):
             intensity_profile_processed = self.smooth(intensity_profile_unprocessed, box_pts=box_pts)
             intensity_profiles.append(intensity_profile_processed)
 
-        # if is_debugging():
-        #     for ind, profile in enumerate(intensity_profiles):
-        #         plt.plot(profile, label=f'region {ind}')
-        #     plt.legend()
-        #     plt.show()
-
         normalization_ranges = []
         for ind, profile in enumerate(intensity_profiles):
             min_val, max_val = self.get_pdms_and_empty_channel_intensities(profile)
             normalization_ranges.append((min_val, max_val))
 
         self.set_gl_roi_normalization_ranges(growthlane_rois, normalization_ranges)
-
-        # if is_debugging():
-        #     for ind, profile in enumerate(intensity_profiles):
-        #         plt.plot(profile, label=f'region {ind}')
-        #         plt.scatter(np.argwhere(profile == min_vals[ind]), min_vals[ind], color='r')
-        #         plt.scatter(np.argwhere(profile == max_vals[ind]), max_vals[ind], color='g')
-        #     plt.legend()
-        #     plt.show()
-
-        # min_reference_value = np.min(min_vals)
-        # max_reference_value = np.max(max_vals)
-        # image_normalized = self._normalize_image_with_min_and_max_values(image, min_reference_value, max_reference_value)
-        # normalization_range = (min_reference_value, max_reference_value)
 
         self.save_normalization_range_to_csv_log(normalization_ranges, position_nr, frame_nr, output_path)
 
@@ -232,7 +201,6 @@ class MomaImageProcessor(object):
                                           position_nr,
                                           frame_nr,
                                           output_path):
-            # plt.imshow(original_image, cmap='gray')
             plt.imshow(image_registered, cmap='gray')
             for region in self.gl_regions:
                 plt.axvline(region.start+offset, color='r')
@@ -248,15 +216,6 @@ class MomaImageProcessor(object):
             if frame_nr % self.image_save_fequency == 0:
                 image_to_save = np.array(self._gl_region_indicator_images)
                 tff.imwrite(os.path.join(output_path, f'region_indiator_images__pos_{position_nr}.tif'), image_to_save)
-
-            # with TiffWriter(output_path+'temp.ome.tif', bigtiff=True) as tif:
-            #     options = dict(tile=(256, 256), compression='jpeg')
-            #     tif.write(result, subifds=2, **options)
-
-            # plt.imshow(result)
-            # plt.show()
-            # plt.show()
-            # plt.savefig(os.path.join(output_path, f'region_indicator_pos_{position_nr}__frame_{frame_nr:04}.png'), bbox_inches='tight')
 
     def plot_and_save_intensity_profiles_with_peaks(self,
                                                     intensity_profiles,
@@ -300,9 +259,6 @@ class MomaImageProcessor(object):
                 image_to_save = np.array(self._intensity_profiles[region_ind])
                 path = os.path.join(output_path, f'intensity_profile__pos_{position_nr}__region_{region_ind}.tif')
                 tff.imwrite(path, image_to_save)
-
-            # plt.savefig(os.path.join(output_path, f'intensity_profile__pos_{position_nr}__frame_{frame_nr:04}__region_{region_ind}.png'), bbox_inches='tight')
-            # plt.close(plt.gcf())
 
     def get_pdms_and_empty_channel_intensities(self, intensity_profile):
         mean_peak_inds = find_peaks(intensity_profile, distance=25)[0]
