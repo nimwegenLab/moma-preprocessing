@@ -487,7 +487,8 @@ class TestPreprocessing(TestCase):
     def test_create_growthlane_objects(self):
         from mmpreprocesspy import preprocessing
 
-        regions = preprocessing.get_growthlane_rois([1, 20], 20, 50)
+        parent_gl_region_id = 0
+        regions = preprocessing.get_growthlane_rois([1, 20], 20, 50, parent_gl_region_id)
         pass
 
     def test_get_rotation_matrix(self):

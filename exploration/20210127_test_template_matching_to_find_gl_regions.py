@@ -60,43 +60,54 @@ class TestPreproc_fun(TestCase):
                     print('stop')
                     pass
 
-                    # plt.imshow(imdata)
-                    # plt.title(f"{test['name']}, position: {position_index}")
+                    # plt.imshow(min_max_normalize(imdata), cmap='gray')
+                    plt.imshow(saturate(imdata, 0, 10000), cmap='gray')
+                    plt.title(f"{test['name']}, position: {position_index}")
+                    plt.show()
+
+                    template_image = tff.imread(template_config['template_path'])
+
+                    # plt.imshow(template)
                     # plt.show()
-                    #
-                    # template_image = tff.imread(template_config['template_path'])
-                    #
-                    # # plt.imshow(template)
-                    # # plt.show()
-                    #
-                    # # self.inspect_template_config(template_config)
-                    #
+
+                    plt.imshow(saturate(template_image, 0, 8000), cmap='gray')
+                    plt.title(f"{test['name']}, position: {position_index}")
+                    plt.show()
+
+
+                    self.inspect_template_config(template_config)
+
                     # normalized_cross_correlation = match_template(imdata, template_image, pad_input=False)
-                    #
-                    # fig, ax = plt.subplots(1, 3, figsize=(15, 5))
-                    # ax[0].imshow(imdata)
-                    # ax[0].set_title('input image')
-                    # ax[1].imshow(template_image)
-                    # ax[1].set_title('mask')
-                    # ax[2].imshow(normalized_cross_correlation)
-                    # ax[2].set_title('cross-correlation output')
-                    # plt.show()
-                    #
-                    # plt.imshow(normalized_cross_correlation)
-                    # plt.title(f"{test['name']}, position: {position_index}")
-                    # plt.show()
-                    #
-                    # plt.plot(np.mean(normalized_cross_correlation, axis=0), color='r', label='mean proj.')
-                    # plt.plot(np.max(normalized_cross_correlation, axis=0), color='g', label='max proj.')
-                    # plt.legend()
-                    # plt.title(f"{test['name']}, position: {position_index}")
-                    # plt.show()
-                    #
-                    # plt.plot(np.mean(normalized_cross_correlation, axis=1), color='r', label='mean proj.')
-                    # plt.plot(np.max(normalized_cross_correlation, axis=1), color='g', label='max proj.')
-                    # plt.legend()
-                    # plt.title(f"{test['name']}, position: {position_index}")
-                    # plt.show()
+                    normalized_cross_correlation = match_template(imdata, template_image)
+
+                    normalized_cross_correlation_new = match_template(imdata - np.mean(imdata.flatten()), template_image - np.mean(template_image.flatten()))
+
+                    fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+                    ax[0].imshow(imdata)
+                    ax[0].set_title('input image')
+                    ax[1].imshow(template_image)
+                    ax[1].set_title('mask')
+                    ax[2].imshow(normalized_cross_correlation)
+                    ax[2].set_title('cross-correlation output')
+                    plt.show()
+
+                    plt.imshow(normalized_cross_correlation)
+                    plt.title(f"{test['name']}, position: {position_index}")
+                    plt.show()
+
+                    plt.plot(np.mean(normalized_cross_correlation, axis=0), color='r', label='mean proj.')
+                    plt.plot(np.max(normalized_cross_correlation, axis=0), color='g', label='max proj.')
+                    plt.legend()
+                    plt.title(f"{test['name']}, position: {position_index}")
+                    plt.show()
+
+                    plt.plot(np.mean(normalized_cross_correlation, axis=1), color='r', label='mean proj.')
+                    plt.plot(np.max(normalized_cross_correlation, axis=1), color='g', label='max proj.')
+                    plt.legend()
+                    plt.title(f"{test['name']}, position: {position_index}")
+                    plt.show()
+
+                    print('stop')
 
                     pass
 
@@ -173,6 +184,12 @@ class TestPreproc_fun(TestCase):
                         'first_gl_position': 52,
                         'gl_spacing': 105.75,
                         })
+        configs.append({'name': 'template__thomas_20201229_glc_lac_1_2',
+                        'template_path': './data/20210127_test_template_matching_to_find_gl_regions/16_thomas_20201229_glc_lac_1_MMStack.ome-1___template_v01.tif',
+                        'gl_regions': [[30, 565], [840, 1410]],
+                        'first_gl_position': 52,
+                        'gl_spacing': 105.75,
+                        })
         configs.append({'name': '17_lis_20201218_VNG40_AB6min_2h_1_1__template_v000',
                         'template_path': './data/20210127_test_template_matching_to_find_gl_regions/17_lis_20201218_VNG40_AB6min_2h_1_1__template_v000.tif',
                         'gl_regions': [[40, 610], [888, 1417]],
@@ -207,12 +224,12 @@ class TestPreproc_fun(TestCase):
         #               'glt': 200,
         #               'centers': [538, 1343],
         #               'gl_detection_template': '17_lis_20201218_VNG40_AB6min_2h_1_1__template_v000'})
-        # tests.append({'name': 'dataset_16',
-        #               'path': "./16_thomas_20201229_glc_lac_1/MMStack/20201229_glc_lac_1_MMStack.ome.tif",
-        #               'angle': 90,
-        #               'glt': 200,
-        #               'centers': [435.0, 1415.0],
-        #               'gl_detection_template': 'template__thomas_20201229_glc_lac_1'})
+        tests.append({'name': 'dataset_16',
+                      'path': "./16_thomas_20201229_glc_lac_1/MMStack/20201229_glc_lac_1_MMStack.ome.tif",
+                      'angle': 90,
+                      'glt': 200,
+                      'centers': [435.0, 1415.0],
+                      'gl_detection_template': 'template__thomas_20201229_glc_lac_1'})
         # tests.append({'name': 'dataset_15',
         #               'path': "./15_lis_20201119_VNG1040_AB2h_2h_1/MMStack/20201119_VNG1040_AB2h_2h_1_MMStack.ome.tif",
         #               'angle': 90,
@@ -243,12 +260,12 @@ class TestPreproc_fun(TestCase):
         #               'glt': 300,
         #               'centers': [518, 1355],
         #               'gl_detection_template': '11_20190910_glc_spcm_1_MMStack__template_v00'})
-        tests.append({'name': 'dataset_10',
-                      'path': "./10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement/20190424_hi2_hi3_med2_rplN_4_MMStack.ome.tif",
-                      'angle': 0,
-                      'glt': 300,
-                      'centers': [392, 1249],
-                       'gl_detection_template': 'template__thomas_20201229_glc_lac_1'})
+        # tests.append({'name': 'dataset_10',
+        #               'path': "./10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement/20190424_hi2_hi3_med2_rplN_4_MMStack.ome.tif",
+        #               'angle': 0,
+        #               'glt': 300,
+        #               'centers': [392, 1249],
+        #                'gl_detection_template': 'template__thomas_20201229_glc_lac_1'})
         # tests.append({'name': 'dataset_9',
         #               'path': "./resources/data__test_preprocessing_py/09_20190325_hi1_hi2_med1_rpmB_glu_gly_pl_chr_1.tif",
         #               'angle': 0,
@@ -294,4 +311,11 @@ class TestPreproc_fun(TestCase):
 def min_max_normalize(imdata):
     import numpy as np
     return (imdata - np.min(imdata)) / (np.max(imdata) - np.min(imdata))
+
+def saturate(imdata_orig, min, max):
+    import numpy as np
+    imdata = imdata_orig.copy()
+    imdata[imdata > max] = max
+    imdata[imdata < min] = min
+    return imdata
 

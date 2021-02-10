@@ -37,7 +37,10 @@ class TestRoi(TestCase):
 
         sut = Roi(90, 342, 190, 742)  # size: (width=400, height=100)
 
-        roi_image = sut.get_from_image(imdata)
+        imdata_extended = imdata[np.newaxis, ...]  # add axis at position 0, because get_from_image new expects an image stack with the channels being the first axis
+        roi_image_extended = sut.get_from_image(imdata_extended)
+        roi_image = roi_image_extended[0, ...]
+
         self.assertEqual(roi_image.shape[0], 100)
         self.assertEqual(roi_image.shape[1], 400)
         # aux.show_image(roi_image)

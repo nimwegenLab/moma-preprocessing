@@ -4,24 +4,29 @@ import numpy as np
 class GrowthlaneRoi(object):
     """ Represents the growth-lane present inside a Mother-machine image. """
 
-    def __init__(self, roi=None, id=None):
+    def __init__(self, roi=None, id=None, parent_gl_region_id=None):
         self.roi = roi
         self.id = id
+        self.parent_gl_region_id = parent_gl_region_id
         self.exit_location: GrowthlaneExitLocation = None
+        self.normalization_range = None
 
     def get_oriented_roi_image(self, image):
         roi_image = self.roi.get_from_image(image)
         if self.exit_location is None:
-            self.exit_location = self.determine_location_of_growthlane_exit(roi_image, search_area=50)
+            self.exit_location = self.determine_location_of_growthlane_exit(roi_image[0, ...], search_area=50)
+
+        if self.normalization_range:
+            roi_image = self._normalize_image_with_min_and_max_values(roi_image, self.normalization_range[0], self.normalization_range[1])
 
         if self.exit_location is GrowthlaneExitLocation.AT_TOP:
             return roi_image
         elif self.exit_location is GrowthlaneExitLocation.AT_LEFT:
-            return np.rot90(roi_image,-1)
+            return np.rot90(roi_image,-1, axes=(1, 2))
         elif self.exit_location is GrowthlaneExitLocation.AT_BOTTOM:
-            return np.rot90(roi_image, 2)
+            return np.rot90(roi_image, 2, axes=(1, 2))
         elif self.exit_location is GrowthlaneExitLocation.AT_RIGHT:
-            return np.rot90(roi_image, 1)
+            return np.rot90(roi_image, 1, axes=(1, 2))
         else:
             raise ValueError("Growthlane orientation is not set.")
 
@@ -78,6 +83,10 @@ class GrowthlaneRoi(object):
             return self.roi.height
         else:
             return self.roi.width
+
+    def _normalize_image_with_min_and_max_values(self, image, norm_range_minimum, norm_range_maximum):
+        return (image - norm_range_minimum) / (norm_range_maximum - norm_range_minimum)
+
 
 
 class GrowthlaneExitLocation(Enum):
