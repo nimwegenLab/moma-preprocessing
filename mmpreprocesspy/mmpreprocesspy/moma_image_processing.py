@@ -115,7 +115,7 @@ class MomaImageProcessor(object):
 
         return preprocessing.get_translation_matrix(self.horizontal_shift, self.vertical_shift)
 
-    def normalize_image_and_save_log_data(self, image, frame_nr, position_nr, output_path):
+    def set_normalization_ranges_and_save_log_data(self, growthlane_rois, phc_image, frame_nr, position_nr, output_path):
         """
         This method registers the input `image` and rotates it, so that the
         GL regions are correctly positioned on the resulting image.
@@ -126,10 +126,10 @@ class MomaImageProcessor(object):
 
         offset = 100
 
-        original_image = image
+        original_image = phc_image
 
-        self.determine_image_shift(image)
-        image_registered = self._translate_image(image)
+        self.determine_image_shift(phc_image)
+        image_registered = self._translate_image(phc_image)
         image_registered = self._rotate_image(image_registered)
 
         # if is_debugging():
@@ -154,10 +154,14 @@ class MomaImageProcessor(object):
         #     plt.show()
 
         min_vals, max_vals = [], []
+        normalization_ranges = []
         for ind, profile in enumerate(intensity_profiles):
             min_val, max_val = self.get_pdms_and_empty_channel_intensities(profile)
+            normalization_ranges.append((min_val, max_val))
             min_vals.append(min_val)
             max_vals.append(max_val)
+
+        self.set_gl_roi_normalization_ranges(growthlane_rois, normalization_ranges)
 
         # if is_debugging():
         #     for ind, profile in enumerate(intensity_profiles):
@@ -167,12 +171,12 @@ class MomaImageProcessor(object):
         #     plt.legend()
         #     plt.show()
 
-        min_reference_value = np.min(min_vals)
-        max_reference_value = np.max(max_vals)
-        image_normalized = self._normalize_image_with_min_and_max_values(image, min_reference_value, max_reference_value)
-        normalization_range = (min_reference_value, max_reference_value)
+        # min_reference_value = np.min(min_vals)
+        # max_reference_value = np.max(max_vals)
+        # image_normalized = self._normalize_image_with_min_and_max_values(image, min_reference_value, max_reference_value)
+        # normalization_range = (min_reference_value, max_reference_value)
 
-        self.save_normalization_range_to_csv_log(normalization_range, position_nr, frame_nr, output_path)
+        self.save_normalization_range_to_csv_log(normalization_ranges, position_nr, frame_nr, output_path)
 
         self.save_image_with_region_indicators(image_registered,
                                                offset,
@@ -188,16 +192,32 @@ class MomaImageProcessor(object):
 
         return image_normalized, normalization_range
 
+    def set_gl_roi_normalization_ranges(self, gl_rois, normalization_ranges):
+        for roi in gl_rois:
+            roi.normalization_range = normalization_ranges[roi.parent_gl_region_id]
+
     def save_normalization_range_to_csv_log(self,
-                                            normalization_range,
+                                            normalization_ranges,
                                             position_nr,
                                             frame_nr,
                                             output_path):
         path = os.path.join(output_path, f'intensity_normalization_ranges_pos_{position_nr}.csv')
+
         with open(path, mode='a') as normalization_ranges_file:
-            employee_writer = csv.writer(normalization_ranges_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            employee_writer.writerow([frame_nr, np.round(normalization_range[0], decimals=2), np.round(normalization_range[1], decimals=2)])
-        pass
+            csv_writer = csv.writer(normalization_ranges_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            if frame_nr == 0:  # write header, if we are at the first frame
+                header = []
+                header.append('frame')
+                for ind, range in enumerate(normalization_ranges):
+                    header.append(f'region_{ind}_min')
+                    header.append(f'region_{ind}_max')
+                csv_writer.writerow(header)
+            row = []
+            row.append(frame_nr)
+            for ind, range in enumerate(normalization_ranges):
+                row.append(np.round(range[0], decimals=2))
+                row.append(np.round(range[1], decimals=2))
+            csv_writer.writerow(row)
 
     def convert_figure_to_numpy_array(self, canvas):
         canvas.draw()

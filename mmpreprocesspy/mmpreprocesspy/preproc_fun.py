@@ -196,8 +196,7 @@ def preproc_fun(data_folder,
             if normalization_config_path:
                 phc_image = color_image_stack[:, :, 0]
                 output_path = get_normalization_log_folder_path(folder_to_save, position_index)
-                image_normalized, normalization_range = imageProcessor.normalize_image_and_save_log_data(phc_image, frame_index, position_index, output_path)
-                color_image_stack[:, :, 0] = image_normalized
+                imageProcessor.set_normalization_ranges_and_save_log_data(growthlane_rois, phc_image, frame_index, position_index, output_path)
 
             # if normalization_mode is 1:
             #     phc_image = color_image_stack[:, :, 0]
