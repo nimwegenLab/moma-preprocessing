@@ -266,9 +266,6 @@ class MomaImageProcessor(object):
 
         return mean_peak_vals.min(), mean_peak_vals.max()
 
-    def _normalize_image_with_min_and_max_values(self, image, pdms_intensity, empty_intensity):
-        return (image - pdms_intensity) / (empty_intensity - pdms_intensity)
-
     def smooth(self, y, box_pts):
         box = np.ones(box_pts)/box_pts
         y_smooth = np.convolve(y, box, mode='same')
