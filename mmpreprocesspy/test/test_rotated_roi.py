@@ -25,7 +25,10 @@ class TestRoi(TestCase):
         sut = RotatedRoi(im_center, roi_size, angle)
         # aux.show_image_with_rotated_rois(imdata, [sut])
 
-        roi_image = sut.get_from_image(imdata)
+        imdata_extended = imdata[np.newaxis, ...]  # add axis at front, because RotatedRoi.get_from_image now expects multi-channel images/np-arrays
+        roi_image_extended = sut.get_from_image(imdata_extended)
+        roi_image = roi_image_extended[0, ...]
+
         # np.save('resources/data__test_rotated_roi_py/test__get_roi_from_image__expected_00.npy',roi_image)  # for updating the expected image
         expected = np.load('resources/data__test_rotated_roi_py/test__get_roi_from_image__expected_00.npy')
         self.assertTrue(np.all(expected == roi_image))
@@ -53,7 +56,9 @@ class TestRoi(TestCase):
         # Plot rotated ROI against rotated image
         # aux.show_image_with_rotated_rois(imdata_rotated, [sut])
 
-        roi_image = sut.get_from_image(imdata_rotated)
+        imdata_rotated_extended = imdata_rotated[np.newaxis, ...]  # add axis at front, because RotatedRoi.get_from_image now expects multi-channel images/np-arrays
+        roi_image_extended = sut.get_from_image(imdata_rotated_extended)
+        roi_image = roi_image_extended[0, ...]
 
         # np.save('resources/data__test_rotated_roi_py/test__rotate__expected_00.npy',roi_image)  # for updating the expected image
         expected = np.load('resources/data__test_rotated_roi_py/test__rotate__expected_00.npy')
@@ -158,7 +163,10 @@ class TestRoi(TestCase):
         roi = Roi(90, 342, 190, 742)  # size: (width=400, height=100)
         sut = RotatedRoi.create_from_roi(roi)
 
-        roi_image = sut.get_from_image(imdata)
+        imdata_extended = imdata[np.newaxis, ...]  # add axis at front, because RotatedRoi.get_from_image now expects multi-channel images/np-arrays
+        roi_image_extended = sut.get_from_image(imdata_extended)
+        roi_image = roi_image_extended[0, ...]
+
 
         self.assertEqual(roi_image.shape[0], 100)
         self.assertEqual(roi_image.shape[1], 400)

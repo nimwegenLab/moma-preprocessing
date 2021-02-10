@@ -13,16 +13,16 @@ class GrowthlaneRoi(object):
     def get_oriented_roi_image(self, image):
         roi_image = self.roi.get_from_image(image)
         if self.exit_location is None:
-            self.exit_location = self.determine_location_of_growthlane_exit(roi_image, search_area=50)
+            self.exit_location = self.determine_location_of_growthlane_exit(roi_image[0, ...], search_area=50)
 
         if self.exit_location is GrowthlaneExitLocation.AT_TOP:
             return roi_image
         elif self.exit_location is GrowthlaneExitLocation.AT_LEFT:
-            return np.rot90(roi_image,-1)
+            return np.rot90(roi_image,-1, axes=(1, 2))
         elif self.exit_location is GrowthlaneExitLocation.AT_BOTTOM:
-            return np.rot90(roi_image, 2)
+            return np.rot90(roi_image, 2, axes=(1, 2))
         elif self.exit_location is GrowthlaneExitLocation.AT_RIGHT:
-            return np.rot90(roi_image, 1)
+            return np.rot90(roi_image, 1, axes=(1, 2))
         else:
             raise ValueError("Growthlane orientation is not set.")
 

@@ -293,10 +293,7 @@ def append_gl_roi_images(time_index, growthlane_rois, gl_image_dict, color_image
     z_index = 0
     nr_of_colors = color_image_stack.shape[2]
     for gl_roi in growthlane_rois:
-        color_index = 0
-        gl_image_dict[gl_roi.id][time_index, z_index, color_index, ...] = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
-        for color_index in range(1, nr_of_colors):  # add remaining channels
-            gl_image_dict[gl_roi.id][time_index, z_index, color_index, ...] = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
+        gl_image_dict[gl_roi.id][time_index, z_index, ...] = gl_roi.get_oriented_roi_image(np.moveaxis(color_image_stack, -1, 0))
 
 
 def append_to_kymo_graph(time_index, growthlane_rois, kymo_image_dict, color_image_stack):
@@ -304,12 +301,9 @@ def append_to_kymo_graph(time_index, growthlane_rois, kymo_image_dict, color_ima
     z_index = 0
     nr_of_colors = color_image_stack.shape[2]
     for gl_roi in growthlane_rois:
-        color_index = 0
-        gl_roi_crop = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
-        kymo_image_dict[gl_roi.id][stack_time_index, z_index, color_index, :, time_index] = get_kymo_graph_slice(gl_roi_crop)
-        for color_index in range(1, nr_of_colors):  # add remaining channels
-            gl_roi_crop = gl_roi.get_oriented_roi_image(color_image_stack[:, :, color_index])
-            kymo_image_dict[gl_roi.id][stack_time_index, z_index, color_index, :, time_index] = get_kymo_graph_slice(gl_roi_crop)
+        gl_roi_crop = gl_roi.get_oriented_roi_image(np.moveaxis(color_image_stack, -1, 0))
+        for color_index in range(0, nr_of_colors):  # add remaining channels
+            kymo_image_dict[gl_roi.id][stack_time_index, z_index, color_index, :, time_index] = get_kymo_graph_slice(gl_roi_crop[color_index, ...])
 
 
 def get_kymo_graph_slice(gl_roi_crop):
