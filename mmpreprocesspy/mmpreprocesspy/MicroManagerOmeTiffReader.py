@@ -32,8 +32,15 @@ class MicroManagerOmeTiffReader(object):
             self._position_names = [c['Label'] for c in
                                     metadata['InitialPositionList']]  # this is for TIFF format from MicroManager 1
         elif 'StagePositions' in metadata:
-            self._position_names = [c['Label'] for c in
-                                    metadata['StagePositions']]  # this is for TIFF format from MicroManager 2
+            if 'Label' in metadata['StagePositions'][0].keys():
+                self._position_names = [c['Label'] for c in
+                                        metadata['StagePositions']]  # this is for TIFF format from MicroManager 2
+            elif 'label' in metadata['StagePositions'][0].keys():
+                self._position_names = [c['label'] for c in
+                                        metadata['StagePositions']]  # this is for TIFF format from MicroManager 2
+            else:
+                raise LookupError(
+                    "TIFF metadata['StagePositions'] contains no key 'Label' or 'label'")
         else:
             raise LookupError(
                 "TIFF metadata contains no entry for either 'InitialPositionList' or 'StagePositions'")
