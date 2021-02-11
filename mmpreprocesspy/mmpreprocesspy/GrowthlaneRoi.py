@@ -17,7 +17,7 @@ class GrowthlaneRoi(object):
             self.exit_location = self.determine_location_of_growthlane_exit(roi_image[0, ...], search_area=50)
 
         if self.normalization_range:
-            roi_image = self._normalize_image_with_min_and_max_values(roi_image, self.normalization_range[0], self.normalization_range[1])
+            roi_image[0, ...] = self._normalize_image_with_min_and_max_values(roi_image[0, ...], self.normalization_range[0], self.normalization_range[1])
 
         if self.exit_location is GrowthlaneExitLocation.AT_TOP:
             return roi_image
