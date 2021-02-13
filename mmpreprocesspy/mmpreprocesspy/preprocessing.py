@@ -334,18 +334,66 @@ def find_rotation(image):
     :return: Returns the angle of the GL ROI-region
     """
     tofft = image
+    tofft = tofft - np.mean(tofft.flatten())
     tofft = np.pad(tofft, ((0, 0), (tofft.shape[0] - tofft.shape[1], 0)), mode='constant', constant_values=0)
 
     f0 = np.fft.fftshift(np.abs(np.fft.fft2(tofft)))
     allproj = []
+    allproj_horz = []
 
     angles = list(np.arange(-10, 10, 0.1))
     for i in angles:
         basicim = skimage.transform.rotate(f0, i, cval=0)
+        projection = np.max(np.sum(basicim, axis=0))
+        allproj.append(projection)
+        projection_horz = np.max(np.sum(basicim, axis=1))
+        allproj_horz.append(projection_horz)
 
-        allproj.append(np.max(np.sum(basicim, axis=0)))
+        if np.allclose(i, -.5): # np.allclose(i, 0) or np.allclose(i, -.5) or np.allclose(i, -1):
+            print('stop')
+            import matplotlib.pyplot as plt
+            plt.plot(np.sum(np.log(basicim), axis=1))
+            plt.show()
+            # plt.plot(projection)
+            # plt.show()
+
+            center = 1024
+            offset = 32
+            to_show = np.log(basicim)[center - offset:center + offset, center - offset:center + offset]
+            plt.imshow(to_show)
+            plt.axvline(to_show.shape[1]/2, color='k', linestyle='--', linewidth=0.5)
+            plt.title(f'angle: {i}')
+            plt.show()
+
+
 
     angle = angles[np.argmax(allproj)]
+    print(f'max angle: {angle}')
+    import matplotlib.pyplot as plt
+    center = 1024
+    offset = 256
+    plt.imshow(np.log(f0)[center-offset:center+offset,center-offset:center+offset])
+    plt.show()
+
+    import matplotlib.pyplot as plt
+    plt.plot(angles, allproj)
+    # plt.axvline(0, color='k', linestyle='--')
+    # plt.axvline(-0.5, color='k', linestyle='--')
+    # plt.axvline(0.5, color='k', linestyle='--')
+    plt.axvline(angles[np.argmax(allproj)], color='r')
+    plt.show()
+
+    import matplotlib.pyplot as plt
+    plt.imshow(image)
+    plt.axvline(756, color='r')
+    plt.show()
+
+    plt.plot(angles, allproj_horz)
+    # plt.axvline(0, color='k', linestyle='--')
+    # plt.axvline(-0.5, color='k', linestyle='--')
+    # plt.axvline(0.5, color='k', linestyle='--')
+    plt.axvline(angles[np.argmax(allproj_horz)], color='r')
+    plt.show()
     return angle
 
 

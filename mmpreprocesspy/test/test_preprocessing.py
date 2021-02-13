@@ -8,11 +8,139 @@ import numpy as np
 import skimage.transform
 from skimage.io import imread
 from skimage.transform import AffineTransform, warp
+from skimage.filters import sobel_h, sobel_v
 from parameterized import parameterized
 
 
 class TestPreprocessing(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
+
+    def inner_weigthed_inner_product(self, f1, f2, roi_size):
+        from scipy.ndimage import uniform_filter
+        res = f1 * f2
+        return uniform_filter(res, size=roi_size)
+
+    def test__orientj_method(self):
+        import tifffile as tff
+        import matplotlib.pyplot as plt
+        from mmpreprocesspy import preprocessing
+
+        image = tff.imread("./resources/data__test_preprocessing_py/21__dany__20190515_hi1_med1_med2_rpmB_glu_gly_7_MMStack__pos25__frame_0.tif")
+        # image = tff.imread("./resources/data__test_preprocessing_py/12_20190816_Theo_MMStack.ome.tif")
+
+        f_x = sobel_v(image)
+        f_y = sobel_h(image)
+
+        roi_size = 7
+        inner_prod_mixed = self.inner_weigthed_inner_product(f_x, f_y, roi_size=roi_size)
+        inner_prod_x = self.inner_weigthed_inner_product(f_x, f_x, roi_size=roi_size)
+        inner_prod_y = self.inner_weigthed_inner_product(f_y, f_y, roi_size=roi_size)
+        angle = 0.5 * np.arctan(2*(inner_prod_mixed/(inner_prod_y - inner_prod_x)))
+
+        plt.imshow(angle)
+        plt.colorbar()
+        plt.show()
+
+        print('stop')
+
+        # uniform_filter(f_x)
+
+    def test__orientation_detection(self):
+        import tifffile as tff
+        import matplotlib.pyplot as plt
+        from mmpreprocesspy import preprocessing
+
+        image = tff.imread("./resources/data__test_preprocessing_py/21__dany__20190515_hi1_med1_med2_rpmB_glu_gly_7_MMStack__pos25__frame_0.tif")
+        # image = tff.imread("./resources/data__test_preprocessing_py/12_20190816_Theo_MMStack.ome.tif")
+
+        sobel_v_image = sobel_v(image)
+        sobel_h_image = sobel_h(image)
+
+        tofft = sobel_h_image
+        tofft = tofft - np.mean(tofft.flatten())
+        tofft = np.pad(tofft, ((0, 0), (tofft.shape[0] - tofft.shape[1], 0)), mode='constant', constant_values=0)
+
+        f0 = np.fft.fftshift(np.abs(np.fft.fft2(tofft)))
+
+        angles = np.arctan2(sobel_h_image, sobel_v_image)
+        angles[angles<0] += 2*np.pi
+        # angles = np.abs(angles) - np.pi
+        plt.imshow(angles)
+        plt.colorbar()
+        plt.show()
+
+        plt.plot(angles.flatten())
+        plt.show()
+
+        res = plt.hist(angles.flatten(), bins=360)
+        plt.plot(res[1][:-1], res[0])
+        plt.show()
+
+        hist_x = res[1][:-1]
+        hist_y = res[0]
+
+        hist_y[hist_x < (np.pi-1)] = 0
+        hist_y[hist_x > (np.pi + 1)] = 0
+
+        plt.plot(hist_x, hist_y)
+        plt.show()
+
+        hist_x[np.argmax(hist_y)]
+
+        plt.imshow(sobel_v_image)
+        plt.show()
+
+        plt.imshow(sobel_h_image)
+        plt.show()
+
+        plt.imshow(f0)
+        plt.show()
+
+        center = 1024
+        offset = 32
+        # to_show = np.log(f0)[center - offset:center + offset, center - offset:center + offset]
+        to_show = np.log(f0)
+        plt.imshow(to_show)
+        plt.show()
+
+        allproj = []
+        allproj_horz = []
+        angles = list(np.arange(-10, 10, 0.1))
+        for i in angles:
+            basicim = skimage.transform.rotate(f0, i, cval=0)
+            projection = np.max(np.sum(basicim, axis=0))
+            allproj.append(projection)
+            projection_horz = np.max(np.sum(basicim, axis=1))
+            allproj_horz.append(projection_horz)
+
+        angle = angles[np.argmax(allproj)]
+
+        plt.plot(angles, allproj)
+        plt.axvline(.5, color='r')
+        plt.show()
+
+
+    def test__get_rotated_image__returns_correctly_aligned_image_for_dataset_21(self):
+        import tifffile as tff
+        import matplotlib.pyplot as plt
+        from mmpreprocesspy import preprocessing
+
+        # image = tff.imread("./resources/data__test_preprocessing_py/21__dany__20190515_hi1_med1_med2_rpmB_glu_gly_7_MMStack__pos25__frame_0.tif")
+        image = tff.imread("./resources/data__test_preprocessing_py/12_20190816_Theo_MMStack.ome.tif")
+
+        rotated_image, main_channel_angle = preprocessing.get_rotated_image(image, 0)
+        # expected angle: ~0.5
+        print('stop')
+        # fig, ax = plt.subplots(1, 2)
+        # ax[0].imshow(image)
+        # ax[1].imshow(rotated_image)
+        # plt.show()
+        # fig, ax = plt.subplots(1, 2)
+        # ax[0].imshow(image)
+        plt.imshow(rotated_image)
+        plt.axvline(1500, color='r', linewidth=0.5, linestyle='--')
+        plt.show()
+        self.assertEqual(0, angle)
 
     def test__get_gl_regions_using_template(self):
         import os
