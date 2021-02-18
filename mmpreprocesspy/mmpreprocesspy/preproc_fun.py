@@ -195,7 +195,7 @@ def preproc_fun(data_folder,
 
             growthlane_rois = translate_gl_rois(growthlane_rois, (-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
 
-            growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict = remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image_dict, kymo_image_dict, gl_image_path_dict)
+            growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict = remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict)
 
             color_image_stack = dataset.get_image_stack(frame_index=t, position_index=position_index)  # TODO: rename this to e.g. 'current_image_frame'
 
@@ -281,7 +281,7 @@ def translate_gl_rois(growthlane_rois, shift_x_y):
     return growthlane_rois
 
 
-def remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image_dict, kymo_image_dict, gl_image_path_dict):
+def remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict):
     """
     This method checks, if a GL ROI lies outside of the image.
     If so, it is removed from all lists/dicts.
@@ -301,6 +301,7 @@ def remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image
         if not gl_roi.roi.is_inside_image(image):
             del gl_image_dict[gl_roi.id]
             del kymo_image_dict[gl_roi.id]
+            del gl_csv_path_dict[gl_roi.id]
             gl_folder_path = os.path.dirname(gl_image_path_dict[gl_roi.id])
             del gl_image_path_dict[gl_roi.id]
             del growthlane_rois[ind]
@@ -308,12 +309,12 @@ def remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image
             if os.path.exists(gl_folder_path):
                 shutil.rmtree(gl_folder_path)
 
-    return growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict
+    return growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict
 
 
 def append_gl_csv(frame_index, growthlane_rois, gl_csv_path_dict):
-    for ind, gl_roi in enumerate(growthlane_rois):
-        path = gl_csv_path_dict[ind]
+    for gl_roi in growthlane_rois:
+        path = gl_csv_path_dict[gl_roi.id]
         with open(path, mode='a') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             if frame_index == 0:  # write header, if we are at the first frame
