@@ -43,7 +43,7 @@ for (( I=0; I<N; I++ )); do
   -i \"$RAW_PATH\" \
   -o \"$PREPROC_DIR\""
   if [ -n "$POS_NAME" ]; then CMD_STR="$CMD_STR -p $POS_NAME"; fi # append optional argument
-  if ! (( $ROTATION == 0 )); then CMD_STR="$CMD_STR -r $ROTATION"; fi # append optional argument
+  if [ -n "$ROTATION" ]; then CMD_STR="$CMD_STR -r $ROTATION"; fi # append optional argument
 #  if [ -n "$CAMERA_ROI_PATH" ]; then CMD_STR="$CMD_STR -j $CAMERA_ROI_PATH"; fi # append optional argument
 #  if [ -n "$DARK_PATH" ]; then CMD_STR="$CMD_STR -d $DARK_PATH"; fi # append optional argument
 #  if [ -n "$GAIN_PATH" ]; then CMD_STR="$CMD_STR -g $GAIN_PATH"; fi # append optional argument
@@ -56,7 +56,7 @@ for (( I=0; I<N; I++ )); do
   if [ -n "$GLT" ]; then CMD_STR="$CMD_STR -glt $GLT"; fi # append optional argument
   if [ -n "$ROI_BOUNDARY_OFFSET_AT_MOTHER_CELL" ]; then CMD_STR="$CMD_STR --roi_boundary_offset_at_mother_cell $ROI_BOUNDARY_OFFSET_AT_MOTHER_CELL"; fi # append optional argument
   if [ -n "$GL_DETECTION_TEMPLATE_PATH" ]; then CMD_STR="$CMD_STR --gl_detection_template_path $GL_DETECTION_TEMPLATE_PATH"; fi # append optional argument
-  if [ -n "$GL_DETECTION_TEMPLATE_PATH" ]; then CMD_STR="$CMD_STR --normalization_config_path $NORMALIZATION_CONFIG_PATH"; fi # append optional argument
+  if [ -n "$NORMALIZATION_CONFIG_PATH" ]; then CMD_STR="$CMD_STR --normalization_config_path $NORMALIZATION_CONFIG_PATH"; fi # append optional argument
 
   CMD_STR="$CMD_STR -log $LOG"
 
