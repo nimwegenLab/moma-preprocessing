@@ -20,13 +20,15 @@ def get_rotated_image(image, main_channel_angle=None):
     if main_channel_angle == None:
         main_channel_angle = find_main_channel_orientation(image)
 
-    if main_channel_angle != 0:
-        image = skimage.transform.rotate(image, main_channel_angle,
-                                         resize=True)  # rotate image angle back to 0, if needed
-
-    # find rotation angle
-    angle = find_rotation(image)
-    main_channel_angle += angle
+    if float(main_channel_angle).is_integer():  # if the main_channel_angle is integer, we assume a crude approximantion by the user and try to refine the angle
+        if main_channel_angle != 0:
+            image = skimage.transform.rotate(image, main_channel_angle,
+                                             resize=True)  # rotate image angle back to 0, if needed
+        # find rotation angle
+        angle = find_rotation(image)
+        main_channel_angle += angle
+    else:
+        angle = main_channel_angle  # the user specified the angle with decimals. We therefore do not refine it.
 
     # recalculate channel region boundary on rotated image
     image_rotated = skimage.transform.rotate(image, angle, cval=0)

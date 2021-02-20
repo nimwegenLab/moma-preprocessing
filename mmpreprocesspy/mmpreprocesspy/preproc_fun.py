@@ -314,13 +314,14 @@ def remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image
 
 def append_gl_csv(frame_index, growthlane_rois, gl_csv_path_dict):
     for gl_roi in growthlane_rois:
-        path = gl_csv_path_dict[gl_roi.id]
-        with open(path, mode='a') as csv_file:
-            csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            if frame_index == 0:  # write header, if we are at the first frame
-                csv_writer.writerow(['frame', 'norm_range_min', 'norm_range_max'])
-            range = gl_roi.normalization_range
-            csv_writer.writerow([frame_index, np.round(range[0], decimals=2), np.round(range[1], decimals=2)])
+        if gl_roi.normalization_range:  # store if we have normalization information
+            path = gl_csv_path_dict[gl_roi.id]
+            with open(path, mode='a') as csv_file:
+                csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                if frame_index == 0:  # write header, if we are at the first frame
+                    csv_writer.writerow(['frame', 'norm_range_min', 'norm_range_max'])
+                range = gl_roi.normalization_range
+                csv_writer.writerow([frame_index, np.round(range[0], decimals=2), np.round(range[1], decimals=2)])
 
 
 def append_gl_roi_images(frame_index, growthlane_rois, gl_image_dict, color_image_stack):
