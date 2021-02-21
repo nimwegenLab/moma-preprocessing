@@ -243,9 +243,9 @@ class MomaImageProcessor(object):
             plt.axhline(normalization_range[0], linestyle='--', color='k')
             plt.axhline(normalization_range[1], linestyle='--', color='k', label='norm range')
 
-            plt.scatter(np.argwhere(intensity_profile == normalization_range[0]), normalization_range[0], color='k')
-            plt.scatter(np.argwhere(intensity_profile == normalization_range[1]), normalization_range[1], color='k',
-                        label='norm values')
+            # plt.scatter(np.argwhere(intensity_profile == normalization_range[0]), normalization_range[0], color='k')
+            # plt.scatter(np.argwhere(intensity_profile == normalization_range[1]), normalization_range[1], color='k',
+            #             label='norm values')
 
             plt.ylim([0, 1.1 * np.max(intensity_profile_unprocessed)])
             plt.ylabel('intensity [a.u.]')
