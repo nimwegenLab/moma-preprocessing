@@ -219,7 +219,7 @@ class MomaImageProcessor(object):
 
             if frame_nr % self.image_save_fequency == 0:
                 image_to_save = np.array(self._gl_region_indicator_images)
-                tff.imwrite(os.path.join(output_path, f'region_indiator_images__pos_{position_nr}.tif'), image_to_save)
+                tff.imwrite(os.path.join(output_path, f'region_indicator_images__pos_{position_nr}.tif'), image_to_save)
 
     def plot_and_save_intensity_profiles_with_peaks(self,
                                                     intensity_profiles,
