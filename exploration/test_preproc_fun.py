@@ -7,6 +7,33 @@ from unittest import TestCase
 class TestPreproc_fun(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
+    def test__dataset_24_with_flatfield(self):
+        from mmpreprocesspy import preproc_fun
+
+        data_directory = self.test_data_base_path + '/24__lis__20210303/MMStack/'
+        directory_to_save = self.test_data_base_path + '/24__lis__20210303/result_with_flatfield/'
+        gl_detection_template_path = self.test_data_base_path + '/24__lis__20210303/DONT_DELETE_gl_detection_template/gl_detection_template.json'
+        flatfield_directory = os.path.join(self.test_data_base_path, '24__lis__20210303/flatfield__lis__20210211')
+        positions = [0]
+        maxframe = 3
+        dark_noise = 90
+        gaussian_sigma = 5
+        main_channel_angle = 89.8
+        normalization_config_path = 'True'
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
+                                gaussian_sigma=gaussian_sigma,
+                                main_channel_angle=main_channel_angle,
+                                gl_detection_template_path=gl_detection_template_path,
+                                normalization_config_path=normalization_config_path,
+                                flatfield_directory=flatfield_directory)
+
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+                                          title='test__dataset_21_no_flatfield')
+
     def test__dataset_23_no_flatfield(self):
         from mmpreprocesspy import preproc_fun
 
