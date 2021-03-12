@@ -226,7 +226,7 @@ def preproc_fun(data_folder,
         finalize_memmap_images(growthlane_rois, kymo_image_dict)
 
         path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_final.tiff'
-        store_gl_index_image(imageProcessor.growthlane_rois, imageProcessor.image, path)
+        store_gl_index_image(growthlane_rois, phc_image, path)
 
     # # finalize measurement of processing time
     # print("Out of bounds ROIs: " + str(incomplete_GL))

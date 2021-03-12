@@ -15,7 +15,7 @@ class TestPreproc_fun(TestCase):
         gl_detection_template_path = self.test_data_base_path + '/24__lis__20210303/DONT_DELETE_gl_detection_template/gl_detection_template.json'
         flatfield_directory = os.path.join(self.test_data_base_path, '24__lis__20210303/flatfield__lis__20210211')
         positions = [0]
-        maxframe = 3
+        maxframe = 10
         dark_noise = 90
         gaussian_sigma = 5
         main_channel_angle = 89.8
