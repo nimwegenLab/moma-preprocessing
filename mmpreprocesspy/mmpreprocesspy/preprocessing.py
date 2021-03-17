@@ -43,9 +43,9 @@ def get_gl_regions(image_rotated, growthlane_length_threshold=0, roi_boundary_of
     return growthlane_rois, region_list
 
 def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetectionTemplate, roi_boundary_offset_at_mother_cell=0):
-    normalized_cross_correlation = match_template(image_rotated, gl_detection_template.template_image, pad_input=True)
-    horizontal_index_of_max_correlation = np.argmax(np.max(normalized_cross_correlation, axis=0))
-    vertical_index_of_max_correlation = np.argmax(np.max(normalized_cross_correlation, axis=1))
+    normalized_cross_correlation = match_template(image_rotated, gl_detection_template.template_image)
+    vertical_index_of_max_correlation = gl_detection_template.template_image.shape[0]/2 + np.argmax(np.max(normalized_cross_correlation, axis=1))
+    horizontal_index_of_max_correlation = gl_detection_template.template_image.shape[1]/2 + np.argmax(np.max(normalized_cross_correlation, axis=0))
 
     gl_regions = []
     gl_rois = []
@@ -89,6 +89,15 @@ def calculate_vertical_gl_centers(gl_region,
     return gl_centers
 
 def calculate_gl_region(gl_region, horizontal_index_of_max_correlation, template_image_shape):
+    """
+    Calculate the start and end of the image region parallel to the main-channel that contains the GLs.
+
+    :param gl_region:
+    :param horizontal_index_of_max_correlation:
+    :param template_image_shape:
+    :return:
+    """
+
     horizontal_index_of_max_correlation = horizontal_index_of_max_correlation - (template_image_shape[1] / 2)
     return int(gl_region.start + horizontal_index_of_max_correlation), int(gl_region.end + horizontal_index_of_max_correlation)
 
