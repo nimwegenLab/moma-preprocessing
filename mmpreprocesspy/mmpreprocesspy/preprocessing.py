@@ -71,17 +71,17 @@ def calculate_vertical_gl_centers(gl_region,
                 template_image_shape[0] / 2)
     seed_gl_center = vertical_index_of_max_correlation_shifted + gl_region.first_gl_position_from_top
     gl_centers = []
-    gl_centers.append(int(seed_gl_center))
+    gl_centers.append(seed_gl_center)
 
     # calculate and add valid vertical centers before seed center
     for shift_factor in range(1, 100):
-        new_gl_center = int(seed_gl_center - gl_region.gl_spacing_vertical * shift_factor)
+        new_gl_center = seed_gl_center - gl_region.gl_spacing_vertical * shift_factor
         if new_gl_center < 0: break
         gl_centers.append(new_gl_center)
 
     # calculate and add valid vertical centers after seed center
     for shift_factor in range(1, 100):
-        new_gl_center = int(seed_gl_center + gl_region.gl_spacing_vertical * shift_factor)
+        new_gl_center = seed_gl_center + gl_region.gl_spacing_vertical * shift_factor
         if new_gl_center > image_shape[0]: break
         gl_centers.append(new_gl_center)
 
@@ -102,7 +102,7 @@ def calculate_gl_region(gl_region, horizontal_index_of_max_correlation, template
     return int(gl_region.start + horizontal_index_of_max_correlation), int(gl_region.end + horizontal_index_of_max_correlation)
 
 def rotate_rois(image, growthlane_rois, main_channel_angle):
-    rotation_center = (np.int0(image.shape[1]/2), np.int0(image.shape[0]/2))
+    rotation_center = (np.int(np.round(image.shape[1]/2)), np.int(np.round(image.shape[0]/2)))
     for growthlane_roi in growthlane_rois:
         growthlane_roi.roi.rotate(rotation_center, -main_channel_angle)
     return growthlane_rois

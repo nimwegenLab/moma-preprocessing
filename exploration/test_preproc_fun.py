@@ -12,13 +12,13 @@ class TestPreproc_fun(TestCase):
 
         data_directory = self.test_data_base_path + '/24__lis__20210303/MMStack/'
         directory_to_save = self.test_data_base_path + '/24__lis__20210303/result_with_flatfield/'
-        gl_detection_template_path = self.test_data_base_path + '/24__lis__20210303/DONT_DELETE_gl_detection_template/gl_detection_template.json'
+        gl_detection_template_path = self.test_data_base_path + '/24__lis__20210303/DONT_DELETE_gl_detection_template/gl_detection_template_size_1__v003.json'
         flatfield_directory = os.path.join(self.test_data_base_path, '24__lis__20210303/flatfield__lis__20210211')
-        positions = [0]
-        maxframe = 10
+        positions = [21]
+        maxframe = 2
         dark_noise = 90
         gaussian_sigma = 5
-        main_channel_angle = 89.8
+        main_channel_angle = 89.7
         normalization_config_path = 'True'
 
         if os.path.isdir(directory_to_save):

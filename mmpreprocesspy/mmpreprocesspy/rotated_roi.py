@@ -139,5 +139,5 @@ class RotatedRoi(object):
     @property
     def points(self):
         rot_rect = (self.center, (self.width, self.height), -self.angle) #  NOTE-MM-2019-05-02: I do not understand why it has to be '-self.angle' instead of self.angle
-        return np.int0(cv.boxPoints(rot_rect))
+        return np.int0(np.round(cv.boxPoints(rot_rect)))
         # we could use this to do everything in floating point precision: tmp_int = cv.boundingRect(cv.boxPoints(rot_rect)*1000); tmp_float = [float(integral)/1000 for integral in tmp_int];
