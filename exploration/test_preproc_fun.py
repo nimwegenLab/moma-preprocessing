@@ -12,7 +12,7 @@ class TestPreproc_fun(TestCase):
 
         data_directory = self.test_data_base_path + '/24__lis__20210303/MMStack/'
         directory_to_save = self.test_data_base_path + '/24__lis__20210303/result_with_flatfield/'
-        gl_detection_template_path = self.test_data_base_path + '/24__lis__20210303/DONT_DELETE_gl_detection_template/gl_detection_template_size_1__v003.json'
+        gl_detection_template_path = self.test_data_base_path + '/24__lis__20210303/DONT_DELETE_gl_detection_template/gl_detection_template_size_1__v004.json'
         flatfield_directory = os.path.join(self.test_data_base_path, '24__lis__20210303/flatfield__lis__20210211')
         positions = [21]
         maxframe = 2
