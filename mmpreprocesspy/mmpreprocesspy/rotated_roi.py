@@ -54,13 +54,15 @@ class RotatedRoi(object):
         rotated_roi = RotatedRoi((center_x, center_y), (roi.width, roi.height), 0)
         return rotated_roi
 
+    first_run = True
     def get_from_image(self, image):
         """ Return the cropped and rotated image data of the ROI. """
-        if self.angle < -45.0: # REF: https://answers.opencv.org/question/497/extract-a-rotatedrect-area/?answer=518#post-id-518
+        if self.first_run and (self.angle < -45.0 or self.angle > 45.0) :  # this is a hack to get rotation and image-roi shape correctly; this should have been done up higher in the call-stack, but I don't see how to easily do it.
             self.angle += 90.0
             width = self.width
             self.width = self.height
             self.height = width
+            self.first_run = False
 
         # boundRect = cv.boundingRect(self.points)
         x, y, w, h = cv.boundingRect(self.points)
