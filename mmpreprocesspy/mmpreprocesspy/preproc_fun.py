@@ -62,7 +62,7 @@ def get_gl_tiff_path(result_base_path, base_name, indp, gl_index):
     :param gl_index:
     :return:
     """
-    return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '.tiff'
+    return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '.tif'
 
 
 def get_gl_csv_path(result_base_path, base_name, indp, gl_index):
@@ -90,7 +90,7 @@ def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index):
     :return:
     """
 
-    return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_kymo.tiff'
+    return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_kymo.tif'
 
 
 def preproc_fun(data_folder,
@@ -170,7 +170,7 @@ def preproc_fun(data_folder,
         if not os.path.exists(os.path.dirname(folder_to_save)):
             os.makedirs(os.path.dirname(folder_to_save))
 
-        path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_initial.tiff'
+        path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_initial.tif'
         store_gl_index_image(imageProcessor.growthlane_rois, imageProcessor.image, path)
 
         # create empty kymographs to fill
@@ -220,7 +220,7 @@ def preproc_fun(data_folder,
         finalize_memmap_images(growthlane_rois, gl_image_dict)
         finalize_memmap_images(growthlane_rois, kymo_image_dict)
 
-        path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_final.tiff'
+        path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_final.tif'
         store_gl_index_image(growthlane_rois, phc_image, path)
 
     # # finalize measurement of processing time
