@@ -33,7 +33,8 @@ class TestPreproc_fun(TestCase):
                                 main_channel_angle=main_channel_angle,
                                 gl_detection_template_path=gl_detection_template_path,
                                 normalization_config_path=normalization_config_path,
-                                flatfield_directory=flatfield_directory)
+                                flatfield_directory=flatfield_directory,
+                                z_slice=7)
 
         self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_21_no_flatfield')

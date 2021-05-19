@@ -105,7 +105,8 @@ def preproc_fun(data_folder,
                 main_channel_angle=None,
                 roi_boundary_offset_at_mother_cell=None,
                 gl_detection_template_path=None,
-                normalization_config_path=None):
+                normalization_config_path=None,
+                z_slice=0):
 
     # create a micro-manager image object
     dataset = MicroManagerOmeTiffReader(data_folder)
@@ -151,7 +152,7 @@ def preproc_fun(data_folder,
             preprocessor.save_flatfields(position_folder)
 
         # load first phase contrast image
-        color_image_stack = dataset.get_image_stack(frame_index=minframe, position_index=position_index, z_slice=0)
+        color_image_stack = dataset.get_image_stack(frame_index=minframe, position_index=position_index, z_slice=z_slice)
         first_phc_image = color_image_stack[..., 0]
 
         # Process first image to find ROIs, etc.
@@ -188,7 +189,7 @@ def preproc_fun(data_folder,
 
         # go through time-lapse and cut out channels
         for frame_index, t in enumerate(range(minframe, maxframe)):
-            image = dataset.get_image_stack(frame_index=t, position_index=position_index, z_slice=0)[..., phase_channel_index]
+            image = dataset.get_image_stack(frame_index=t, position_index=position_index, z_slice=z_slice)[..., phase_channel_index]
             imageProcessor.determine_image_shift(image)
             growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
 
@@ -198,7 +199,7 @@ def preproc_fun(data_folder,
 
             growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict = remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict)
 
-            color_image_stack = dataset.get_image_stack(frame_index=t, position_index=position_index, z_slice=0)  # TODO: rename this to e.g. 'current_image_frame'
+            color_image_stack = dataset.get_image_stack(frame_index=t, position_index=position_index, z_slice=z_slice)  # TODO: rename this to e.g. 'current_image_frame'
 
             # correct images and append corrected and non-corrected images
             if preprocessor is not None:
