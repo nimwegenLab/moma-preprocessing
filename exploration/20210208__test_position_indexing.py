@@ -21,7 +21,7 @@ for name in dataset._position_names:
 # position_inds = list(range(len(position_names)))
 frame_nr = 0
 for name, ind in zip(position_names, position_inds):
-    image_stack = dataset.get_image_stack(position_index=ind, frame_index=frame_nr)
+    image_stack = dataset.get_image_stack(position_index=ind, frame_index=frame_nr, z_slice=0)
     plt.imshow(image_stack[:, :, 0], cmap='gray')
     plt.title(f'Position: {name}')
     plt.show()

@@ -38,7 +38,8 @@ class TestPreproc_fun(TestCase):
 
                 for position_index in pos_ind_range:
                     current_stack = dataset.get_image_stack(frame_index=frame_index,
-                                                            position_index=position_index)
+                                                            position_index=position_index,
+                                                            z_slice=0)
                     imdata = current_stack[:, :, 0]
                     imdata = rotate(imdata, rotation_angle)
 

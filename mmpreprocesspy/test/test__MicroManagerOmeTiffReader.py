@@ -13,7 +13,7 @@ class test_MicroManagerOmeTiffReader(TestCase):
         dataset = MicroManagerOmeTiffReader(path)
         # dataset = MMData(path)
 
-        image_stack = dataset.get_image_stack(0, 0)
+        image_stack = dataset.get_image_stack(0, 0, z_slice=0)
 
         # np.save('resources/data__test__MicroManagerOmeTiffReader/expected_002.npy', image_stack)
         expected = np.load('resources/data__test__MicroManagerOmeTiffReader/expected_002.npy')
@@ -29,7 +29,7 @@ class test_MicroManagerOmeTiffReader(TestCase):
         dataset = MicroManagerOmeTiffReader(path)
         # dataset = MMData(path)
 
-        image_stack = dataset.get_image_stack(0, 0)
+        image_stack = dataset.get_image_stack(0, 0, z_slice=0)
 
         # np.save('resources/data__test__MicroManagerOmeTiffReader/expected_001.npy', image_stack)
         expected = np.load('resources/data__test__MicroManagerOmeTiffReader/expected_001.npy')
@@ -64,7 +64,8 @@ class test_MicroManagerOmeTiffReader(TestCase):
 
                 for frame_index in range(min_frame, max_frame):
                     current_frame = dataset.get_image_stack(frame_index=frame_index,
-                                                            position_index=position_index)
+                                                            position_index=position_index,
+                                                            z_slice=0)
 
                     for ind, periodicity in enumerate(periodicty_of_nonzero_frame):
                         channel_ind = channel_inds_with_missing_frames[ind]
@@ -119,9 +120,11 @@ class test_MicroManagerOmeTiffReader(TestCase):
 
                 for frame_index in range(min_frame, max_frame):
                     current_frame = dataset.get_image_stack(frame_index=frame_index,
-                                                                position_index=position_index)
+                                                            position_index=position_index,
+                                                            z_slice=0)
                     next_frame = dataset.get_image_stack(frame_index=frame_index + 1,
-                                                                position_index=position_index)
+                                                         position_index=position_index,
+                                                         z_slice=0)
 
                     # print('')
                     # print(f'frame {frame_index}:')

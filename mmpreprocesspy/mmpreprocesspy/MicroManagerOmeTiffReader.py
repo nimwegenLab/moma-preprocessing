@@ -103,11 +103,11 @@ class MicroManagerOmeTiffReader(object):
         :param channel_index:
         :return:
         """
-        image_stack = self.get_image_stack(position_index, frame_index)
+        image_stack = self.get_image_stack(position_index, frame_index, z_slice=0)
         channel_image = image_stack[:, :, channel_index]
         return channel_image
 
-    def get_image_stack(self, position_index, frame_index):
+    def get_image_stack(self, position_index, frame_index, z_slice):
         """
         Get image stack containing the different channels for the specified position and frame.
         For frame indexes >0, we check if the image returned by `_get_image_stack_with_adapted_dimensions`
@@ -121,10 +121,10 @@ class MicroManagerOmeTiffReader(object):
         :return:
         """
         if frame_index == 0:
-            return self._get_image_stack_with_adapted_dimensions(position_index, frame_index)
+            return self._get_image_stack_with_adapted_dimensions(position_index, frame_index, z_slice=z_slice)
         elif frame_index > 0:
-            image_stack_current = self._get_image_stack_with_adapted_dimensions(position_index, frame_index)
-            image_stack_previous = self._get_image_stack_with_adapted_dimensions(position_index, frame_index - 1)
+            image_stack_current = self._get_image_stack_with_adapted_dimensions(position_index, frame_index, z_slice=z_slice)
+            image_stack_previous = self._get_image_stack_with_adapted_dimensions(position_index, frame_index - 1, z_slice=z_slice)
 
             for channel_index in range(image_stack_current.shape[2]):
                 if np.all(image_stack_current[:,:,channel_index] == image_stack_previous[:,:,channel_index]):
@@ -141,7 +141,7 @@ class MicroManagerOmeTiffReader(object):
         index = self._position_index_lut[position_index]
         return self._position_zarr[index]
 
-    def _get_image_stack_with_adapted_dimensions(self, position_index, frame_index):
+    def _get_image_stack_with_adapted_dimensions(self, position_index, frame_index, z_slice=0):
         """
         Get image stack containing the different channels for the specified position and frame.
 

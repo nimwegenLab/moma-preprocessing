@@ -151,7 +151,8 @@ def preproc_fun(data_folder,
             preprocessor.save_flatfields(position_folder)
 
         # load first phase contrast image
-        first_phc_image = dataset.get_image_fast(channel=phase_channel_index, frame=minframe, position=position_index)
+        color_image_stack = dataset.get_image_stack(frame_index=minframe, position_index=position_index, z_slice=0)
+        first_phc_image = color_image_stack[..., 0]
 
         # Process first image to find ROIs, etc.
         imageProcessor = MomaImageProcessor()
@@ -197,7 +198,7 @@ def preproc_fun(data_folder,
 
             growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict = remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict)
 
-            color_image_stack = dataset.get_image_stack(frame_index=t, position_index=position_index)  # TODO: rename this to e.g. 'current_image_frame'
+            color_image_stack = dataset.get_image_stack(frame_index=t, position_index=position_index, z_slice=0)  # TODO: rename this to e.g. 'current_image_frame'
 
             # correct images and append corrected and non-corrected images
             if preprocessor is not None:
