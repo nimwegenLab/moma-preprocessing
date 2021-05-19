@@ -82,18 +82,6 @@ class MicroManagerOmeTiffReader(object):
                        re.search('.*(MMStack).*ome.tif', f)]
         return image_files
 
-    def get_image_fast(self, frame=0, channel=0, plane=None, position=0):
-        """
-        This is to stay compatible with MMData.py
-
-        :param frame:
-        :param channel:
-        :param plane:
-        :param position:
-        :return:
-        """
-        return self.get_image(position, frame, channel)
-
     def get_image(self, position_index, frame_index, channel_index):
         """
         Get single image for the specified position, frame and channel.

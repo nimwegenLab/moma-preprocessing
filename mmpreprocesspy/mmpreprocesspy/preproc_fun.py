@@ -188,7 +188,7 @@ def preproc_fun(data_folder,
 
         # go through time-lapse and cut out channels
         for frame_index, t in enumerate(range(minframe, maxframe)):
-            image = dataset.get_image_fast(channel=phase_channel_index, frame=t, position=position_index)
+            image = dataset.get_image_stack(frame_index=t, position_index=position_index, z_slice=0)[..., phase_channel_index]
             imageProcessor.determine_image_shift(image)
             growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
 

@@ -44,7 +44,7 @@ class ImagePreprocessor(object):
         self.flatfields = np.zeros((height, width, nr_of_colors))
         for color_ind in range(0, nr_of_colors):
             for pos_ind in range(0, nr_of_flatfield_positions):
-                next_image = self.flatfield_dataset.get_image_fast(channel=color_ind, frame=0, position=pos_ind)
+                next_image = self.flatfield_dataset.get_image_stack(frame_index=0, position_index=pos_ind, z_slice=0)[..., color_ind].copy()
                 self.flatfields[:, :, color_ind] += next_image[:height, :width]
             self.flatfields[:, :, color_ind] /= nr_of_flatfield_positions
         pass
