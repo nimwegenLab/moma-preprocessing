@@ -7,6 +7,37 @@ from unittest import TestCase
 class TestPreproc_fun(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
+    def test__dataset_26__Lis__20210304_defocus_stack(self):
+        from mmpreprocesspy import preproc_fun
+
+        data_directory = self.test_data_base_path + '/26__Lis__20210304_defocus_stack/MMStack/'
+        directory_to_save = self.test_data_base_path + '/26__Lis__20210304_defocus_stack/FLATFILED/'
+        gl_detection_template_path = self.test_data_base_path + '/26__Lis__20210304_defocus_stack/GL_DETECTION_TEMPLATE/template_config.json'
+        flatfield_directory = os.path.join(self.test_data_base_path, '25__dany__20210423/flatfield')
+        positions = [0]
+        # minframe = 0
+        maxframe = 2
+        dark_noise = 90
+        gaussian_sigma = 5
+        main_channel_angle = 89.8
+        normalization_config_path = 'True'
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        preproc_fun.preproc_fun(data_directory, directory_to_save, positions,
+                                # minframe=minframe,
+                                maxframe=maxframe,
+                                dark_noise=dark_noise,
+                                gaussian_sigma=gaussian_sigma,
+                                main_channel_angle=main_channel_angle,
+                                gl_detection_template_path=gl_detection_template_path,
+                                normalization_config_path=normalization_config_path,
+                                flatfield_directory=flatfield_directory)
+
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
+                                          title='test__dataset_21_no_flatfield')
+
     def test__dataset_25_without_flatfield(self):
         from mmpreprocesspy import preproc_fun
 
@@ -35,7 +66,7 @@ class TestPreproc_fun(TestCase):
                                 normalization_config_path=normalization_config_path,
                                 flatfield_directory=flatfield_directory)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_21_no_flatfield')
 
     def test__dataset_24_with_flatfield(self):
@@ -62,7 +93,7 @@ class TestPreproc_fun(TestCase):
                                 normalization_config_path=normalization_config_path,
                                 flatfield_directory=flatfield_directory)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_21_no_flatfield')
 
     def test__dataset_23_no_flatfield(self):
@@ -87,7 +118,7 @@ class TestPreproc_fun(TestCase):
                                 main_channel_angle=main_channel_angle,
                                 gl_detection_template_path=gl_detection_template_path)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_21_no_flatfield')
 
     def test__dataset_20_with_flatfield(self):
@@ -114,7 +145,7 @@ class TestPreproc_fun(TestCase):
                                 growthlane_length_threshold=growthlane_length_threshold, gaussian_sigma=gaussian_sigma,
                                 main_channel_angle=main_channel_angle)
 
-        self.read_and_show_gl_index_image(os.path.join(output_directory, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(output_directory, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_20_with_flatfield')
 
     def test__dataset_19_no_flatfield(self):
@@ -136,7 +167,7 @@ class TestPreproc_fun(TestCase):
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
                                 growthlane_length_threshold=growthlane_length_threshold, gaussian_sigma=gaussian_sigma, main_channel_angle=main_channel_angle)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_19_no_flatfield')
 
     def test__dataset_17_no_flatfield(self):
@@ -158,7 +189,7 @@ class TestPreproc_fun(TestCase):
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
                                 growthlane_length_threshold=growthlane_length_threshold, gaussian_sigma=gaussian_sigma, main_channel_angle=main_channel_angle)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_17_no_flatfield')
 
 
@@ -183,7 +214,7 @@ class TestPreproc_fun(TestCase):
                                 gl_detection_template_path=gl_detection_template_path,
                                 normalization_config_path=normalization_config_path)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_16_no_flatfield_with_gl_detection_template')
 
     def test__dataset_16_no_flatfield(self):
@@ -203,7 +234,7 @@ class TestPreproc_fun(TestCase):
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
                                 growthlane_length_threshold=growthlane_length_threshold, gaussian_sigma=gaussian_sigma)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_16_no_flatfield')
 
     def test__dataset_15_no_flatfield(self):
@@ -233,7 +264,7 @@ class TestPreproc_fun(TestCase):
                                 main_channel_angle=main_channel_angle,
                                 roi_boundary_offset_at_mother_cell=roi_boundary_offset_at_mother_cell)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_15_no_flatfield')
 
     def test__dataset_14_no_flatfield(self):
@@ -253,7 +284,7 @@ class TestPreproc_fun(TestCase):
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe, dark_noise=dark_noise,
                                 growthlane_length_threshold=growthlane_length_threshold, gaussian_sigma=gaussian_sigma)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_14_no_flatfield')
 
 
@@ -279,7 +310,7 @@ class TestPreproc_fun(TestCase):
                                 growthlane_length_threshold=growthlane_length_threshold, flatfield_directory=flatfield_directory,
                                 main_channel_angle=main_channel_angle, dark_noise=dark_noise, gaussian_sigma=gaussian_sigma)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_13_with_flatfield')
 
     def test__dataset_10_with_flatfield(self):
@@ -301,7 +332,7 @@ class TestPreproc_fun(TestCase):
                                 growthlane_length_threshold=300, flatfield_directory=flatfield_directory,
                                 dark_noise=dark_noise, gaussian_sigma=gaussian_sigma)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_10_with_flatfield')
 
     def test__dataset_11_with_flatfield(self):
@@ -323,7 +354,7 @@ class TestPreproc_fun(TestCase):
                                 growthlane_length_threshold=300, flatfield_directory=flatfield_directory,
                                 dark_noise=dark_noise, gaussian_sigma=gaussian_sigma)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_11_with_flatfield')
 
     def test__dataset_11_no_flatfield(self):
@@ -343,7 +374,7 @@ class TestPreproc_fun(TestCase):
         preproc_fun.preproc_fun(data_directory, directory_to_save, positions, maxframe=maxframe,
                                 growthlane_length_threshold=300, dark_noise=dark_noise, gaussian_sigma=gaussian_sigma)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_11_no_flatfield')
 
     def test__dataset_12_with_flatfield(self):
@@ -366,7 +397,7 @@ class TestPreproc_fun(TestCase):
                                 gaussian_sigma=gaussian_sigma,
                                 growthlane_length_threshold=growthlane_length_threshold)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_12_with_flatfield')
 
     def test__dataset_12_no_flatfield_using_gl_detection_template(self):
@@ -391,7 +422,7 @@ class TestPreproc_fun(TestCase):
                                 gl_detection_template_path=gl_detection_template_path,
                                 normalization_config_path=normalization_config_path)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_12_no_flatfield_using_gl_detection_template')
 
     def test__dataset_12_no_flatfield(self):
@@ -412,7 +443,7 @@ class TestPreproc_fun(TestCase):
                                 gaussian_sigma=gaussian_sigma,
                                 growthlane_length_threshold=growthlane_length_threshold)
 
-        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_12_no_flatfield')
 
     def test__dataset_11(self):
@@ -429,7 +460,7 @@ class TestPreproc_fun(TestCase):
 
         preproc_fun.preproc_fun(data_directory, results_directory, positions=positions, maxframe=maxframe, growthlane_length_threshold=300)
 
-        self.read_and_show_gl_index_image(os.path.join(results_directory, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(results_directory, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_11')
 
     def test__dataset_04(self):
@@ -448,7 +479,7 @@ class TestPreproc_fun(TestCase):
         preproc_fun.preproc_fun(data_directory, results_directory, positions=positions, maxframe=maxframe,
                                 growthlane_length_threshold=growthlane_length_threshold)
 
-        self.read_and_show_gl_index_image(os.path.join(results_directory, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(results_directory, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_04')
 
     def test__dataset_08(self):
@@ -467,7 +498,7 @@ class TestPreproc_fun(TestCase):
         preproc_fun.preproc_fun(data_directory, results_directory, positions=positions, maxframe=maxframe,
                                 growthlane_length_threshold=growthlane_length_threshold)
 
-        self.read_and_show_gl_index_image(os.path.join(results_directory, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(results_directory, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_08')
 
     def test__dataset_10(self):
@@ -492,7 +523,7 @@ class TestPreproc_fun(TestCase):
                                 gaussian_sigma=gaussian_sigma,
                                 growthlane_length_threshold=growthlane_length_threshold)
 
-        self.read_and_show_gl_index_image(os.path.join(results_directory, f'Pos{positions[0]}_GL_index_initial.tiff'),
+        self.read_and_show_gl_index_image(os.path.join(results_directory, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_10')
 
     def test__dataset_10__shift_is_determined_correctly(self):
