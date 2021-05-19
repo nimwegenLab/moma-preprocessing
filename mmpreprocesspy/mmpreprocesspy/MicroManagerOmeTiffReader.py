@@ -82,19 +82,6 @@ class MicroManagerOmeTiffReader(object):
                        re.search('.*(MMStack).*ome.tif', f)]
         return image_files
 
-    def get_image(self, position_index, frame_index, channel_index):
-        """
-        Get single image for the specified position, frame and channel.
-
-        :param position_index:
-        :param frame_index:
-        :param channel_index:
-        :return:
-        """
-        image_stack = self.get_image_stack(position_index, frame_index, z_slice=0)
-        channel_image = image_stack[:, :, channel_index]
-        return channel_image
-
     def get_image_stack(self, position_index, frame_index, z_slice):
         """
         Get image stack containing the different channels for the specified position and frame.

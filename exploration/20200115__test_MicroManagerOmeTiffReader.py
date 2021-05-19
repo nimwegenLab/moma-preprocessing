@@ -29,7 +29,7 @@ ax = ax.flatten()
 # plot `max_index` frames of the selected position and channel
 imgs = []
 for ax_index, frame_index in enumerate(range(start_frame, start_frame + max_index)):
-    img = data.get_image(position_index, frame_index, channel_index)
+    img = data.get_image_stack(position_index, frame_index, z_slice=0)[..., channel_index]
     min = np.min(img)
     max = np.max(img)
     img = (img - min)/(max - min)
