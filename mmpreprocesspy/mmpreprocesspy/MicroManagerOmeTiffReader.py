@@ -140,6 +140,9 @@ class MicroManagerOmeTiffReader(object):
         elif position_series.axes == 'CYX':
             image_stack = position_zarr[:, :, :].astype(dtype=np.float).copy()
             return np.moveaxis(image_stack, 0, -1)
+        elif position_series.axes == 'TZCYX':
+            image_stack = position_zarr[frame_index, z_slice, ...].astype(dtype=np.float).copy()
+            return np.moveaxis(image_stack, 0, -1)
         else:
             image_stack = position_zarr[frame_index, :].astype(dtype=np.float).copy()
             return np.moveaxis(image_stack, 0, -1)
