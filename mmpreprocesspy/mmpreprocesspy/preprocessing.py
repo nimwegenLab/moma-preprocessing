@@ -57,11 +57,16 @@ def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetection
                                                             gl_detection_template.template_image.shape,
                                                             image_rotated.shape)
         rois_in_region = get_growthlane_rois(vertical_gl_centers, gl_region_start, gl_region_end, parent_gl_region_id)
+        if region.gl_exit_orientation:
+            set_gl_exit_orientation(rois_in_region, region.gl_exit_orientation)
         gl_rois += rois_in_region
         parent_gl_region_id += 1
     gl_rois = fix_roi_ids(gl_rois)
     return gl_rois, gl_regions
 
+def set_gl_exit_orientation(rois, gl_exit_orientation):
+    for roi in rois:
+        roi.exit_location = gl_exit_orientation
 
 def calculate_vertical_gl_centers(gl_region,
                                   vertical_index_of_max_correlation_shifted,

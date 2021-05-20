@@ -1,4 +1,3 @@
-import inspect
 import os
 import shutil
 from unittest import TestCase
@@ -21,7 +20,7 @@ class TestPreproc_fun(TestCase):
         gaussian_sigma = 5
         main_channel_angle = 89.8
         normalization_config_path = 'True'
-        z_slice_index = 0
+        z_slice_index = 7
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)

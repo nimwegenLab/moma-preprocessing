@@ -3,7 +3,7 @@ import json
 from dataclasses import dataclass
 import numpy as np
 import tifffile as tff
-
+from mmpreprocesspy.GrowthlaneRoi import GrowthlaneExitLocation
 
 @dataclass
 class GlRegion:
@@ -58,6 +58,7 @@ class GlDetectionTemplate(object):
         region.width = region.end - region.start
         region.gl_spacing_vertical = self.config_dict['gl_regions'][index]['gl_spacing_vertical']
         region.first_gl_position_from_top = self.config_dict['gl_regions'][index]['first_gl_position_from_top']
+        region.gl_exit_orientation = self.get_gl_exit_orientation(index)
         return region
 
     def get_gl_region_in_pixel(self, index: int) -> GlRegion:
@@ -68,7 +69,20 @@ class GlDetectionTemplate(object):
         region.width = region.end - region.start
         region.gl_spacing_vertical = self.config_dict['gl_regions'][index]['gl_spacing_vertical'] / pixel_size
         region.first_gl_position_from_top = self.config_dict['gl_regions'][index]['first_gl_position_from_top'] / pixel_size
+        region.gl_exit_orientation = self.get_gl_exit_orientation(index)
         return region
+
+    def get_gl_exit_orientation(self, index: int) -> GrowthlaneExitLocation:
+        try:
+            gl_exit_orientation = self.config_dict['gl_regions'][index]['gl_exit_orientation']
+        except KeyError:
+            gl_exit_orientation = ""  # if the orientation is not part of the config, set it to ""; this will make it be detected (see below)
+        if gl_exit_orientation == "":
+            return None  # if exit orientation not specified, set to None; this will lead to it being automatically determined in GrowthlaneRoi.get_oriented_roi_image
+        elif gl_exit_orientation == "left":
+            return GrowthlaneExitLocation.AT_TOP
+        elif gl_exit_orientation == "right":
+            return GrowthlaneExitLocation.AT_BOTTOM
 
     def get_gl_regions_in_pixel(self):
         regions = []
