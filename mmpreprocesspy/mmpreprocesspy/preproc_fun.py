@@ -169,6 +169,7 @@ def preproc_fun(data_folder,
         imageProcessor.roi_boundary_offset_at_mother_cell = roi_boundary_offset_at_mother_cell
 
         imageProcessor.process_image()
+        imageProcessor.set_image_registration_template()
 
         # store GL index image
         if not os.path.exists(os.path.dirname(folder_to_save)):

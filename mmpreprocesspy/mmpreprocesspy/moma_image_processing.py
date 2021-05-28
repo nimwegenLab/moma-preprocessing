@@ -71,14 +71,13 @@ class MomaImageProcessor(object):
         self.growthlane_rois = preprocessing.remove_rois_not_fully_in_image(self.image, self.growthlane_rois)
 
         self.reset_growthlane_roi_ids()
-        self.get_image_registration_template()
 
     def reset_growthlane_roi_ids(self):
         self.growthlane_rois = sorted(self.growthlane_rois, key=operator.attrgetter("id"))  # make sure that the GLs are sorted by ID
         for new_id, roi in enumerate(self.growthlane_rois):
             roi.id = new_id
 
-    def get_image_registration_template(self):
+    def set_image_registration_template(self):
         self._image_for_registration = self.image.copy()
 
     def determine_image_shift(self, image):

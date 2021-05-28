@@ -55,6 +55,7 @@ class test_MomaImageProcessor(TestCase):
         # imageProcessor.roi_boundary_offset_at_mother_cell = roi_boundary_offset_at_mother_cell
 
         imageProcessor.process_image()
+        imageProcessor.set_image_registration_template()
 
 
         show_gl_index_image(imageProcessor.growthlane_rois, original_image)
@@ -107,6 +108,7 @@ class test_MomaImageProcessor(TestCase):
         # imageProcessor.roi_boundary_offset_at_mother_cell = roi_boundary_offset_at_mother_cell
 
         imageProcessor.process_image()
+        imageProcessor.set_image_registration_template()
 
         growthlane_rois_orig = copy.deepcopy(imageProcessor.growthlane_rois)
         expected_shift = [0, 10.1]
