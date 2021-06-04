@@ -106,7 +106,8 @@ def preproc_fun(data_folder,
                 roi_boundary_offset_at_mother_cell=None,
                 gl_detection_template_path=None,
                 normalization_config_path=None,
-                z_slice_index=None):
+                z_slice_index=None,
+                image_registration_method=2):
 
     # create a micro-manager image object
     dataset = MicroManagerOmeTiffReader(data_folder)
@@ -190,13 +191,23 @@ def preproc_fun(data_folder,
         kymo_image_path_dict = get_kymo_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
         kymo_image_dict = get_kymo_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels, kymo_image_path_dict)
 
+        if image_registration_method == 2:
+            total_shift = np.array([0.0, 0.0])
+
         # go through time-lapse and cut out channels
         for frame_index, t in enumerate(range(minframe, maxframe)):
             image = dataset.get_image_stack(frame_index=t, position_index=position_index, z_slice=z_slice_index)[..., phase_channel_index]
-            imageProcessor.determine_image_shift(image)
+            if image_registration_method == 1:
+                imageProcessor.determine_image_shift(image)
+            elif  image_registration_method == 2:
+                imageProcessor.determine_image_shift(image)
+                imageProcessor.set_image_registration_template_external(image)  # update image used for registration in next iteration
+                total_shift += np.array([imageProcessor.horizontal_shift, imageProcessor.vertical_shift]) # accumulated shifts and update total shift for getting ROIs
+                imageProcessor.horizontal_shift, imageProcessor.vertical_shift = total_shift
+
             growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
 
-            print(f"Shift of frame {t}: {imageProcessor.horizontal_shift:.2}, {imageProcessor.vertical_shift:.2}")
+            print(f"Shift of frame {t}: {imageProcessor.horizontal_shift:3.3f}, {imageProcessor.vertical_shift:3.3f}")
 
             growthlane_rois = translate_gl_rois(growthlane_rois, (-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
 

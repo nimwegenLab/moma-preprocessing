@@ -11,13 +11,15 @@ class TestPreproc_fun(TestCase):
 
         data_directory = self.test_data_base_path + '/28__theo__20210506/MMStack/'
         directory_to_save = self.test_data_base_path + '/28__theo__20210506/result_with_flatfield/'
+        # gl_detection_template_path = self.test_data_base_path + '/28__theo__20210506/DONT_DELETE_gl_detection_template/template_Theo_20210506.json'
         gl_detection_template_path = self.test_data_base_path + '/28__theo__20210506/DONT_DELETE_gl_detection_template/template_Theo_20210506.json'
-        positions = [4]
+        positions = [0]
         # minframe = 0
         maxframe = 10
         dark_noise = 90
         gaussian_sigma = 5
-        main_channel_angle = -90.7
+        # main_channel_angle = -90.7
+        main_channel_angle = 89.3
         normalization_config_path = 'True'
 
         if os.path.isdir(directory_to_save):
@@ -30,7 +32,8 @@ class TestPreproc_fun(TestCase):
                                 gaussian_sigma=gaussian_sigma,
                                 main_channel_angle=main_channel_angle,
                                 gl_detection_template_path=gl_detection_template_path,
-                                normalization_config_path=normalization_config_path)
+                                normalization_config_path=normalization_config_path,
+                                image_registration_method=2)
 
         self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_21_no_flatfield')

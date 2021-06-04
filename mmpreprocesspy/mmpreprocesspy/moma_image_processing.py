@@ -80,6 +80,9 @@ class MomaImageProcessor(object):
     def set_image_registration_template(self):
         self._image_for_registration = self.image.copy()
 
+    def set_image_registration_template_external(self, template_image):
+        self._image_for_registration = template_image.copy()
+
     def determine_image_shift(self, image):
         self._sr.register(self._image_for_registration, image)
         translation_matrix = self._sr.get_matrix()
