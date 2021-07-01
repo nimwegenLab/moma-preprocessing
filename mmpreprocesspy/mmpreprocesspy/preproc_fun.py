@@ -107,7 +107,9 @@ def preproc_fun(data_folder,
                 gl_detection_template_path=None,
                 normalization_config_path=None,
                 z_slice_index=None,
-                image_registration_method=2):
+                image_registration_method=2,
+                normalization_region_offset=None):
+
 
     # create a micro-manager image object
     dataset = MicroManagerOmeTiffReader(data_folder)
@@ -160,6 +162,9 @@ def preproc_fun(data_folder,
 
         # Process first image to find ROIs, etc.
         imageProcessor = MomaImageProcessor()
+        if normalization_region_offset:
+            imageProcessor.normalization_region_offset = normalization_region_offset
+
         if gl_detection_template_path:
             gl_detection_template = GlDetectionTemplate()
             gl_detection_template.load_config(gl_detection_template_path)

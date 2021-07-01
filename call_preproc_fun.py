@@ -41,6 +41,8 @@ parser.add_argument("-normconfpath", "--normalization_config_path", type=str,
                     help="")
 parser.add_argument("-zslice", "--z_slice_index", type=int,
                     help="")
+parser.add_argument("-nro", "--normalization_region_offset", type=int,
+                    help="offset by which the normalization region is reduced relative to the GL ROI length")
 args = parser.parse_args()
 
 # overwrite sys.stdout and sys.stderr for logging
@@ -75,6 +77,8 @@ print("normalization_config_path:")
 print(args.normalization_config_path)
 print("z_slice_index:")
 print(args.z_slice_index)
+print("normalization_region_offset:")
+print(args.normalization_region_offset)
 
 
 # parse position argument; IMPORTANT: this only works for a single position argument
@@ -87,5 +91,6 @@ preproc_fun(args.input, args.output, positions=posval, minframe=args.timeframemi
             main_channel_angle=args.rotation, roi_boundary_offset_at_mother_cell=args.roi_boundary_offset_at_mother_cell,
             gl_detection_template_path=args.gl_detection_template_path,
             normalization_config_path=args.normalization_config_path,
-            z_slice_index=args.z_slice_index)
+            z_slice_index=args.z_slice_index,
+            normalization_region_offset=args.normalization_region_offset)
 

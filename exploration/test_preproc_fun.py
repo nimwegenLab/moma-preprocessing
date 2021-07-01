@@ -21,6 +21,7 @@ class TestPreproc_fun(TestCase):
         # main_channel_angle = -90.7
         main_channel_angle = 89.3
         normalization_config_path = 'True'
+        normalization_region_offset = 20
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
@@ -33,7 +34,8 @@ class TestPreproc_fun(TestCase):
                                 main_channel_angle=main_channel_angle,
                                 gl_detection_template_path=gl_detection_template_path,
                                 normalization_config_path=normalization_config_path,
-                                image_registration_method=2)
+                                image_registration_method=2,
+                                normalization_region_offset=normalization_region_offset)
 
         self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_21_no_flatfield')

@@ -45,6 +45,7 @@ class MomaImageProcessor(object):
         self._gl_region_indicator_images = []
         self._intensity_profiles = [[], []]  # we assume that at max. we will have two regions: one to each side of the main channel
         self.image_save_fequency = 2
+        self.normalization_region_offset = 100  # offset to both sides of the actual region range; this reduces the range where we will calculate the averaged profile by 2*offset
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -150,15 +151,14 @@ class MomaImageProcessor(object):
         :return:
         """
 
-        offset = 100  # offset to both sides of the actual region range; this reduces the range where we will calculate the averaged profile by 2*offset
         box_pts = 11  # number of point to average over
-
         image_registered = self.get_registered_image(phc_image)
 
         intensity_profiles_unprocessed = []
         intensity_profiles = []
         for region in self.gl_regions:
-            intensity_profile_region = image_registered[:, region.start+offset:region.end-offset]
+            intensity_profile_region = image_registered[:,
+                                       region.start + self.normalization_region_offset:region.end - self.normalization_region_offset]
             intensity_profile_unprocessed = np.mean(intensity_profile_region, axis=1)
             intensity_profiles_unprocessed.append(intensity_profile_unprocessed)
             intensity_profile_processed = self.smooth(intensity_profile_unprocessed, box_pts=box_pts)
@@ -174,7 +174,7 @@ class MomaImageProcessor(object):
         self.save_normalization_range_to_csv_log(normalization_ranges, position_nr, frame_nr, output_path)
 
         self.save_image_with_region_indicators(image_registered,
-                                               offset,
+                                               self.normalization_region_offset,
                                                position_nr,
                                                frame_nr,
                                                output_path)
