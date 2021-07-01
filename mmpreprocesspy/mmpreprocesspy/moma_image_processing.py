@@ -115,8 +115,8 @@ class MomaImageProcessor(object):
         self.horizontal_shift, self.vertical_shift = self.total_shift
 
     def get_registered_image(self, image_to_register):
-        registered_image = self._rotate_image(image_to_register)
-        registered_image = self._translate_image(registered_image)
+        registered_image = self._translate_image(image_to_register)
+        registered_image = self._rotate_image(registered_image)
         return registered_image
 
     def _translate_image(self, image):
@@ -153,10 +153,7 @@ class MomaImageProcessor(object):
         offset = 100  # offset to both sides of the actual region range; this reduces the range where we will calculate the averaged profile by 2*offset
         box_pts = 11  # number of point to average over
 
-        original_image = phc_image
-
-        image_registered = self._translate_image(phc_image)
-        image_registered = self._rotate_image(image_registered)
+        image_registered = self.get_registered_image(phc_image)
 
         intensity_profiles_unprocessed = []
         intensity_profiles = []
