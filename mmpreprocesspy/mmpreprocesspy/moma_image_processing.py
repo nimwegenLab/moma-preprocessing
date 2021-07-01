@@ -83,11 +83,36 @@ class MomaImageProcessor(object):
     def set_image_registration_template_external(self, template_image):
         self._image_for_registration = template_image.copy()
 
-    def determine_image_shift(self, image):
+    def determine_image_shift_1(self, image):
+        '''
+        When using this method we always determine the shift relative to the first image of the stack.
+
+        :param image:
+        :return:
+        '''
         self._sr.register(self._image_for_registration, image)
         translation_matrix = self._sr.get_matrix()
         self.horizontal_shift = -translation_matrix[0][2]
         self.vertical_shift = -translation_matrix[1][2]
+
+    total_shift = np.array([0.0, 0.0])  # variable to accumulated the total shift of images when using method 2 (see determine_image_shift_2)
+    def determine_image_shift_2(self, image):
+        '''
+        When using this method we determine the shift relative to the previous image and accumulate the total shift
+        between consecutive images. We do this by updating the template registration image using
+        self.set_image_registration_template_external after each registration and summing the determined shifts to
+        the previous shift.
+
+        :param image:
+        :return:
+        '''
+        self._sr.register(self._image_for_registration, image)
+        translation_matrix = self._sr.get_matrix()
+        self.horizontal_shift = -translation_matrix[0][2]
+        self.vertical_shift = -translation_matrix[1][2]
+        self._image_for_registration = image.copy()  # update image used for registration in next iteration
+        self.total_shift += np.array([self.horizontal_shift, self.vertical_shift])  # accumulated shifts and update total shift for getting ROIs
+        self.horizontal_shift, self.vertical_shift = self.total_shift
 
     def get_registered_image(self, image_to_register):
         registered_image = self._rotate_image(image_to_register)

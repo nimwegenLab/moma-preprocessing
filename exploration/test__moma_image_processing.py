@@ -113,14 +113,14 @@ class test_MomaImageProcessor(TestCase):
         growthlane_rois_orig = copy.deepcopy(imageProcessor.growthlane_rois)
         expected_shift = [0, 10.1]
         shifted_image_0 = self.support__shift_image(original_image, expected_shift)
-        imageProcessor.determine_image_shift(shifted_image_0)
+        imageProcessor.determine_image_shift_1(shifted_image_0)
         growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
         growthlane_rois_shifted_0 = translate_gl_rois(growthlane_rois,
                                             (-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
         print(f'determined_shift: {(imageProcessor.horizontal_shift, imageProcessor.vertical_shift)}')
         expected_shift = [0, 10.9]
         shifted_image_1 = self.support__shift_image(original_image, expected_shift)
-        imageProcessor.determine_image_shift(shifted_image_1)
+        imageProcessor.determine_image_shift_1(shifted_image_1)
         growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
         growthlane_rois_shifted_1 = translate_gl_rois(growthlane_rois,
                                             (-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
@@ -150,7 +150,7 @@ class test_MomaImageProcessor(TestCase):
 
                 shifted_image = self.support__shift_image(original_image, expected_shift)
 
-                sut.determine_image_shift(shifted_image)
+                sut.determine_image_shift_1(shifted_image)
                 actual_shift = (sut.horizontal_shift, sut.vertical_shift)
 
                 np.testing.assert_array_almost_equal(expected_shift,
