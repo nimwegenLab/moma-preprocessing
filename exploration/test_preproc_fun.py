@@ -10,7 +10,7 @@ class TestPreproc_fun(TestCase):
         from mmpreprocesspy import preproc_fun
 
         data_directory = self.test_data_base_path + '/28__theo__20210506/MMStack/'
-        directory_to_save = self.test_data_base_path + '/28__theo__20210506/result_with_flatfield/'
+        directory_to_save = self.test_data_base_path + '/28__theo__20210506/result_without_flatfield/'
         # gl_detection_template_path = self.test_data_base_path + '/28__theo__20210506/DONT_DELETE_gl_detection_template/template_Theo_20210506.json'
         gl_detection_template_path = self.test_data_base_path + '/28__theo__20210506/DONT_DELETE_gl_detection_template/template_Theo_20210506.json'
         positions = [0]

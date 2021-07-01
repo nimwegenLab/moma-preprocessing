@@ -130,7 +130,6 @@ class MomaImageProcessor(object):
 
         original_image = phc_image
 
-        self.determine_image_shift(phc_image)
         image_registered = self._translate_image(phc_image)
         image_registered = self._rotate_image(image_registered)
 
