@@ -62,6 +62,7 @@ class MomaImageProcessor(object):
         if self.gl_detection_template:
             self.growthlane_rois, self.gl_regions = preprocessing.get_gl_rois_using_template(self.rotated_image,
                                                                                              self.gl_detection_template,
+                                                                                             self.main_channel_angle,
                                                                                              roi_boundary_offset_at_mother_cell=self.roi_boundary_offset_at_mother_cell)
         else:
             self.growthlane_rois, self.gl_regions = preprocessing.get_gl_regions(self.rotated_image,

@@ -13,6 +13,7 @@ import tifffile as tff
 import numpy as np
 from mmpreprocesspy.data_region import DataRegion
 from mmpreprocesspy.GlDetectionTemplate import GlDetectionTemplate, GlRegion
+from mmpreprocesspy.GrowthlaneRoi import GrowthlaneExitLocation
 
 
 # find rotation, channel boundaries and positions for first image that is then used as reference
@@ -42,7 +43,7 @@ def get_gl_regions(image_rotated, growthlane_length_threshold=0, roi_boundary_of
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rotated, region_list)
     return growthlane_rois, region_list
 
-def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetectionTemplate, roi_boundary_offset_at_mother_cell=0):
+def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetectionTemplate, main_channel_angle, roi_boundary_offset_at_mother_cell=0):
     normalized_cross_correlation = match_template(image_rotated, gl_detection_template.template_image)
     vertical_index_of_max_correlation = gl_detection_template.template_image.shape[0]/2 + np.argmax(np.max(normalized_cross_correlation, axis=1))
     horizontal_index_of_max_correlation = gl_detection_template.template_image.shape[1]/2 + np.argmax(np.max(normalized_cross_correlation, axis=0))
@@ -58,15 +59,42 @@ def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetection
                                                             image_rotated.shape)
         rois_in_region = get_growthlane_rois(vertical_gl_centers, gl_region_start, gl_region_end, parent_gl_region_id)
         if region.gl_exit_orientation:
-            set_gl_exit_orientation(rois_in_region, region.gl_exit_orientation)
+            set_gl_exit_orientation(rois_in_region, region.gl_exit_orientation, main_channel_angle)
         gl_rois += rois_in_region
         parent_gl_region_id += 1
     gl_rois = fix_roi_ids(gl_rois)
     return gl_rois, gl_regions
 
-def set_gl_exit_orientation(rois, gl_exit_orientation):
+def set_gl_exit_orientation(rois, gl_exit_orientation, main_channel_angle):
     for roi in rois:
-        roi.exit_location = gl_exit_orientation
+        if main_channel_angle > 45:
+            roi.exit_location = gl_exit_orientation
+        elif main_channel_angle < 45:
+            roi.exit_location = convert_gl_exit_orientation_according_to_image_orientation(gl_exit_orientation)
+
+def convert_gl_exit_orientation_according_to_image_orientation(gl_exit_orientation):
+    '''
+    This is a hack:
+    We specifiy gl_exit_orientation as left/right string in the detection template file that is read into
+    GlDetectionTemplate.
+    This is then converted to GrowthlaneExitLocation.AT_BOTTOM/GrowthlaneExitLocation.AT_TOP in
+    GlDetectionTemplate.get_gl_exit_orientation,
+    where we do not have information on the actual rotation angle of the main-channel (note that we always rotate the
+    template image, so that the main-channel is vertical).
+    However, since the original implementation only considered the possibility of horizontally oriented main-channels in
+    original image (hence the values GrowthlaneExitLocation.AT_BOTTOM/AT_BOTTOM), I had to add this method as a fix for
+    vertically oriented main channels.
+
+    :param gl_exit_orientation:
+    :return:
+    '''
+
+    if gl_exit_orientation is GrowthlaneExitLocation.AT_BOTTOM:
+        return GrowthlaneExitLocation.AT_RIGHT
+    elif gl_exit_orientation is GrowthlaneExitLocation.AT_TOP:
+        return GrowthlaneExitLocation.AT_LEFT
+    else:
+        raise ValueError  # fail for any other case, since this is a hacked in solution
 
 def calculate_vertical_gl_centers(gl_region,
                                   vertical_index_of_max_correlation_shifted,
