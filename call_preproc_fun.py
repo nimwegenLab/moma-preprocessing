@@ -43,7 +43,15 @@ parser.add_argument("-zslice", "--z_slice_index", type=int,
                     help="")
 parser.add_argument("-nro", "--normalization_region_offset", type=int,
                     help="offset by which the normalization region is reduced relative to the GL ROI length")
+parser.add_argument("-fti", "--frames_to_ignore", type=str,
+                    help="pass the frames which should be ignored as a comma-separated list of integers")
+
+# parse values
 args = parser.parse_args()
+if args.frames_to_ignore:
+    frames_to_ignore = [int(strInt) for strInt in args.frames_to_ignore.split(",")]
+else:
+    frames_to_ignore = None
 
 # overwrite sys.stdout and sys.stderr for logging
 if args.logfile is not None:
@@ -79,7 +87,8 @@ print("z_slice_index:")
 print(args.z_slice_index)
 print("normalization_region_offset:")
 print(args.normalization_region_offset)
-
+print("frames_to_ignore:")
+print(frames_to_ignore)
 
 # parse position argument; IMPORTANT: this only works for a single position argument
 res = re.match('Pos[0]*(\d+)', args.positions)
@@ -92,5 +101,6 @@ preproc_fun(args.input, args.output, positions=posval, minframe=args.timeframemi
             gl_detection_template_path=args.gl_detection_template_path,
             normalization_config_path=args.normalization_config_path,
             z_slice_index=args.z_slice_index,
-            normalization_region_offset=args.normalization_region_offset)
+            normalization_region_offset=args.normalization_region_offset,
+            frames_to_ignore=frames_to_ignore)
 

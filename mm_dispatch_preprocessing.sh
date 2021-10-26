@@ -55,12 +55,13 @@ for (( I=0; I<N; I++ )); do
   if [ -n "$TMAX" ]; then CMD_STR="$CMD_STR -tmax $TMAX"; fi # append optional argument
   if [ -n "$GLT" ]; then CMD_STR="$CMD_STR -glt $GLT"; fi # append optional argument
   if [ -n "$ROI_BOUNDARY_OFFSET_AT_MOTHER_CELL" ]; then CMD_STR="$CMD_STR --roi_boundary_offset_at_mother_cell $ROI_BOUNDARY_OFFSET_AT_MOTHER_CELL"; fi # append optional argument
-  if [ -n "$GL_DETECTION_TEMPLATE_PATH" ]; then CMD_STR="$CMD_STR --gl_detection_template_path $GL_DETECTION_TEMPLATE_PATH"; fi # append optional argument
+  if [ -n "$GL_DETECTION_TEMPLATE_PATH" ]; then CMD_STR="$CMD_STR --gl_detection_template_path \"$GL_DETECTION_TEMPLATE_PATH\""; fi # append optional argument
   if [ -n "$NORMALIZATION_CONFIG_PATH" ]; then CMD_STR="$CMD_STR --normalization_config_path $NORMALIZATION_CONFIG_PATH"; fi # append optional argument
   if [ -n "$ZSLICE" ]; then CMD_STR="$CMD_STR -zslice $ZSLICE"; fi # append optional argument
   if [ -n "$NORMALIZATION_REGION_OFFSET" ]; then CMD_STR="$CMD_STR --normalization_region_offset $NORMALIZATION_REGION_OFFSET"; fi # append optional argument
+  if [ -n "$FRAMES_TO_IGNORE" ]; then CMD_STR="$CMD_STR --frames_to_ignore \"$FRAMES_TO_IGNORE\""; fi # append optional argument
 
-  CMD_STR="$CMD_STR -log $LOG"
+  CMD_STR="$CMD_STR -log \"$LOG\""
 
   # use single quote to prevent variable evaluation
   CMD_SCRIPT="#!/bin/bash \n\n\

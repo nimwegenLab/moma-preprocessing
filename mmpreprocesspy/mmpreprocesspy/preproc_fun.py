@@ -108,7 +108,8 @@ def preproc_fun(data_folder,
                 normalization_config_path=None,
                 z_slice_index=None,
                 image_registration_method=2,
-                normalization_region_offset=None):
+                normalization_region_offset=None,
+                frames_to_ignore=None):
 
 
     # create a micro-manager image object
