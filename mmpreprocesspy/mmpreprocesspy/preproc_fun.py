@@ -158,7 +158,7 @@ def preproc_fun(data_folder,
             preprocessor.save_flatfields(position_folder)
 
         # load first phase contrast image
-        color_image_stack = dataset.get_image_stack(frame_index=minframe, position_index=position_index, z_slice=z_slice_index)
+        color_image_stack = get_valid_image_stack(dataset, frame_index=minframe, position_index=position_index, z_slice=z_slice_index)
         first_phc_image = color_image_stack[..., 0]
 
         # Process first image to find ROIs, etc.
@@ -199,10 +199,10 @@ def preproc_fun(data_folder,
 
         # go through time-lapse and cut out channels
         for frame_index, t in enumerate(range(minframe, maxframe)):
-            image = dataset.get_image_stack(frame_index=t, position_index=position_index, z_slice=z_slice_index)[..., phase_channel_index]
+            image = get_valid_image_stack(dataset, frame_index=t, position_index=position_index, z_slice=z_slice_index)[..., phase_channel_index]
             if image_registration_method == 1:
                 imageProcessor.determine_image_shift_1(image)
-            elif  image_registration_method == 2:
+            elif image_registration_method == 2:
                 imageProcessor.determine_image_shift_2(image)
 
             growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
@@ -213,7 +213,7 @@ def preproc_fun(data_folder,
 
             growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict = remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict)
 
-            color_image_stack = dataset.get_image_stack(frame_index=t, position_index=position_index, z_slice=z_slice_index)  # TODO: rename this to e.g. 'current_image_frame'
+            color_image_stack = get_valid_image_stack(dataset, frame_index=t, position_index=position_index, z_slice=z_slice_index)
 
             # correct images and append corrected and non-corrected images
             if preprocessor is not None:
@@ -244,6 +244,8 @@ def preproc_fun(data_folder,
     end1 = time.time()
     print("Processing time [s]:" + str(end1 - start1))
 
+def get_valid_image_stack(dataset, frame_index, position_index, z_slice):
+    return dataset.get_image_stack(frame_index=frame_index, position_index=position_index, z_slice=z_slice)
 
 def get_gl_image_stacks(growthlane_rois, nr_of_timesteps, nr_of_color_channels, gl_image_path_dict):
     gl_image_stacks = {}
