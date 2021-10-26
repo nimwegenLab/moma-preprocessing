@@ -7,8 +7,8 @@
 
 mm_dispatch_preprocessing(){
 
-MMPRE_EXIST=$(module av MMPreproc 2>&1 | grep MMPreproc | wc -l)
-if [ $MMPRE_EXIST -eq 0 ]; then printf "The module MMPreproc cannot be found. Aborting...\n" >&2; exit 1; fi
+#MMPRE_EXIST=$(module av MMPreproc 2>&1 | grep MMPreproc | wc -l)
+#if [ $MMPRE_EXIST -eq 0 ]; then printf "The module MMPreproc cannot be found. Aborting...\n" >&2; exit 1; fi
 
 # Check arguments
 if [ -n "$CAMERA_ROI_PATH" ]; then printf "WARNING: CAMERA_ROI_PATH argument is defined, but not supported. Will be ignored.\n"; fi
@@ -35,7 +35,7 @@ for (( I=0; I<N; I++ )); do
   LOG=$PREPROC_DIR/logs/slurm_${POS_NAME}.log             # path to redirect stdout (qsub command and job ID)
   S_OUT=$PREPROC_DIR/logs/slurm_${POS_NAME}_out.log  # path to redirect qsub stdout
   S_ERR=$PREPROC_DIR/logs/slurm_${POS_NAME}_err.log  # path to redirect qsub stderr
-  
+
   mkdir -p $PREPROC_DIR # -p: no error if existing, make parent directories as needed
   mkdir -p $PREPROC_DIR/logs
   
