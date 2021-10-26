@@ -92,157 +92,158 @@ def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index):
 
     return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_kymo.tif'
 
+class PreprocessingRunner(object):
 
-def preproc_fun(data_folder,
-                folder_to_save,
-                positions=None,
-                minframe=None,
-                maxframe=None,
-                flatfield_directory=None,
-                dark_noise=None,
-                gaussian_sigma=None,
-                growthlane_length_threshold=0,
-                main_channel_angle=None,
-                roi_boundary_offset_at_mother_cell=None,
-                gl_detection_template_path=None,
-                normalization_config_path=None,
-                z_slice_index=None,
-                image_registration_method=2,
-                normalization_region_offset=None,
-                frames_to_ignore=None):
+    def preproc_fun(self,
+                    data_folder,
+                    folder_to_save,
+                    positions=None,
+                    minframe=None,
+                    maxframe=None,
+                    flatfield_directory=None,
+                    dark_noise=None,
+                    gaussian_sigma=None,
+                    growthlane_length_threshold=0,
+                    main_channel_angle=None,
+                    roi_boundary_offset_at_mother_cell=None,
+                    gl_detection_template_path=None,
+                    normalization_config_path=None,
+                    z_slice_index=None,
+                    image_registration_method=2,
+                    normalization_region_offset=None,
+                    frames_to_ignore=None):
 
+        # create a micro-manager image object
+        dataset = MicroManagerOmeTiffReader(data_folder)
 
-    # create a micro-manager image object
-    dataset = MicroManagerOmeTiffReader(data_folder)
+        # define basic parameters
+        colors = dataset.get_channels()
+        phase_channel_index = 0
 
-    # define basic parameters
-    colors = dataset.get_channels()
-    phase_channel_index = 0
+        # get default values for non-specified optional parameters
+        if z_slice_index is None:
+            z_slice_index = 0
+        if minframe is None:
+            minframe = 0
+        if maxframe is None:
+            maxframe = dataset.get_number_of_frames()
+        if positions is None:
+            nr_of_positions_in_data = len(dataset.get_position_names())
+            positions = range(0, nr_of_positions_in_data)
+        nrOfFrames = maxframe - minframe
 
-    # get default values for non-specified optional parameters
-    if z_slice_index is None:
-        z_slice_index = 0
-    if minframe is None:
-        minframe = 0
-    if maxframe is None:
-        maxframe = dataset.get_number_of_frames()
-    if positions is None:
-        nr_of_positions_in_data = len(dataset.get_position_names())
-        positions = range(0, nr_of_positions_in_data)
-    nrOfFrames = maxframe - minframe
+        if roi_boundary_offset_at_mother_cell is None:
+            roi_boundary_offset_at_mother_cell = 0
 
-    if roi_boundary_offset_at_mother_cell is None:
-        roi_boundary_offset_at_mother_cell = 0
+        # recover the basic experiment name
+        base_name = dataset.get_first_tiff().split('.')[0]
 
-    # recover the basic experiment name
-    base_name = dataset.get_first_tiff().split('.')[0]
+        # define metadata for imagej
+        metadata = {'channels': len(colors), 'slices': 1, 'frames': nrOfFrames, 'hyperstack': True, 'loop': False}
 
-    # define metadata for imagej
-    metadata = {'channels': len(colors), 'slices': 1, 'frames': nrOfFrames, 'hyperstack': True, 'loop': False}
+        # start measurement of processing time
+        start1 = time.time()
+        for position_index in positions:  # MM: Currently proproc_fun.py in only run for a single position; so this loop is not needed
+            # load and use flatfield data, if provided
+            preprocessor = None
+            if flatfield_directory is not None:
+                flatfield = MicroManagerOmeTiffReader(flatfield_directory)
+                preprocessor = ImagePreprocessor(dataset, flatfield, dark_noise, gaussian_sigma)
+                roi_shape = (dataset.get_image_height(), dataset.get_image_width())
+                preprocessor.calculate_flatfields(roi_shape)
+                # since we are correcting the images: correct the number and naming of the available colors
+                colors_orig = colors.copy()
+                colors[1:] = [name + '_corrected' for name in colors[1:]]
+                colors = colors + colors_orig[1:]
+                position_folder = get_position_folder_path(folder_to_save, position_index)
+                preprocessor.save_flatfields(position_folder)
 
-    # start measurement of processing time
-    start1 = time.time()
-    for position_index in positions:  # MM: Currently proproc_fun.py in only run for a single position; so this loop is not needed
-        # load and use flatfield data, if provided
-        preprocessor = None
-        if flatfield_directory is not None:
-            flatfield = MicroManagerOmeTiffReader(flatfield_directory)
-            preprocessor = ImagePreprocessor(dataset, flatfield, dark_noise, gaussian_sigma)
-            roi_shape = (dataset.get_image_height(), dataset.get_image_width())
-            preprocessor.calculate_flatfields(roi_shape)
-            # since we are correcting the images: correct the number and naming of the available colors
-            colors_orig = colors.copy()
-            colors[1:] = [name + '_corrected' for name in colors[1:]]
-            colors = colors + colors_orig[1:]
-            position_folder = get_position_folder_path(folder_to_save, position_index)
-            preprocessor.save_flatfields(position_folder)
+            # load first phase contrast image
+            color_image_stack = get_valid_image_stack(dataset, frame_index=minframe, position_index=position_index, z_slice=z_slice_index)
+            first_phc_image = color_image_stack[..., 0]
 
-        # load first phase contrast image
-        color_image_stack = get_valid_image_stack(dataset, frame_index=minframe, position_index=position_index, z_slice=z_slice_index)
-        first_phc_image = color_image_stack[..., 0]
+            # Process first image to find ROIs, etc.
+            imageProcessor = MomaImageProcessor()
+            if normalization_region_offset:
+                imageProcessor.normalization_region_offset = normalization_region_offset
 
-        # Process first image to find ROIs, etc.
-        imageProcessor = MomaImageProcessor()
-        if normalization_region_offset:
-            imageProcessor.normalization_region_offset = normalization_region_offset
+            if gl_detection_template_path:
+                gl_detection_template = GlDetectionTemplate()
+                gl_detection_template.load_config(gl_detection_template_path)
+                imageProcessor.gl_detection_template = gl_detection_template
+            imageProcessor.load_numpy_image_array(first_phc_image)
+            imageProcessor.growthlane_length_threshold = growthlane_length_threshold
+            imageProcessor.main_channel_angle = main_channel_angle
+            imageProcessor.roi_boundary_offset_at_mother_cell = roi_boundary_offset_at_mother_cell
 
-        if gl_detection_template_path:
-            gl_detection_template = GlDetectionTemplate()
-            gl_detection_template.load_config(gl_detection_template_path)
-            imageProcessor.gl_detection_template = gl_detection_template
-        imageProcessor.load_numpy_image_array(first_phc_image)
-        imageProcessor.growthlane_length_threshold = growthlane_length_threshold
-        imageProcessor.main_channel_angle = main_channel_angle
-        imageProcessor.roi_boundary_offset_at_mother_cell = roi_boundary_offset_at_mother_cell
+            imageProcessor.process_image()
+            imageProcessor.set_image_registration_template()
 
-        imageProcessor.process_image()
-        imageProcessor.set_image_registration_template()
+            # store GL index image
+            if not os.path.exists(os.path.dirname(folder_to_save)):
+                os.makedirs(os.path.dirname(folder_to_save))
 
-        # store GL index image
-        if not os.path.exists(os.path.dirname(folder_to_save)):
-            os.makedirs(os.path.dirname(folder_to_save))
+            path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_initial.tif'
+            store_gl_index_image(imageProcessor.growthlane_rois, imageProcessor.image, path)
 
-        path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_initial.tif'
-        store_gl_index_image(imageProcessor.growthlane_rois, imageProcessor.image, path)
+            # create empty kymographs to fill
+            kymographs = [np.zeros((roi.length, nrOfFrames, len(colors))) for roi in imageProcessor.growthlane_rois]
 
-        # create empty kymographs to fill
-        kymographs = [np.zeros((roi.length, nrOfFrames, len(colors))) for roi in imageProcessor.growthlane_rois]
+            # initialize list of images to hold the final GL crop images
+            nr_of_timesteps = maxframe - minframe
+            nr_of_color_channels = len(colors)
+            gl_image_path_dict = get_gl_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
+            gl_csv_path_dict = get_gl_image_csv_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
+            gl_image_dict = get_gl_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels, gl_image_path_dict)
+            kymo_image_path_dict = get_kymo_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
+            kymo_image_dict = get_kymo_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels, kymo_image_path_dict)
 
-        # initialize list of images to hold the final GL crop images
-        nr_of_timesteps = maxframe - minframe
-        nr_of_color_channels = len(colors)
-        gl_image_path_dict = get_gl_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
-        gl_csv_path_dict = get_gl_image_csv_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
-        gl_image_dict = get_gl_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels, gl_image_path_dict)
-        kymo_image_path_dict = get_kymo_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
-        kymo_image_dict = get_kymo_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels, kymo_image_path_dict)
+            # go through time-lapse and cut out channels
+            for frame_index, t in enumerate(range(minframe, maxframe)):
+                image = get_valid_image_stack(dataset, frame_index=t, position_index=position_index, z_slice=z_slice_index)[..., phase_channel_index]
+                if image_registration_method == 1:
+                    imageProcessor.determine_image_shift_1(image)
+                elif image_registration_method == 2:
+                    imageProcessor.determine_image_shift_2(image)
 
-        # go through time-lapse and cut out channels
-        for frame_index, t in enumerate(range(minframe, maxframe)):
-            image = get_valid_image_stack(dataset, frame_index=t, position_index=position_index, z_slice=z_slice_index)[..., phase_channel_index]
-            if image_registration_method == 1:
-                imageProcessor.determine_image_shift_1(image)
-            elif image_registration_method == 2:
-                imageProcessor.determine_image_shift_2(image)
+                growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
 
-            growthlane_rois = copy.deepcopy(imageProcessor.growthlane_rois)
+                print(f"Shift of frame {t}: {imageProcessor.horizontal_shift:3.3f}, {imageProcessor.vertical_shift:3.3f}")
 
-            print(f"Shift of frame {t}: {imageProcessor.horizontal_shift:3.3f}, {imageProcessor.vertical_shift:3.3f}")
+                growthlane_rois = translate_gl_rois(growthlane_rois, (-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
 
-            growthlane_rois = translate_gl_rois(growthlane_rois, (-imageProcessor.horizontal_shift, -imageProcessor.vertical_shift))
+                growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict = remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict)
 
-            growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict = remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict)
+                color_image_stack = get_valid_image_stack(dataset, frame_index=t, position_index=position_index, z_slice=z_slice_index)
 
-            color_image_stack = get_valid_image_stack(dataset, frame_index=t, position_index=position_index, z_slice=z_slice_index)
+                # correct images and append corrected and non-corrected images
+                if preprocessor is not None:
+                    corrected_colors = preprocessor.process_image_stack(color_image_stack[:, :, 1:])  # correct all colors, but the PhC channel
+                    # corrected_color_image_stack = np.append(corrected_color_image_stack,
+                    #                                         color_image_stack[:, :, 1:], 2)
+                    color_image_stack_corr = np.append(color_image_stack[:, :, 0, np.newaxis], corrected_colors, 2)  # append corrected channel values
+                    color_image_stack_corr = np.append(color_image_stack_corr, color_image_stack[:, :, 1:], 2)  # append original channel values
+                    color_image_stack = color_image_stack_corr
 
-            # correct images and append corrected and non-corrected images
-            if preprocessor is not None:
-                corrected_colors = preprocessor.process_image_stack(color_image_stack[:, :, 1:])  # correct all colors, but the PhC channel
-                # corrected_color_image_stack = np.append(corrected_color_image_stack,
-                #                                         color_image_stack[:, :, 1:], 2)
-                color_image_stack_corr = np.append(color_image_stack[:, :, 0, np.newaxis], corrected_colors, 2)  # append corrected channel values
-                color_image_stack_corr = np.append(color_image_stack_corr, color_image_stack[:, :, 1:], 2)  # append original channel values
-                color_image_stack = color_image_stack_corr
+                phc_image = color_image_stack[:, :, 0]
+                if normalization_config_path:
+                    output_path = get_normalization_log_folder_path(folder_to_save, position_index)
+                    imageProcessor.set_normalization_ranges_and_save_log_data(growthlane_rois, phc_image, frame_index, position_index, output_path)
 
-            phc_image = color_image_stack[:, :, 0]
-            if normalization_config_path:
-                output_path = get_normalization_log_folder_path(folder_to_save, position_index)
-                imageProcessor.set_normalization_ranges_and_save_log_data(growthlane_rois, phc_image, frame_index, position_index, output_path)
+                append_gl_roi_images(frame_index, growthlane_rois, gl_image_dict, color_image_stack)
+                append_to_kymo_graph(frame_index, growthlane_rois, kymo_image_dict, color_image_stack)
+                append_gl_csv(frame_index, growthlane_rois, gl_csv_path_dict)
 
-            append_gl_roi_images(frame_index, growthlane_rois, gl_image_dict, color_image_stack)
-            append_to_kymo_graph(frame_index, growthlane_rois, kymo_image_dict, color_image_stack)
-            append_gl_csv(frame_index, growthlane_rois, gl_csv_path_dict)
+            finalize_memmap_images(growthlane_rois, gl_image_dict)
+            finalize_memmap_images(growthlane_rois, kymo_image_dict)
 
-        finalize_memmap_images(growthlane_rois, gl_image_dict)
-        finalize_memmap_images(growthlane_rois, kymo_image_dict)
+            path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_final.tif'
+            store_gl_index_image(growthlane_rois, phc_image, path)
 
-        path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_final.tif'
-        store_gl_index_image(growthlane_rois, phc_image, path)
-
-    # # finalize measurement of processing time
-    # print("Out of bounds ROIs: " + str(incomplete_GL))
-    end1 = time.time()
-    print("Processing time [s]:" + str(end1 - start1))
+        # # finalize measurement of processing time
+        # print("Out of bounds ROIs: " + str(incomplete_GL))
+        end1 = time.time()
+        print("Processing time [s]:" + str(end1 - start1))
 
 def get_valid_image_stack(dataset, frame_index, position_index, z_slice):
     return dataset.get_image_stack(frame_index=frame_index, position_index=position_index, z_slice=z_slice)

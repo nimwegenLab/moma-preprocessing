@@ -1,6 +1,7 @@
 import os
 import shutil
 from unittest import TestCase
+from mmpreprocesspy.preproc_fun import PreprocessingRunner
 
 
 class TestPreproc_fun(TestCase):
@@ -26,7 +27,8 @@ class TestPreproc_fun(TestCase):
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
 
-        preproc_fun.preproc_fun(data_directory, directory_to_save, positions,
+        runner = PreprocessingRunner()
+        runner.preproc_fun(data_directory, directory_to_save, positions,
                                 # minframe=minframe,
                                 maxframe=maxframe,
                                 dark_noise=dark_noise,

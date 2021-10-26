@@ -11,7 +11,7 @@ import sys
 import argparse
 import re
 
-from mmpreprocesspy.preproc_fun import preproc_fun
+from mmpreprocesspy.preproc_fun import PreprocessingRunner
 
 parser = argparse.ArgumentParser()
 
@@ -95,12 +95,18 @@ res = re.match('Pos[0]*(\d+)', args.positions)
 posval = int(res.group(1))
 posval = [posval]
 
-preproc_fun(args.input, args.output, positions=posval, minframe=args.timeframeminimum, maxframe=args.timeframemaximum,
-            flatfield_directory=args.flatfieldpath, growthlane_length_threshold=args.growthlanelengththreshold,
-            main_channel_angle=args.rotation, roi_boundary_offset_at_mother_cell=args.roi_boundary_offset_at_mother_cell,
-            gl_detection_template_path=args.gl_detection_template_path,
-            normalization_config_path=args.normalization_config_path,
-            z_slice_index=args.z_slice_index,
-            normalization_region_offset=args.normalization_region_offset,
-            frames_to_ignore=frames_to_ignore)
-
+runner = PreprocessingRunner()
+runner.preproc_fun(args.input,
+                   args.output,
+                   positions=posval,
+                   minframe=args.timeframeminimum,
+                   maxframe=args.timeframemaximum,
+                   flatfield_directory=args.flatfieldpath,
+                   growthlane_length_threshold=args.growthlanelengththreshold,
+                   main_channel_angle=args.rotation,
+                   roi_boundary_offset_at_mother_cell=args.roi_boundary_offset_at_mother_cell,
+                   gl_detection_template_path=args.gl_detection_template_path,
+                   normalization_config_path=args.normalization_config_path,
+                   z_slice_index=args.z_slice_index,
+                   normalization_region_offset=args.normalization_region_offset,
+                   frames_to_ignore=frames_to_ignore)
