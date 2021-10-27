@@ -23,21 +23,23 @@ class TestPreproc_fun(TestCase):
         main_channel_angle = 90.3
         normalization_config_path = 'True'
         normalization_region_offset = 120
+        frames_to_ignore = [1, 3]
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
 
         runner = PreprocessingRunner()
         runner.preproc_fun(data_directory, directory_to_save, positions,
-                                # minframe=minframe,
-                                maxframe=maxframe,
-                                dark_noise=dark_noise,
-                                gaussian_sigma=gaussian_sigma,
-                                main_channel_angle=main_channel_angle,
-                                gl_detection_template_path=gl_detection_template_path,
-                                normalization_config_path=normalization_config_path,
-                                image_registration_method=2,
-                                normalization_region_offset=normalization_region_offset)
+                           # minframe=minframe,
+                           maxframe=maxframe,
+                           dark_noise=dark_noise,
+                           gaussian_sigma=gaussian_sigma,
+                           main_channel_angle=main_channel_angle,
+                           gl_detection_template_path=gl_detection_template_path,
+                           normalization_config_path=normalization_config_path,
+                           image_registration_method=2,
+                           normalization_region_offset=normalization_region_offset,
+                           frames_to_ignore=frames_to_ignore)
 
         self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_21_no_flatfield')
