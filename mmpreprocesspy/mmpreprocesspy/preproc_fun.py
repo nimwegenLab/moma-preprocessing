@@ -111,7 +111,9 @@ class PreprocessingRunner(object):
                     z_slice_index=None,
                     image_registration_method=2,
                     normalization_region_offset=None,
-                    frames_to_ignore=None):
+                    frames_to_ignore=[]):
+
+        self.last_valid_frame = None
 
         # create a micro-manager image object
         dataset = MicroManagerOmeTiffReader(data_folder)
@@ -159,7 +161,7 @@ class PreprocessingRunner(object):
                 preprocessor.save_flatfields(position_folder)
 
             # load first phase contrast image
-            color_image_stack = get_valid_image_stack(dataset, frame_index=minframe, position_index=position_index, z_slice=z_slice_index)
+            color_image_stack = self.get_valid_image_stack(dataset, frame_index=minframe, position_index=position_index, z_slice=z_slice_index, frames_to_ignore=frames_to_ignore)
             first_phc_image = color_image_stack[..., 0]
 
             # Process first image to find ROIs, etc.
@@ -200,7 +202,7 @@ class PreprocessingRunner(object):
 
             # go through time-lapse and cut out channels
             for frame_index, t in enumerate(range(minframe, maxframe)):
-                image = get_valid_image_stack(dataset, frame_index=t, position_index=position_index, z_slice=z_slice_index)[..., phase_channel_index]
+                image = self.get_valid_image_stack(dataset, frame_index=t, position_index=position_index, z_slice=z_slice_index, frames_to_ignore=frames_to_ignore)[..., phase_channel_index]
                 if image_registration_method == 1:
                     imageProcessor.determine_image_shift_1(image)
                 elif image_registration_method == 2:
@@ -214,7 +216,7 @@ class PreprocessingRunner(object):
 
                 growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict = remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict)
 
-                color_image_stack = get_valid_image_stack(dataset, frame_index=t, position_index=position_index, z_slice=z_slice_index)
+                color_image_stack = self.get_valid_image_stack(dataset, frame_index=t, position_index=position_index, z_slice=z_slice_index, frames_to_ignore=frames_to_ignore)
 
                 # correct images and append corrected and non-corrected images
                 if preprocessor is not None:
@@ -245,8 +247,12 @@ class PreprocessingRunner(object):
         end1 = time.time()
         print("Processing time [s]:" + str(end1 - start1))
 
-def get_valid_image_stack(dataset, frame_index, position_index, z_slice):
-    return dataset.get_image_stack(frame_index=frame_index, position_index=position_index, z_slice=z_slice)
+    def get_valid_image_stack(self, dataset, frame_index, position_index, z_slice, frames_to_ignore):
+        if frame_index not in frames_to_ignore:
+            self.last_valid_frame = frame_index
+            return dataset.get_image_stack(frame_index=frame_index, position_index=position_index, z_slice=z_slice)
+        else:
+            return dataset.get_image_stack(frame_index=self.last_valid_frame, position_index=position_index, z_slice=z_slice)
 
 def get_gl_image_stacks(growthlane_rois, nr_of_timesteps, nr_of_color_channels, gl_image_path_dict):
     gl_image_stacks = {}
