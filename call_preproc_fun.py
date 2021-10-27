@@ -48,10 +48,9 @@ parser.add_argument("-fti", "--frames_to_ignore", type=str,
 
 # parse values
 args = parser.parse_args()
+frames_to_ignore = []
 if args.frames_to_ignore:
-    frames_to_ignore = [int(strInt) for strInt in args.frames_to_ignore.split(",")]
-else:
-    frames_to_ignore = None
+    frames_to_ignore.extend([int(strInt) for strInt in args.frames_to_ignore.split(",")])
 
 # overwrite sys.stdout and sys.stderr for logging
 if args.logfile is not None:
