@@ -51,6 +51,7 @@ args = parser.parse_args()
 frames_to_ignore = []
 if args.frames_to_ignore:
     frames_to_ignore.extend([int(strInt) for strInt in args.frames_to_ignore.split(",")])
+    frames_to_ignore = [val - 1 for val in frames_to_ignore]  # convert from 1-based index (used by ImageJ) to 0-based (used by Python)
 
 # overwrite sys.stdout and sys.stderr for logging
 if args.logfile is not None:
