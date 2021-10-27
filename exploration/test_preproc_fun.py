@@ -7,6 +7,41 @@ from mmpreprocesspy.preproc_fun import PreprocessingRunner
 class TestPreproc_fun(TestCase):
     test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
 
+    def test__30__lis_20210813__ignore_frames(self):
+        from mmpreprocesspy import preproc_fun
+
+        data_directory = self.test_data_base_path + '/30__lis_20210813/MMStack/'
+        directory_to_save = self.test_data_base_path + '/30__lis_20210813/result_without_flatfield/'
+        gl_detection_template_path = self.test_data_base_path + '/30__lis_20210813/TEMPLATE/template_config.json'
+        positions = [0]
+        # minframe = 0
+        maxframe = 5
+        dark_noise = 90
+        gaussian_sigma = 5
+        # main_channel_angle = -90.7
+        # main_channel_angle = 180
+        main_channel_angle = 90.3
+        normalization_config_path = 'True'
+        normalization_region_offset = 120
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        runner = PreprocessingRunner()
+        runner.preproc_fun(data_directory, directory_to_save, positions,
+                                # minframe=minframe,
+                                maxframe=maxframe,
+                                dark_noise=dark_noise,
+                                gaussian_sigma=gaussian_sigma,
+                                main_channel_angle=main_channel_angle,
+                                gl_detection_template_path=gl_detection_template_path,
+                                normalization_config_path=normalization_config_path,
+                                image_registration_method=2,
+                                normalization_region_offset=normalization_region_offset)
+
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
+                                          title='test__dataset_21_no_flatfield')
+
     def test__30__lis_20210813(self):
         from mmpreprocesspy import preproc_fun
 
