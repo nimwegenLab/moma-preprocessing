@@ -109,7 +109,7 @@ class PreprocessingRunner(object):
                     gl_detection_template_path=None,
                     normalization_config_path=None,
                     z_slice_index=None,
-                    image_registration_method=2,
+                    image_registration_method=None,
                     normalization_region_offset=None,
                     frames_to_ignore=[]):
 
@@ -136,6 +136,9 @@ class PreprocessingRunner(object):
 
         if roi_boundary_offset_at_mother_cell is None:
             roi_boundary_offset_at_mother_cell = 0
+
+        if image_registration_method is None:
+            image_registration_method = 2
 
         # recover the basic experiment name
         base_name = dataset.get_first_tiff().split('.')[0]

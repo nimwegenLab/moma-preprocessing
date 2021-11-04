@@ -23,6 +23,7 @@ TMAX=5 # uncomment to specify the last frame to analyze
 ROI_BOUNDARY_OFFSET_AT_MOTHER_CELL=0
 NORMALIZATION_CONFIG_PATH="true"
 NORMALIZATION_REGION_OFFSET=30
+IMAGE_REGISTRATION_METHOD=2
 
 # generate an array of same length as position array, with every element containing the ROTATION scalar value
 ROTATIONS=$ROTATION

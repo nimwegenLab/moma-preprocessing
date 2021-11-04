@@ -45,6 +45,9 @@ parser.add_argument("-nro", "--normalization_region_offset", type=int,
                     help="offset by which the normalization region is reduced relative to the GL ROI length")
 parser.add_argument("-fti", "--frames_to_ignore", type=str,
                     help="pass the frames which should be ignored as a comma-separated list of integers")
+parser.add_argument("-irm", "--image_registration_method", type=int,
+                    help="pass the frames which should be ignored as a comma-separated list of integers")
+
 
 # parse values
 args = parser.parse_args()
@@ -89,6 +92,8 @@ print("normalization_region_offset:")
 print(args.normalization_region_offset)
 print("frames_to_ignore:")
 print(frames_to_ignore)
+print("image_registration_method:")
+print(args.image_registration_method)
 
 # parse position argument; IMPORTANT: this only works for a single position argument
 res = re.match('Pos[0]*(\d+)', args.positions)
@@ -109,4 +114,5 @@ runner.preproc_fun(args.input,
                    normalization_config_path=args.normalization_config_path,
                    z_slice_index=args.z_slice_index,
                    normalization_region_offset=args.normalization_region_offset,
-                   frames_to_ignore=frames_to_ignore)
+                   frames_to_ignore=frames_to_ignore,
+                   image_registration_method=args.image_registration_method)
