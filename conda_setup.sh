@@ -40,10 +40,15 @@ conda install -y scipy
 conda install -y -c lightsource2-tag pystackreg
 conda install -y conda-build
 conda install -y scikit-image
-conda install -y tifffile
+conda install -y tifffile=2020.10.1
 conda install -y zarr
 conda install -y -c conda-forge imagecodecs
 conda install -y pandas
+#if [[ "$runningOnScicore" = true ]]; then
+#    conda install $PREPROC_PACKAGE_PATH
+#else
+#    conda develop $PREPROC_PACKAGE_PATH
+#fi
 conda develop $PREPROC_PACKAGE_PATH
 
 #conda install -y -c conda-forge opencv-contrib-python
