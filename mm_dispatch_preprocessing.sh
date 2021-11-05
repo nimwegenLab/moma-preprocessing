@@ -60,7 +60,7 @@ for (( I=0; I<N; I++ )); do
   if [ -n "$ZSLICE" ]; then CMD_STR="$CMD_STR -zslice $ZSLICE"; fi # append optional argument
   if [ -n "$NORMALIZATION_REGION_OFFSET" ]; then CMD_STR="$CMD_STR --normalization_region_offset $NORMALIZATION_REGION_OFFSET"; fi # append optional argument
   if [ -n "$FRAMES_TO_IGNORE" ]; then CMD_STR="$CMD_STR --frames_to_ignore \"$FRAMES_TO_IGNORE\""; fi # append optional argument
-  if [ -n "$FRAMES_TO_IGNORE" ]; then CMD_STR="$CMD_STR --image_registration_method \"$IMAGE_REGISTRATION_METHOD\""; fi # append optional argument
+  if [ -n "$IMAGE_REGISTRATION_METHOD" ]; then CMD_STR="$CMD_STR --image_registration_method \"$IMAGE_REGISTRATION_METHOD\""; fi # append optional argument
 
   CMD_STR="$CMD_STR -log \"$LOG\""
 
