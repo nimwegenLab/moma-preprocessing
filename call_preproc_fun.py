@@ -100,6 +100,9 @@ res = re.match('Pos[0]*(\d+)', args.positions)
 posval = int(res.group(1))
 posval = [posval]
 
+if args.normalization_config_path is not "true":
+    args.normalization_config_path = None  # do not perform normalization unless NORMALIZATION_CONFIG_PATH is set to "TRUE"
+
 runner = PreprocessingRunner()
 runner.preproc_fun(args.input,
                    args.output,
