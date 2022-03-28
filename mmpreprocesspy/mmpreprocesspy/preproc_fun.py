@@ -375,7 +375,7 @@ def get_kymo_graph_slice(gl_roi_crop):
 
     gl_channel_width_halved = 10/2  # unit: [px]; channel width is roughly 10px
     image_width = gl_roi_crop.shape[1]
-    image_center = int(image_width/2)
+    image_center = int(np.round(image_width/2))
     start_ind = image_center - int(gl_channel_width_halved)
     end_ind = image_center + int(gl_channel_width_halved)
     kymo_slice = np.mean(gl_roi_crop[:, start_ind:end_ind], axis=1)
@@ -391,7 +391,7 @@ def finalize_memmap_images(growthlane_rois, gl_image_dict):
 def initialize_gl_roi_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, image_path):
     nr_of_z_planes = 1
     image_height = gl_roi.length
-    image_width = gl_roi.width
+    image_width = np.int(np.round(gl_roi.width))
     image_shape = (nr_of_timesteps, nr_of_z_planes, nr_of_color_channels, image_height, image_width)
     # image_stack = np.float32(np.zeros(image_shape))
     os.makedirs(os.path.dirname(image_path), exist_ok=True)

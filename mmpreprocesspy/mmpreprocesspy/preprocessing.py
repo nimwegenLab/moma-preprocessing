@@ -135,7 +135,7 @@ def calculate_gl_region(gl_region, horizontal_index_of_max_correlation, template
     return int(gl_region.start + horizontal_index_of_max_correlation), int(gl_region.end + horizontal_index_of_max_correlation)
 
 def rotate_rois(image, growthlane_rois, main_channel_angle):
-    rotation_center = (np.int(np.round(image.shape[1]/2)), np.int(np.round(image.shape[0]/2)))
+    rotation_center = (image.shape[1] / 2) - 0.5, (image.shape[0] / 2) - 0.5  # center=(cols / 2 - 0.5, rows / 2 - 0.5)
     for growthlane_roi in growthlane_rois:
         growthlane_roi.roi.rotate(rotation_center, -main_channel_angle)
     return growthlane_rois
@@ -344,7 +344,7 @@ def get_mean_distance_between_growthlanes(channel_centers):
     :param channel_centers:
     :return:
     """
-    return np.int0(np.mean(np.diff(channel_centers)))
+    return np.mean(np.diff(channel_centers)) # TODO-MM-20220328: this could be the/a culprit for the poor centering: np.mean(np.diff(channel_centers)) = 106.623; but this floors it to 106
 
 
 def find_main_channel_orientation(image):
@@ -531,7 +531,7 @@ def get_roi(vertical_center_index, height, start_index, stop_index):
     :param stop_index:
     :return:
     """
-    roi_half_width = int(height / 2)
+    roi_half_width = height / 2
     m1 = vertical_center_index - roi_half_width
     m2 = vertical_center_index + roi_half_width
     n1 = start_index
