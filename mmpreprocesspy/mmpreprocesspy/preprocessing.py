@@ -135,7 +135,8 @@ def calculate_gl_region(gl_region, horizontal_index_of_max_correlation, template
     return int(gl_region.start + horizontal_index_of_max_correlation), int(gl_region.end + horizontal_index_of_max_correlation)
 
 def rotate_rois(image, growthlane_rois, main_channel_angle):
-    rotation_center = (np.int(np.round(image.shape[1]/2)), np.int(np.round(image.shape[0]/2)))
+    # rotation_center = (np.int(np.round(image.shape[1]/2)), np.int(np.round(image.shape[0]/2))) # center=(cols / 2 - 0.5, rows / 2 - 0.5)
+    rotation_center = (image.shape[1] / 2) - 0.5, (image.shape[0] / 2) - 0.5  # center=(cols / 2 - 0.5, rows / 2 - 0.5)
     for growthlane_roi in growthlane_rois:
         growthlane_roi.roi.rotate(rotation_center, -main_channel_angle)
     return growthlane_rois
