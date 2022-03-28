@@ -69,7 +69,6 @@ class RotatedRoi(object):
         # boundingRectCenter = (x+w/2, y+h/2)
         # aux.show_image_with_rotated_rois(image, [self])
         # cv.waitKey()
-        bounding_box_roi = RotatedRoi((x+w/2, y+h/2), (w, h), 0)
         bounding_box_image = image[:, y:y+h,x:x+w]
         bounding_image_center = (bounding_box_image.shape[2]/2, bounding_box_image.shape[1]/2)
         # cv.imshow("boundingBoxImage", bounding_box_image)
@@ -90,15 +89,19 @@ class RotatedRoi(object):
         # cv.waitKey()
 
         rotated_image = np.float32(rotated_image_orig)
-        cropped_shape = (rotated_image.shape[0], self.size[1], self.size[0])  # we flip axis, because this is how cv.getRectSubPix returns the data
+        sizeRounded = self.getSizeRounded()
+        cropped_shape = (rotated_image.shape[0], sizeRounded[1], sizeRounded[0])  # we flip axis, because this is how cv.getRectSubPix returns the data
         cropped_image = np.zeros(cropped_shape)
         for color_ind in range(rotated_image.shape[0]):
-            cropped_image[color_ind, ...] = cv.getRectSubPix(rotated_image[color_ind, ...], self.size, bounding_image_center)
+            cropped_image[color_ind, ...] = cv.getRectSubPix(rotated_image[color_ind, ...], sizeRounded, bounding_image_center)
 
         # cv.imshow("tmp", np.int16(cropped))
         # aux.show_image(cropped)
         # cv.waitKey()
         return cropped_image
+
+    def getSizeRounded(self):
+        return (np.int(np.round(self.size[0])), np.int(np.round(self.size[1])))
 
     def draw_to_image(self, image, with_bounding_box=False):
         """

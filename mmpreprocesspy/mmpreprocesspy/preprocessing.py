@@ -531,7 +531,7 @@ def get_roi(vertical_center_index, height, start_index, stop_index):
     :param stop_index:
     :return:
     """
-    roi_half_width = int(height / 2)
+    roi_half_width = height / 2
     m1 = vertical_center_index - roi_half_width
     m2 = vertical_center_index + roi_half_width
     n1 = start_index

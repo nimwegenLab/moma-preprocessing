@@ -375,7 +375,7 @@ def get_kymo_graph_slice(gl_roi_crop):
 
     gl_channel_width_halved = 10/2  # unit: [px]; channel width is roughly 10px
     image_width = gl_roi_crop.shape[1]
-    image_center = int(image_width/2)
+    image_center = int(np.round(image_width/2))
     start_ind = image_center - int(gl_channel_width_halved)
     end_ind = image_center + int(gl_channel_width_halved)
     kymo_slice = np.mean(gl_roi_crop[:, start_ind:end_ind], axis=1)
