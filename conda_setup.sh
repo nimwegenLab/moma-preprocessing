@@ -28,41 +28,14 @@ eval $(conda shell.bash hook)
 conda create --file $DIR/conda_package_list.txt -y --prefix $DIR/mmpreprocesspy_conda_environment python=3.7
 source activate $DIR/mmpreprocesspy_conda_environment
 
-######### packages for deep leaning ##############
 conda install pip
+pip install opencv-contrib-python==4.5.5.64
 
-# conda install -y wheel
-# conda install -y -c conda-forge ipdb
-# conda install -y -c conda-forge pudb
-# conda install -y -c conda-forge exifread
-# conda install -y pillow
-# conda install -y scipy
-# conda install -y -c lightsource2-tag pystackreg
-# conda install -y conda-build
-# conda install -y scikit-image
-# conda install -y tifffile=2020.10.1
-# conda install -y zarr
-# conda install -y -c conda-forge imagecodecs
-# conda install -y pandas
 #if [[ "$runningOnScicore" = true ]]; then
 #    conda install $PREPROC_PACKAGE_PATH
 #else
 #    conda develop $PREPROC_PACKAGE_PATH
 #fi
 conda develop $PREPROC_PACKAGE_PATH
-
-#conda install -y -c conda-forge opencv-contrib-python
-
-
-pip install opencv-contrib-python==4.5.5.64
-
-#if [[ "$runningOnScicore" = false  ]]; then
-#  echo "Copying OpenCV from the resource folder ..."
-#  cp -a resources/cv2 venv-testenv/lib/python3.7/site-packages/
-#else
-#  echo "Installing OpenCV using pip ..."
-#  pip install opencv-contrib-python
-#fi
-
 
 conda deactivate
