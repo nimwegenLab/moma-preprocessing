@@ -1,3 +1,4 @@
+# This file was created using: conda list --explicit > conda_package_list.txt
 # This file may be used to create an environment using:
 # $ conda create --name <env> --file <this file>
 # platform: linux-64
