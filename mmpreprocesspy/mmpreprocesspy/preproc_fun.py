@@ -391,7 +391,7 @@ def finalize_memmap_images(growthlane_rois, gl_image_dict):
 def initialize_gl_roi_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, image_path):
     nr_of_z_planes = 1
     image_height = gl_roi.length
-    image_width = np.int(np.round(gl_roi.width))
+    image_width = int(np.round(gl_roi.width))
     image_shape = (nr_of_timesteps, nr_of_z_planes, nr_of_color_channels, image_height, image_width)
     # image_stack = np.float32(np.zeros(image_shape))
     os.makedirs(os.path.dirname(image_path), exist_ok=True)

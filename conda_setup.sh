@@ -25,25 +25,25 @@ fi
 
 eval $(conda shell.bash hook)
 
-conda create -y --prefix $DIR/mmpreprocesspy_conda_environment python=3.7
+conda create --file $DIR/conda_package_list.txt -y --prefix $DIR/mmpreprocesspy_conda_environment python=3.7
 source activate $DIR/mmpreprocesspy_conda_environment
 
 ######### packages for deep leaning ##############
 conda install pip
 
-conda install -y wheel
-conda install -y -c conda-forge ipdb
-conda install -y -c conda-forge pudb
-conda install -y -c conda-forge exifread
-conda install -y pillow
-conda install -y scipy
-conda install -y -c lightsource2-tag pystackreg
-conda install -y conda-build
-conda install -y scikit-image
-conda install -y tifffile=2020.10.1
-conda install -y zarr
-conda install -y -c conda-forge imagecodecs
-conda install -y pandas
+# conda install -y wheel
+# conda install -y -c conda-forge ipdb
+# conda install -y -c conda-forge pudb
+# conda install -y -c conda-forge exifread
+# conda install -y pillow
+# conda install -y scipy
+# conda install -y -c lightsource2-tag pystackreg
+# conda install -y conda-build
+# conda install -y scikit-image
+# conda install -y tifffile=2020.10.1
+# conda install -y zarr
+# conda install -y -c conda-forge imagecodecs
+# conda install -y pandas
 #if [[ "$runningOnScicore" = true ]]; then
 #    conda install $PREPROC_PACKAGE_PATH
 #else

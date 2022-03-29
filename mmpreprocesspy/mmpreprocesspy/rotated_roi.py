@@ -101,7 +101,7 @@ class RotatedRoi(object):
         return cropped_image
 
     def getSizeRounded(self):
-        return (np.int(np.round(self.size[0])), np.int(np.round(self.size[1])))
+        return (int(np.round(self.size[0])), int(np.round(self.size[1])))
 
     def draw_to_image(self, image, with_bounding_box=False):
         """
