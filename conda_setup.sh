@@ -54,7 +54,7 @@ conda develop $PREPROC_PACKAGE_PATH
 #conda install -y -c conda-forge opencv-contrib-python
 
 
-pip install opencv-contrib-python
+pip install opencv-contrib-python==4.5.5.64
 
 #if [[ "$runningOnScicore" = false  ]]; then
 #  echo "Copying OpenCV from the resource folder ..."
