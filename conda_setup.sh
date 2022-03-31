@@ -28,7 +28,7 @@ eval $(conda shell.bash hook)
 conda create --file $DIR/conda_package_list.txt -y --prefix $DIR/mmpreprocesspy_conda_environment python=3.7
 source activate $DIR/mmpreprocesspy_conda_environment
 
-conda install pip
+conda install -y pip
 pip install opencv-contrib-python==4.5.5.64
 
 #if [[ "$runningOnScicore" = true ]]; then
