@@ -115,10 +115,13 @@ class PreprocessingRunner(object):
 
         self.last_valid_frame = None
 
-        # create a micro-manager image object
+        if not os.path.exists(os.path.dirname(folder_to_save)):
+            os.makedirs(os.path.dirname(folder_to_save))
+
+        self.copy_version_info_to_output_folder(folder_to_save)
+
         dataset = MicroManagerOmeTiffReader(data_folder)
 
-        # define basic parameters
         colors = dataset.get_channels()
         phase_channel_index = 0
 
@@ -184,10 +187,6 @@ class PreprocessingRunner(object):
             imageProcessor.process_image()
             imageProcessor.set_image_registration_template()
 
-            # store GL index image
-            if not os.path.exists(os.path.dirname(folder_to_save)):
-                os.makedirs(os.path.dirname(folder_to_save))
-
             path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_initial.tif'
             store_gl_index_image(imageProcessor.growthlane_rois, imageProcessor.image, path)
 
@@ -249,6 +248,14 @@ class PreprocessingRunner(object):
         # print("Out of bounds ROIs: " + str(incomplete_GL))
         end1 = time.time()
         print("Processing time [s]:" + str(end1 - start1))
+
+    def copy_version_info_to_output_folder(self, folder_to_save):
+        version_filename = "VERSION_INFO"
+        if not os.path.exists(os.path.join(folder_to_save, version_filename)):
+            import pathlib
+            version_source_path = pathlib.Path(__file__).parent.resolve()
+            version_file_path = os.path.join(version_source_path, version_filename)
+            shutil.copy(version_file_path, folder_to_save)
 
     def get_valid_image_stack(self, dataset, frame_index, position_index, z_slice, frames_to_ignore):
         if frame_index not in frames_to_ignore:
