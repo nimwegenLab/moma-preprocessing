@@ -1,15 +1,17 @@
 import os
 import shutil
+import dotenv
 from unittest import TestCase
 from mmpreprocesspy.preproc_fun import PreprocessingRunner
 
 
 class TestPreproc_fun(TestCase):
-    test_data_base_path = '/media/micha/T7/20210816_test_data_michael/00_preprocessing_test_data/MM_Testing'
+    def setUp(self):
+        dotenv.load_dotenv('.env_for_testing')
+        self.test_data_base_path = os.getenv('PREPROCDATADIR')
 
     def test__35__lis__20220320__repeat(self):
         from mmpreprocesspy import preproc_fun
-        self.test_data_base_path = "/media/micha/T7/20210816_test_data_michael/00_preprocessing_test_data/MM_Testing/"
         data_directory = self.test_data_base_path + '/35__lis__20220320__repeat/MMSTACK/20220320_VNG1040_AB2h_1_Frame0-478_resaved/'
         directory_to_save = self.test_data_base_path + '/35__lis__20220320__repeat/result_without_flatfield/'
         gl_detection_template_path = self.test_data_base_path + '/35__lis__20220320__repeat/TEMPLATE_MICHAEL_v002/template_config.json'
