@@ -5,7 +5,7 @@ from mmpreprocesspy.preproc_fun import PreprocessingRunner
 
 
 class TestPreproc_fun(TestCase):
-    test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
+    test_data_base_path = '/media/micha/T7/20210816_test_data_michael/00_preprocessing_test_data/MM_Testing'
 
     def test__35__lis__20220320__repeat(self):
         from mmpreprocesspy import preproc_fun
