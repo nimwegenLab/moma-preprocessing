@@ -251,11 +251,12 @@ class PreprocessingRunner(object):
 
     def copy_version_info_to_output_folder(self, folder_to_save):
         version_filename = "VERSION_INFO"
-        if not os.path.exists(os.path.join(folder_to_save, version_filename)):
+        version_file_target_path = os.path.join(folder_to_save, version_filename)
+        if not os.path.exists(version_file_target_path):
             import pathlib
-            version_source_path = pathlib.Path(__file__).parent.resolve()
-            version_file_path = os.path.join(version_source_path, version_filename)
-            shutil.copy(version_file_path, folder_to_save)
+            version_file_source_path = pathlib.Path(__file__).parent.resolve()
+            version_file_path = os.path.join(version_file_source_path, version_filename)
+            shutil.copyfile(version_file_path, version_file_target_path)
 
     def get_valid_image_stack(self, dataset, frame_index, position_index, z_slice, frames_to_ignore):
         if frame_index not in frames_to_ignore:
