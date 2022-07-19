@@ -4,15 +4,20 @@ import dotenv
 from unittest import TestCase
 from mmpreprocesspy.preproc_fun import PreprocessingRunner
 
+def __main__():
+    tests = TestDanysData()
+    tests.test__20220716_zstacks_hi1_500_1()
 
-class TestPreproc_fun(TestCase):
+class TestDanysData(TestCase):
+
     def setUp(self):
         dotenv.load_dotenv('.env_for_testing')
-        self.test_data_base_path = os.getenv('PREPROCDATADIR')
+        self.test_data_base_path = "/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks/20220716_zstacks"
+        self.output_path = '/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks_output'
 
-    def test__35__lis__20220320__repeat(self):
-        data_directory = self.test_data_base_path + '/35__lis__20220320__repeat/MMSTACK/20220320_VNG1040_AB2h_1_Frame0-478_resaved/'
-        directory_to_save = self.test_data_base_path + '/35__lis__20220320__repeat/result_without_flatfield/'
+    def test__20220716_zstacks_hi1_500_1(self):
+        data_directory = os.path.join(self.test_data_base_path, '20220716_zstacks_hi1_500_1')
+        directory_to_save = os.path.join(self.output_path, '20220716_zstacks_hi1_500_1')
         gl_detection_template_path = self.test_data_base_path + '/35__lis__20220320__repeat/TEMPLATE_MICHAEL_v002/template_config.json'
         image_registration_method = 1
         positions = [0]
@@ -29,6 +34,7 @@ class TestPreproc_fun(TestCase):
 
         if os.path.isdir(directory_to_save):
             shutil.rmtree(directory_to_save)
+        os.makedirs(directory_to_save, exist_ok=True)
 
         runner = PreprocessingRunner()
         runner.preproc_fun(data_directory, directory_to_save, positions,
