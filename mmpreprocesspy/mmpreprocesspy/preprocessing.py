@@ -1,5 +1,6 @@
 import cv2
 # import mmpreprocesspy.dev_auxiliary_functions as aux
+import matplotlib.pyplot as plt
 import numpy as np
 import skimage.transform
 from mmpreprocesspy.GrowthlaneRoi import GrowthlaneRoi
@@ -32,7 +33,11 @@ def get_rotated_image(image, main_channel_angle=None):
         angle = main_channel_angle  # the user specified the angle with decimals. We therefore do not refine it.
 
     # recalculate channel region boundary on rotated image
-    image_rotated = skimage.transform.rotate(image, angle, cval=0)
+    image_rotated = skimage.transform.rotate(image, angle, cval=0, resize=True)
+    # fig, ax = plt.subplots(nrows=2)
+    # ax[0].imshow(image)
+    # ax[1].imshow(image_rotated)
+    # plt.show()
 
     return image_rotated, main_channel_angle
 
@@ -43,10 +48,29 @@ def get_gl_regions(image_rotated, growthlane_length_threshold=0, roi_boundary_of
     growthlane_rois, channel_centers = get_all_growthlane_rois(image_rotated, region_list)
     return growthlane_rois, region_list
 
+
+import matplotlib.pyplot as plt
+
+
 def get_gl_rois_using_template(image_rotated, gl_detection_template: GlDetectionTemplate, main_channel_angle, roi_boundary_offset_at_mother_cell=0):
     normalized_cross_correlation = match_template(image_rotated, gl_detection_template.template_image)
     vertical_index_of_max_correlation = gl_detection_template.template_image.shape[0]/2 + np.argmax(np.max(normalized_cross_correlation, axis=1))
     horizontal_index_of_max_correlation = gl_detection_template.template_image.shape[1]/2 + np.argmax(np.max(normalized_cross_correlation, axis=0))
+
+    plt.imshow(gl_detection_template.template_image)
+    plt.show()
+
+    plt.imshow(image_rotated)
+    plt.show()
+
+    plt.imshow(normalized_cross_correlation)
+    plt.show()
+
+    plt.plot(np.max(normalized_cross_correlation, axis=0))
+    plt.show()
+
+    plt.plot(np.max(normalized_cross_correlation, axis=1))
+    plt.show()
 
     gl_regions = []
     gl_rois = []

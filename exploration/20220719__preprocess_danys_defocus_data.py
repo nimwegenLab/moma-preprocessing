@@ -13,12 +13,12 @@ class TestDanysData(TestCase):
     def setUp(self):
         dotenv.load_dotenv('.env_for_testing')
         self.test_data_base_path = "/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks/20220716_zstacks"
-        self.output_path = '/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks_output'
+        self.output_path = '/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks_preprocessing'
 
     def test__20220716_zstacks_hi1_500_1(self):
         data_directory = os.path.join(self.test_data_base_path, '20220716_zstacks_hi1_500_1')
-        directory_to_save = os.path.join(self.output_path, '20220716_zstacks_hi1_500_1')
-        gl_detection_template_path = self.test_data_base_path + '/35__lis__20220320__repeat/TEMPLATE_MICHAEL_v002/template_config.json'
+        directory_to_save = os.path.join(self.output_path, '20220716_zstacks_output/20220716_zstacks_hi1_500_1')
+        gl_detection_template_path = os.path.join(self.output_path, 'template/template_config.json')
         image_registration_method = 1
         positions = [0]
         # minframe = 0
@@ -27,7 +27,7 @@ class TestDanysData(TestCase):
         gaussian_sigma = 5
         # main_channel_angle = -90.7
         # main_channel_angle = 180
-        main_channel_angle = 90.1
+        main_channel_angle = 90.01
         normalization_config_path = 'True'
         normalization_region_offset = 120
         frames_to_ignore = []
