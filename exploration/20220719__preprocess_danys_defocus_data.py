@@ -93,7 +93,7 @@ class DataPreprocessor(object):
         gl_detection_template_path = self.gl_detection_template_path
         image_registration_method = 1
         positions = [self.position]
-        maxframe = None
+        maxframe = 3
         dark_noise = 90
         gaussian_sigma = 5
         main_channel_angle = 0.01
@@ -130,10 +130,10 @@ def process__20220716_zstacks_hi1_500_1():
         dataprocessor = DataPreprocessor(image_base_path, flatfield_path, output_path, gl_detection_template_path, position)
         dataprocessor.process()
 
-def process__20220716_zstacks_hi1_500_downward_1():
-    image_base_path = "/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks/20220716_zstacks/20220716_zstacks_hi1_500_downward_1"
+def process__20220716_zstacks_hi1_500_downward_2():
+    image_base_path = "/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks/20220716_zstacks/20220716_zstacks_hi1_500_downward_2"
     flatfield_path = "/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220719_flatfield/20220719_flatfield 20 exposure cyan30 110ms blanking_4"
-    output_path = '/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks_preprocessing/20220716_zstacks_output/20220716_zstacks_hi1_500_downward_1'
+    output_path = '/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks_preprocessing/20220716_zstacks_output/20220716_zstacks_hi1_500_downward_2'
     gl_detection_template_path = '/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks_preprocessing/template/template_config.json'
 
     if os.path.isdir(output_path):
@@ -146,7 +146,7 @@ def process__20220716_zstacks_hi1_500_downward_1():
         dataprocessor.process()
 
 if __name__ == "__main__":
-    process__20220716_zstacks_hi1_500_1()
-    process__20220716_zstacks_hi1_500_downward_1()
+    # process__20220716_zstacks_hi1_500_1()
+    process__20220716_zstacks_hi1_500_downward_2()
 
 
