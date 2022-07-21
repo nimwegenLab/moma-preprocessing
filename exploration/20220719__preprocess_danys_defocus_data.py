@@ -115,11 +115,10 @@ class DataPreprocessor(object):
                            normalization_region_offset=normalization_region_offset,
                            frames_to_ignore=frames_to_ignore)
 
-def process__20220716_zstacks_hi1_50_110ms_upward_5_images_2_1():
-    dataset_folder_name='20220716_zstacks_hi1_50_110ms_upward_5_images_2_1'
-    image_base_path = os.path.join("/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks/20220716_zstacks/", dataset_folder_name)
+def process__20220716_zstacks_hi1_500_1():
+    image_base_path = "/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks/20220716_zstacks/20220716_zstacks_hi1_500_1"
     flatfield_path = "/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220719_flatfield/20220719_flatfield 20 exposure cyan30 110ms blanking_4"
-    output_path = os.path.join('/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks_preprocessing/20220716_zstacks_output', dataset_folder_name)
+    output_path = '/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks_preprocessing/20220716_zstacks_output/20220716_zstacks_hi1_500_1'
     gl_detection_template_path = '/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks_preprocessing/template/template_config.json'
 
     if os.path.isdir(output_path):
@@ -131,11 +130,10 @@ def process__20220716_zstacks_hi1_50_110ms_upward_5_images_2_1():
         dataprocessor = DataPreprocessor(image_base_path, flatfield_path, output_path, gl_detection_template_path, position)
         dataprocessor.process()
 
-def process__20220716_zstacks_hi1_50_110ms_downward_5_images_2_1():
-    dataset_folder_name='20220716_zstacks_hi1_50_110ms_downward_5_images_2_1'
-    image_base_path = os.path.join("/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks/20220716_zstacks", dataset_folder_name)
+def process__20220716_zstacks_hi1_500_downward_1():
+    image_base_path = "/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks/20220716_zstacks/20220716_zstacks_hi1_500_downward_1"
     flatfield_path = "/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220719_flatfield/20220719_flatfield 20 exposure cyan30 110ms blanking_4"
-    output_path = os.path.join('/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks_preprocessing/20220716_zstacks_output', dataset_folder_name)
+    output_path = '/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks_preprocessing/20220716_zstacks_output/20220716_zstacks_hi1_500_downward_1'
     gl_detection_template_path = '/media/micha/T7/data_michael_mell/20220718__defocus_analysis_dany/20220716_zstacks_preprocessing/template/template_config.json'
 
     if os.path.isdir(output_path):
@@ -148,7 +146,7 @@ def process__20220716_zstacks_hi1_50_110ms_downward_5_images_2_1():
         dataprocessor.process()
 
 if __name__ == "__main__":
-    process__20220716_zstacks_hi1_50_110ms_upward_5_images_2_1()
-    process__20220716_zstacks_hi1_50_110ms_downward_5_images_2_1()
+    process__20220716_zstacks_hi1_500_1()
+    process__20220716_zstacks_hi1_500_downward_1()
 
 
