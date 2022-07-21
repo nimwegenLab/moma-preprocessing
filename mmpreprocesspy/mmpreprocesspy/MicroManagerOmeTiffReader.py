@@ -171,7 +171,7 @@ class MicroManagerOmeTiffReader(object):
 
         :return: image height
         """
-        return self.height
+        return self.width  # TODO-MM-20220721 - WARNING: This is a hack to make this code run with Danys dataset; do not merge this to other branches
 
     def get_image_width(self):
         """
@@ -179,7 +179,7 @@ class MicroManagerOmeTiffReader(object):
 
         :return: image width
         """
-        return self.width
+        return self.height  # TODO-MM-20220721 - WARNING: This is a hack to make this code run with Danys dataset; do not merge this to other branches
 
     def get_position_names(self):
         """
