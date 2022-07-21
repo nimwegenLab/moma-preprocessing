@@ -96,7 +96,15 @@ class MicroManagerOmeTiffReader(object):
         :return:
         """
         if frame_index == 0:
-            return self._get_image_stack_with_adapted_dimensions(position_index, frame_index, z_slice=z_slice)
+            imdata = self._get_image_stack_with_adapted_dimensions(position_index, frame_index, z_slice=z_slice)
+            # import matplotlib.pyplot as plt
+            # imdata.shape
+            # plt.imshow(imdata[:,:, 0])
+            # plt.show()
+            imdata_rot = np.rot90(imdata, axes=(0, 1))
+            # plt.imshow(imdata_rot[:,:, 0])
+            # plt.show()
+            return imdata_rot
         elif frame_index > 0:
             image_stack_current = self._get_image_stack_with_adapted_dimensions(position_index, frame_index, z_slice=z_slice)
             image_stack_previous = self._get_image_stack_with_adapted_dimensions(position_index, frame_index - 1, z_slice=z_slice)
@@ -104,6 +112,7 @@ class MicroManagerOmeTiffReader(object):
             for channel_index in range(image_stack_current.shape[2]):
                 if np.all(image_stack_current[:,:,channel_index] == image_stack_previous[:,:,channel_index]):
                     image_stack_current[:, :, channel_index] = np.nan
+            image_stack_current = np.rot90(image_stack_current, axes=(0, 1))
             return image_stack_current
         else:
             raise ValueError('frame_index cannot be negative')

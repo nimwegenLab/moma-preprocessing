@@ -27,7 +27,7 @@ class TestDanysData(TestCase):
         gaussian_sigma = 5
         # main_channel_angle = -90.7
         # main_channel_angle = 180
-        main_channel_angle = 90.01
+        main_channel_angle = 0.01
         normalization_config_path = 'True'
         normalization_region_offset = 120
         frames_to_ignore = []
