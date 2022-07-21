@@ -125,9 +125,7 @@ class MomaImageProcessor(object):
         return cv.warpAffine(image, self.get_translation_matrix(), (image.shape[1], image.shape[0]))
 
     def _rotate_image(self, image):
-        # return cv.warpAffine(image, self.get_rotation_matrix(), (image.shape[1], image.shape[0]))
-        image_rotated = skimage.transform.rotate(image, self.main_channel_angle, cval=0, resize=True)
-        return image_rotated
+        return cv.warpAffine(image, self.get_rotation_matrix(), (image.shape[1], image.shape[0]))
 
     def get_rotation_matrix(self):
         if self.main_channel_angle is None:
@@ -162,8 +160,6 @@ class MomaImageProcessor(object):
         for region in self.gl_regions:
             intensity_profile_region = image_registered[:,
                                        region.start + self.normalization_region_offset:region.end - self.normalization_region_offset]
-            plt.imshow(image_registered)
-            plt.show()
             intensity_profile_unprocessed = np.mean(intensity_profile_region, axis=1)
             intensity_profiles_unprocessed.append(intensity_profile_unprocessed)
             intensity_profile_processed = self.smooth(intensity_profile_unprocessed, box_pts=box_pts)
