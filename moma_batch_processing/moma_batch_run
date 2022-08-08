@@ -1,4 +1,5 @@
 #!/bin/bash
 
-PYTHON="$MM_PYTHON_ENVIRONMENT_PATH"
-exec "$PYTHON" "moma_batch_run.py" "$@"
+module load Anaconda3/5.0.1
+source activate "$MM_PYTHON_ENVIRONMENT_PATH"
+python "$MOMA_HOME/moma_batch_run.py" "$@"
