@@ -89,7 +89,11 @@ for (( I=0; I<N; I++ )); do
 $anaconda_module_load_string
 \
 source activate $MM_PYTHON_ENVIRONMENT_PATH\n\n\
-$CMD_STR \n"
+\
+$CMD_STR
+\
+conda deactivate
+\n"
 
   if [[ "$running_on_laptop" = true ]]; then
     CMD_SBATCH=$SCRIPT
