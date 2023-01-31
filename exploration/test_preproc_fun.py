@@ -42,7 +42,7 @@ class TestPreproc_fun(TestCase):
                            image_registration_method=image_registration_method,
                            normalization_region_offset=normalization_region_offset,
                            frames_to_ignore=frames_to_ignore,
-                           user_forced_intensity_normalization_range=[1395.39, 5859.17])
+                           forced_intensity_normalization_range=[1395.39, 5859.17])
 
         self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_21_no_flatfield')

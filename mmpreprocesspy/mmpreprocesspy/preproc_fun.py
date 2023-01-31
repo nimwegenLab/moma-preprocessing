@@ -111,7 +111,7 @@ class PreprocessingRunner(object):
                     z_slice_index=None,
                     image_registration_method=None,
                     normalization_region_offset=None,
-                    user_forced_intensity_normalization_range=None,
+                    forced_intensity_normalization_range=None,
                     frames_to_ignore=[]):
 
         self.last_valid_frame = None
@@ -231,9 +231,9 @@ class PreprocessingRunner(object):
                     color_image_stack = color_image_stack_corr
 
                 phc_image = color_image_stack[:, :, 0]
-                if user_forced_intensity_normalization_range:
+                if forced_intensity_normalization_range:
                     for roi in growthlane_rois:
-                        roi.normalization_range = user_forced_intensity_normalization_range
+                        roi.normalization_range = forced_intensity_normalization_range
                 elif normalization_config_path:
                     output_path = get_normalization_log_folder_path(folder_to_save, position_index)
                     imageProcessor.set_normalization_ranges_and_save_log_data(growthlane_rois, phc_image, frame_index, position_index, output_path)

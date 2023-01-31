@@ -61,6 +61,7 @@ for (( I=0; I<N; I++ )); do
   if [ -n "$NORMALIZATION_REGION_OFFSET" ]; then CMD_STR="$CMD_STR --normalization_region_offset $NORMALIZATION_REGION_OFFSET"; fi # append optional argument
   if [ -n "$FRAMES_TO_IGNORE" ]; then CMD_STR="$CMD_STR --frames_to_ignore \"$FRAMES_TO_IGNORE\""; fi # append optional argument
   if [ -n "$IMAGE_REGISTRATION_METHOD" ]; then CMD_STR="$CMD_STR --image_registration_method \"$IMAGE_REGISTRATION_METHOD\""; fi # append optional argument
+  if [ -n "$FORCED_INTENSITY_NORMALIZATION_RANGE" ]; then CMD_STR="$CMD_STR --forced_intensity_normalization_range \"$FORCED_INTENSITY_NORMALIZATION_RANGE\""; fi # append optional argument
 
   CMD_STR="$CMD_STR -log \"$LOG\""
 
