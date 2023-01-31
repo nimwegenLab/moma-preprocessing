@@ -66,7 +66,7 @@ for (( I=0; I<N; I++ )); do
   CMD_STR="$CMD_STR -log \"$LOG\""
 
   if [[ "ierbert2" == "$(hostname)" ]]; then
-    printf "INFO: Running on laptop. Will not use sbatch.\n"
+    printf "INFO: Running on laptop. Will NOT use slurm/sbatch.\n"
     running_on_laptop=true
   fi
 
