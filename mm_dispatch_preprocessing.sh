@@ -64,6 +64,16 @@ for (( I=0; I<N; I++ )); do
 
   CMD_STR="$CMD_STR -log \"$LOG\""
 
+  if [[ "ierbert2" == "$(hostname)" ]]; then
+    printf "INFO: Running on laptop. Will not use sbatch.\n"
+    running_on_laptop=true
+  fi
+
+  anaconda_module_load_string="module load Anaconda3/5.0.1"
+  if [[ "$running_on_laptop" = true ]]; then
+    anaconda_module_load_string=""
+  fi
+
   # use single quote to prevent variable evaluation
   CMD_SCRIPT="#!/bin/bash \n\n\
 #SBATCH -t 1-00:00:00 \n\
@@ -75,12 +85,16 @@ for (( I=0; I<N; I++ )); do
 #SBATCH -o $S_OUT \n\
 #SBATCH -e $S_ERR \n\n\
 \
-module load Anaconda3/5.0.1
+$anaconda_module_load_string
 \
 source activate $MM_PYTHON_ENVIRONMENT_PATH\n\n\
 $CMD_STR \n"
-  CMD_SBATCH="sbatch $SCRIPT"
-#  CMD_SBATCH=$SCRIPT
+
+  if [[ "$running_on_laptop" = true ]]; then
+    CMD_SBATCH=$SCRIPT
+  else
+    CMD_SBATCH="sbatch $SCRIPT"
+  fi
 
   printf "$CMD_SCRIPT" > $SCRIPT
   chmod +x $SCRIPT
