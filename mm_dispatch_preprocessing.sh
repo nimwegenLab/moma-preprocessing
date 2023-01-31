@@ -61,8 +61,19 @@ for (( I=0; I<N; I++ )); do
   if [ -n "$NORMALIZATION_REGION_OFFSET" ]; then CMD_STR="$CMD_STR --normalization_region_offset $NORMALIZATION_REGION_OFFSET"; fi # append optional argument
   if [ -n "$FRAMES_TO_IGNORE" ]; then CMD_STR="$CMD_STR --frames_to_ignore \"$FRAMES_TO_IGNORE\""; fi # append optional argument
   if [ -n "$IMAGE_REGISTRATION_METHOD" ]; then CMD_STR="$CMD_STR --image_registration_method \"$IMAGE_REGISTRATION_METHOD\""; fi # append optional argument
+  if [ -n "$FORCED_INTENSITY_NORMALIZATION_RANGE" ]; then CMD_STR="$CMD_STR --forced_intensity_normalization_range \"$FORCED_INTENSITY_NORMALIZATION_RANGE\""; fi # append optional argument
 
   CMD_STR="$CMD_STR -log \"$LOG\""
+
+  if [[ "ierbert2" == "$(hostname)" ]]; then
+    printf "INFO: Running on laptop. Will NOT use slurm/sbatch.\n"
+    running_on_laptop=true
+  fi
+
+  anaconda_module_load_string="module load Anaconda3/5.0.1"
+  if [[ "$running_on_laptop" = true ]]; then
+    anaconda_module_load_string=""
+  fi
 
   # use single quote to prevent variable evaluation
   CMD_SCRIPT="#!/bin/bash \n\n\
@@ -75,12 +86,20 @@ for (( I=0; I<N; I++ )); do
 #SBATCH -o $S_OUT \n\
 #SBATCH -e $S_ERR \n\n\
 \
-module load Anaconda3/5.0.1
+$anaconda_module_load_string
 \
 source activate $MM_PYTHON_ENVIRONMENT_PATH\n\n\
-$CMD_STR \n"
-  CMD_SBATCH="sbatch $SCRIPT"
-#  CMD_SBATCH=$SCRIPT
+\
+$CMD_STR
+\
+conda deactivate
+\n"
+
+  if [[ "$running_on_laptop" = true ]]; then
+    CMD_SBATCH=$SCRIPT
+  else
+    CMD_SBATCH="sbatch $SCRIPT"
+  fi
 
   printf "$CMD_SCRIPT" > $SCRIPT
   chmod +x $SCRIPT

@@ -47,6 +47,8 @@ parser.add_argument("-fti", "--frames_to_ignore", type=str,
                     help="pass the frames which should be ignored as a comma-separated list of integers")
 parser.add_argument("-irm", "--image_registration_method", type=int,
                     help="pass the frames which should be ignored as a comma-separated list of integers")
+parser.add_argument("-finr", "--forced_intensity_normalization_range", type=str,
+                    help="pass the minimum and maximum normalization intensities as a comma-separated list of floats")
 
 
 # parse values
@@ -55,6 +57,11 @@ frames_to_ignore = []
 if args.frames_to_ignore:
     frames_to_ignore.extend([int(strInt) for strInt in args.frames_to_ignore.split(",")])
     frames_to_ignore = [val - 1 for val in frames_to_ignore]  # convert from 1-based index (used by ImageJ) to 0-based (used by Python)
+
+forced_intensity_normalization_range = None
+if args.forced_intensity_normalization_range:
+    [range_min, range_max] = args.forced_intensity_normalization_range.split(",")
+    forced_intensity_normalization_range = (float(range_min.strip()), float(range_max.strip()))
 
 # overwrite sys.stdout and sys.stderr for logging
 if args.logfile is not None:
@@ -94,6 +101,9 @@ print("frames_to_ignore:")
 print(frames_to_ignore)
 print("image_registration_method:")
 print(args.image_registration_method)
+print("forced_intensity_normalization_range:")
+print(forced_intensity_normalization_range)
+
 
 # parse position argument; IMPORTANT: this only works for a single position argument
 res = re.match('Pos[0]*(\d+)', args.positions)
@@ -115,4 +125,5 @@ runner.preproc_fun(args.input,
                    z_slice_index=args.z_slice_index,
                    normalization_region_offset=args.normalization_region_offset,
                    frames_to_ignore=frames_to_ignore,
-                   image_registration_method=args.image_registration_method)
+                   image_registration_method=args.image_registration_method,
+                   forced_intensity_normalization_range=forced_intensity_normalization_range)
