@@ -46,6 +46,7 @@ class MomaImageProcessor(object):
         self._intensity_profiles = [[], []]  # we assume that at max. we will have two regions: one to each side of the main channel
         self.image_save_fequency = 2
         self.normalization_region_offset = 100  # offset to both sides of the actual region range; this reduces the range where we will calculate the averaged profile by 2*offset
+        self.interpeak_distance = 25  # TODO-MM-20230208: This needs to become a parameter!
 
     def load_numpy_image_array(self, image):
         self.image = image
