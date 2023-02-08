@@ -112,7 +112,7 @@ class PreprocessingRunner(object):
                     image_registration_method=None,
                     normalization_region_offset=None,
                     forced_intensity_normalization_range=None,
-                    normalization_range_cutoffs=None,
+                    normalization_range_detection_cutoffs=None,
                     frames_to_ignore=[]):
 
         self.last_valid_frame = None
@@ -173,7 +173,7 @@ class PreprocessingRunner(object):
             first_phc_image = color_image_stack[..., 0]
 
             # Process first image to find ROIs, etc.
-            imageProcessor = MomaImageProcessor()
+            imageProcessor = MomaImageProcessor(normalization_range_detection_cutoffs=normalization_range_detection_cutoffs)
             if normalization_region_offset:
                 imageProcessor.normalization_region_offset = normalization_region_offset
 
