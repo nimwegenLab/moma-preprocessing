@@ -47,8 +47,10 @@ class MomaImageProcessor(object):
         self.image_save_frequency = 2
         self.normalization_region_offset = 100  # offset to both sides of the actual region range; this reduces the range where we will calculate the averaged profile by 2*offset
         self.interpeak_distance = 25  # TODO-MM-20230208: This needs to become a parameter!
-        if not normalization_range_detection_cutoffs:
-            self.normalization_range_detection_cutoffs = [-float('inf'), float('inf')]  # limits were not specified; thus setting min and max values to be unbounded
+        if normalization_range_detection_cutoffs:
+            self.normalization_range_detection_cutoffs = normalization_range_detection_cutoffs
+        else:
+            self.normalization_range_detection_cutoffs = [-float('inf'), float('inf')]  # limits were NOT specified; thus setting min and max values to be unbounded
 
     def load_numpy_image_array(self, image):
         self.image = image
