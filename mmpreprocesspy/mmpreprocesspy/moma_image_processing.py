@@ -44,7 +44,7 @@ class MomaImageProcessor(object):
         self.gl_regions = None
         self._gl_region_indicator_images = []
         self._intensity_profiles = [[], []]  # we assume that at max. we will have two regions: one to each side of the main channel
-        self.image_save_fequency = 2
+        self.image_save_frequency = 2
         self.normalization_region_offset = 100  # offset to both sides of the actual region range; this reduces the range where we will calculate the averaged profile by 2*offset
         self.interpeak_distance = 25  # TODO-MM-20230208: This needs to become a parameter!
         if not normalization_range_detection_cutoffs:
@@ -245,7 +245,7 @@ class MomaImageProcessor(object):
             self._gl_region_indicator_images.append(result)
             plt.close(plt.gcf())
 
-            if frame_nr % self.image_save_fequency == 0:
+            if frame_nr % self.image_save_frequency == 0:
                 image_to_save = np.array(self._gl_region_indicator_images)
                 tff.imwrite(os.path.join(output_path, f'region_indicator_images__pos_{position_nr}.tif'), image_to_save)
 
@@ -287,7 +287,7 @@ class MomaImageProcessor(object):
             self._intensity_profiles[region_ind].append(result)
             plt.close(plt.gcf())
 
-            if frame_nr % self.image_save_fequency == 0:
+            if frame_nr % self.image_save_frequency == 0:
                 image_to_save = np.array(self._intensity_profiles[region_ind])
                 path = os.path.join(output_path, f'intensity_profile__pos_{position_nr}__region_{region_ind}.tif')
                 tff.imwrite(path, image_to_save)
