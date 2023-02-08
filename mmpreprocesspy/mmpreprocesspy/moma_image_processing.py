@@ -159,7 +159,8 @@ class MomaImageProcessor(object):
         intensity_profiles = []
         for region in self.gl_regions:
             intensity_profile_region = image_registered[:,
-                                       region.start + self.normalization_region_offset:region.end - self.normalization_region_offset]
+                                                        region.start + self.normalization_region_offset:
+                                                        region.end - self.normalization_region_offset]
             intensity_profile_unprocessed = np.mean(intensity_profile_region, axis=1)
             intensity_profiles_unprocessed.append(intensity_profile_unprocessed)
             intensity_profile_processed = self.smooth(intensity_profile_unprocessed, box_pts=box_pts)
@@ -289,7 +290,7 @@ class MomaImageProcessor(object):
                 tff.imwrite(path, image_to_save)
 
     def get_pdms_and_empty_channel_intensities(self, intensity_profile):
-        mean_peak_inds = find_peaks(intensity_profile, distance=25)[0]
+        mean_peak_inds = find_peaks(intensity_profile, distance=self.interpeak_distance)[0]
         mean_peak_vals = intensity_profile[mean_peak_inds]
         return mean_peak_vals.min(), mean_peak_vals.max()
 
