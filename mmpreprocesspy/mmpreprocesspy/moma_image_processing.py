@@ -29,7 +29,7 @@ def is_debugging():
 class MomaImageProcessor(object):
     """ MomaImageProcessor encapsulates the processing of a Mothermachine image. """
 
-    def __init__(self):
+    def __init__(self, normalization_range_cutoffs=None):
         self.image = None
         self.rotated_image = None
         self.main_channel_angle = None
@@ -47,6 +47,8 @@ class MomaImageProcessor(object):
         self.image_save_fequency = 2
         self.normalization_region_offset = 100  # offset to both sides of the actual region range; this reduces the range where we will calculate the averaged profile by 2*offset
         self.interpeak_distance = 25  # TODO-MM-20230208: This needs to become a parameter!
+        if not normalization_range_cutoffs:
+            self.normalization_range_cutoffs = [-float('inf'), float('inf')]  # limits were not specified; thus setting min and max values to be unbounded
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -293,7 +295,28 @@ class MomaImageProcessor(object):
     def get_pdms_and_empty_channel_intensities(self, intensity_profile):
         mean_peak_inds = find_peaks(intensity_profile, distance=self.interpeak_distance)[0]
         mean_peak_vals = intensity_profile[mean_peak_inds]
+
+        [mean_peak_inds, mean_peak_vals] = self.remove_outlier_peaks(intensity_profile, mean_peak_inds, mean_peak_vals)
+
         return mean_peak_vals.min(), mean_peak_vals.max()
+
+    def remove_outlier_peaks(self, intensity_profile, mean_peak_inds, mean_peak_vals):
+        self.normalization_range_cutoffs = [1000, 7000]
+        mean_peak_vals_tmp = mean_peak_vals
+        mean_peak_inds_tmp = mean_peak_inds
+
+        mean_peak_inds_tmp = [val[0] for val in zip(mean_peak_inds_tmp, mean_peak_vals_tmp) if val[1] > self.normalization_range_cutoffs[0]]
+        mean_peak_vals_tmp = [val for val in mean_peak_vals_tmp if val > self.normalization_range_cutoffs[0]]
+
+        mean_peak_inds_tmp = [val[0] for val in zip(mean_peak_inds_tmp, mean_peak_vals_tmp) if val[1] < self.normalization_range_cutoffs[1]]
+        mean_peak_vals_tmp = [val for val in mean_peak_vals_tmp if val < self.normalization_range_cutoffs[1]]
+
+        import matplotlib.pyplot as plt
+        plt.plot(intensity_profile)
+        plt.scatter(mean_peak_inds_tmp, mean_peak_vals_tmp)
+        plt.show()
+
+        return mean_peak_inds, mean_peak_vals_tmp
 
     def smooth(self, y, box_pts):
         box = np.ones(box_pts)/box_pts
