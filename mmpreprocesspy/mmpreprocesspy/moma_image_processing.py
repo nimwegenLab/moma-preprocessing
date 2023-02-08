@@ -303,8 +303,8 @@ class MomaImageProcessor(object):
         return mean_peak_vals.min(), mean_peak_vals.max()
 
     def remove_outlier_peaks(self, mean_peak_vals):
-        mean_peak_vals = [val for val in mean_peak_vals if val > self.normalization_range_detection_cutoffs[0]]
-        mean_peak_vals = [val for val in mean_peak_vals if val < self.normalization_range_detection_cutoffs[1]]
+        mean_peak_vals = mean_peak_vals[mean_peak_vals > self.normalization_range_detection_cutoffs[0]]
+        mean_peak_vals = mean_peak_vals[mean_peak_vals < self.normalization_range_detection_cutoffs[1]]
         return mean_peak_vals
 
     def smooth(self, y, box_pts):
