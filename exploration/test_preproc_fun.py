@@ -41,7 +41,8 @@ class TestPreproc_fun(TestCase):
                            normalization_config_path=normalization_config_path,
                            image_registration_method=image_registration_method,
                            normalization_region_offset=normalization_region_offset,
-                           frames_to_ignore=frames_to_ignore)
+                           frames_to_ignore=frames_to_ignore,
+                           normalization_range_cutoffs=[0, 10000])
 
         self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
                                           title='test__dataset_21_no_flatfield')

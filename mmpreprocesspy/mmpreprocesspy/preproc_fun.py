@@ -112,6 +112,7 @@ class PreprocessingRunner(object):
                     image_registration_method=None,
                     normalization_region_offset=None,
                     forced_intensity_normalization_range=None,
+                    normalization_range_cutoffs=None,
                     frames_to_ignore=[]):
 
         self.last_valid_frame = None
