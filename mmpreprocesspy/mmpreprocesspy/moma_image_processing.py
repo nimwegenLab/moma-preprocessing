@@ -29,7 +29,7 @@ def is_debugging():
 class MomaImageProcessor(object):
     """ MomaImageProcessor encapsulates the processing of a Mothermachine image. """
 
-    def __init__(self, normalization_range_detection_cutoffs=None):
+    def __init__(self, intensity_normalization_range_cutoffs=None):
         self.image = None
         self.rotated_image = None
         self.main_channel_angle = None
@@ -47,10 +47,10 @@ class MomaImageProcessor(object):
         self.image_save_frequency = 2
         self.normalization_region_offset = 100  # offset to both sides of the actual region range; this reduces the range where we will calculate the averaged profile by 2*offset
         self.interpeak_distance = 25  # TODO-MM-20230208: This needs to become a parameter!
-        if normalization_range_detection_cutoffs:
-            self.normalization_range_detection_cutoffs = normalization_range_detection_cutoffs
+        if intensity_normalization_range_cutoffs:
+            self.intensity_normalization_range_cutoffs = intensity_normalization_range_cutoffs
         else:
-            self.normalization_range_detection_cutoffs = [-float('inf'), float('inf')]  # limits were NOT specified; thus setting min and max values to be unbounded
+            self.intensity_normalization_range_cutoffs = [-float('inf'), float('inf')]  # limits were NOT specified; thus setting min and max values to be unbounded
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -310,11 +310,11 @@ class MomaImageProcessor(object):
 
     def remove_outlier_peaks(self, mean_peak_inds, mean_peak_vals):
         # remove outliers towards -infty
-        mean_peak_inds = mean_peak_inds[mean_peak_vals > self.normalization_range_detection_cutoffs[0]]
-        mean_peak_vals = mean_peak_vals[mean_peak_vals > self.normalization_range_detection_cutoffs[0]]
+        mean_peak_inds = mean_peak_inds[mean_peak_vals > self.intensity_normalization_range_cutoffs[0]]
+        mean_peak_vals = mean_peak_vals[mean_peak_vals > self.intensity_normalization_range_cutoffs[0]]
         # remove outliers towards infty
-        mean_peak_inds = mean_peak_inds[mean_peak_vals < self.normalization_range_detection_cutoffs[1]]
-        mean_peak_vals = mean_peak_vals[mean_peak_vals < self.normalization_range_detection_cutoffs[1]]
+        mean_peak_inds = mean_peak_inds[mean_peak_vals < self.intensity_normalization_range_cutoffs[1]]
+        mean_peak_vals = mean_peak_vals[mean_peak_vals < self.intensity_normalization_range_cutoffs[1]]
         return mean_peak_inds, mean_peak_vals
 
     def smooth(self, y, box_pts):

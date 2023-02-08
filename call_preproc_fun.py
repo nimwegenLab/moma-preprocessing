@@ -136,4 +136,4 @@ runner.preproc_fun(args.input,
                    frames_to_ignore=frames_to_ignore,
                    image_registration_method=args.image_registration_method,
                    forced_intensity_normalization_range=forced_intensity_normalization_range,
-                   normalization_range_detection_cutoffs=intensity_normalization_range_cutoffs)
+                   intensity_normalization_range_cutoffs=intensity_normalization_range_cutoffs)
