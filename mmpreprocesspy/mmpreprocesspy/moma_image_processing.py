@@ -263,8 +263,10 @@ class MomaImageProcessor(object):
 
             intensity_profile_unprocessed = intensity_profiles_unprocessed[region_ind]
             normalization_range = normalization_ranges[region_ind]
-            mean_peak_inds = find_peaks(intensity_profile, distance=25)[0]
+            mean_peak_inds = find_peaks(intensity_profile, distance=self.interpeak_distance)[0]
             mean_peak_vals = intensity_profile[mean_peak_inds]
+
+            mean_peak_inds, mean_peak_vals = self.remove_outlier_peaks(mean_peak_inds, mean_peak_vals)
 
             plt.plot(intensity_profile_unprocessed, 'gray', label='profile')
             plt.plot(intensity_profile, label='smoothed')
@@ -298,7 +300,7 @@ class MomaImageProcessor(object):
         mean_peak_inds = find_peaks(intensity_profile, distance=self.interpeak_distance)[0]
         mean_peak_vals = intensity_profile[mean_peak_inds]
 
-        mean_peak_vals = self.remove_outlier_peaks(mean_peak_vals)
+        mean_peak_inds, mean_peak_vals = self.remove_outlier_peaks(mean_peak_inds, mean_peak_vals)
 
         if mean_peak_vals.shape[0] < 2:
             raise RuntimeError("mean_peak_vals has less than two values, which is required to define the normalization\
@@ -306,10 +308,14 @@ class MomaImageProcessor(object):
 
         return mean_peak_vals.min(), mean_peak_vals.max()
 
-    def remove_outlier_peaks(self, mean_peak_vals):
+    def remove_outlier_peaks(self, mean_peak_inds, mean_peak_vals):
+        # remove outliers towards -infty
+        mean_peak_inds = mean_peak_inds[mean_peak_vals > self.normalization_range_detection_cutoffs[0]]
         mean_peak_vals = mean_peak_vals[mean_peak_vals > self.normalization_range_detection_cutoffs[0]]
+        # remove outliers towards infty
+        mean_peak_inds = mean_peak_inds[mean_peak_vals < self.normalization_range_detection_cutoffs[1]]
         mean_peak_vals = mean_peak_vals[mean_peak_vals < self.normalization_range_detection_cutoffs[1]]
-        return mean_peak_vals
+        return mean_peak_inds, mean_peak_vals
 
     def smooth(self, y, box_pts):
         box = np.ones(box_pts)/box_pts
