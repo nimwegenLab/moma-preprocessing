@@ -296,27 +296,14 @@ class MomaImageProcessor(object):
         mean_peak_inds = find_peaks(intensity_profile, distance=self.interpeak_distance)[0]
         mean_peak_vals = intensity_profile[mean_peak_inds]
 
-        [mean_peak_inds, mean_peak_vals] = self.remove_outlier_peaks(intensity_profile, mean_peak_inds, mean_peak_vals)
+        mean_peak_vals = self.remove_outlier_peaks(intensity_profile, mean_peak_inds, mean_peak_vals)
 
         return mean_peak_vals.min(), mean_peak_vals.max()
 
-    def remove_outlier_peaks(self, intensity_profile, mean_peak_inds, mean_peak_vals):
-        self.normalization_range_cutoffs = [1000, 7000]
-        mean_peak_vals_tmp = mean_peak_vals
-        mean_peak_inds_tmp = mean_peak_inds
-
-        mean_peak_inds_tmp = [val[0] for val in zip(mean_peak_inds_tmp, mean_peak_vals_tmp) if val[1] > self.normalization_range_cutoffs[0]]
-        mean_peak_vals_tmp = [val for val in mean_peak_vals_tmp if val > self.normalization_range_cutoffs[0]]
-
-        mean_peak_inds_tmp = [val[0] for val in zip(mean_peak_inds_tmp, mean_peak_vals_tmp) if val[1] < self.normalization_range_cutoffs[1]]
-        mean_peak_vals_tmp = [val for val in mean_peak_vals_tmp if val < self.normalization_range_cutoffs[1]]
-
-        import matplotlib.pyplot as plt
-        plt.plot(intensity_profile)
-        plt.scatter(mean_peak_inds_tmp, mean_peak_vals_tmp)
-        plt.show()
-
-        return mean_peak_inds, mean_peak_vals_tmp
+    def remove_outlier_peaks(self, mean_peak_vals):
+        mean_peak_vals = [val for val in mean_peak_vals if val > self.normalization_range_cutoffs[0]]
+        mean_peak_vals = [val for val in mean_peak_vals if val < self.normalization_range_cutoffs[1]]
+        return mean_peak_vals
 
     def smooth(self, y, box_pts):
         box = np.ones(box_pts)/box_pts
