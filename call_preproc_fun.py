@@ -49,6 +49,8 @@ parser.add_argument("-irm", "--image_registration_method", type=int,
                     help="pass the frames which should be ignored as a comma-separated list of integers")
 parser.add_argument("-finr", "--forced_intensity_normalization_range", type=str,
                     help="pass the minimum and maximum normalization intensities as a comma-separated list of floats")
+parser.add_argument("-inrc", "--intensity_normalization_range_cutoffs", type=str,
+                    help="cutoff values for detecting the minimum and maximum normalization intensities as a comma-separated list of floats, i.e. [min_value, max_value]; intensity values outside this range will be ignored")
 
 
 # parse values
@@ -62,6 +64,11 @@ forced_intensity_normalization_range = None
 if args.forced_intensity_normalization_range:
     [range_min, range_max] = args.forced_intensity_normalization_range.split(",")
     forced_intensity_normalization_range = (float(range_min.strip()), float(range_max.strip()))
+
+intensity_normalization_range_cutoffs = None
+if args.intensity_normalization_range_cutoffs:
+    [range_min, range_max] = args.intensity_normalization_range_cutoffs.split(",")
+    intensity_normalization_range_cutoffs = (float(range_min.strip()), float(range_max.strip()))
 
 # overwrite sys.stdout and sys.stderr for logging
 if args.logfile is not None:
@@ -126,4 +133,5 @@ runner.preproc_fun(args.input,
                    normalization_region_offset=args.normalization_region_offset,
                    frames_to_ignore=frames_to_ignore,
                    image_registration_method=args.image_registration_method,
-                   forced_intensity_normalization_range=forced_intensity_normalization_range)
+                   forced_intensity_normalization_range=forced_intensity_normalization_range,
+                   normalization_range_detection_cutoffs=intensity_normalization_range_cutoffs)

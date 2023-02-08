@@ -400,7 +400,6 @@ def finalize_memmap_images(growthlane_rois, gl_image_dict):
         gl_image_dict[gl_roi.id].flush()
         del gl_image_dict[gl_roi.id]
 
-
 def initialize_gl_roi_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, image_path):
     nr_of_z_planes = 1
     image_height = gl_roi.length
