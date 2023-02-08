@@ -110,6 +110,8 @@ print("image_registration_method:")
 print(args.image_registration_method)
 print("forced_intensity_normalization_range:")
 print(forced_intensity_normalization_range)
+print("intensity_normalization_range_cutoffs:")
+print(intensity_normalization_range_cutoffs)
 
 
 # parse position argument; IMPORTANT: this only works for a single position argument
