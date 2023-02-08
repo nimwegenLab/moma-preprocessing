@@ -112,6 +112,7 @@ class PreprocessingRunner(object):
                     image_registration_method=None,
                     normalization_region_offset=None,
                     forced_intensity_normalization_range=None,
+                    intensity_normalization_range_cutoffs=None,
                     frames_to_ignore=[]):
 
         self.last_valid_frame = None
@@ -172,7 +173,8 @@ class PreprocessingRunner(object):
             first_phc_image = color_image_stack[..., 0]
 
             # Process first image to find ROIs, etc.
-            imageProcessor = MomaImageProcessor()
+            imageProcessor = MomaImageProcessor(intensity_normalization_range_cutoffs=
+                                                intensity_normalization_range_cutoffs)
             if normalization_region_offset:
                 imageProcessor.normalization_region_offset = normalization_region_offset
 
@@ -398,7 +400,6 @@ def finalize_memmap_images(growthlane_rois, gl_image_dict):
     for gl_roi in growthlane_rois:
         gl_image_dict[gl_roi.id].flush()
         del gl_image_dict[gl_roi.id]
-
 
 def initialize_gl_roi_image_stack(gl_roi, nr_of_timesteps, nr_of_color_channels, image_path):
     nr_of_z_planes = 1

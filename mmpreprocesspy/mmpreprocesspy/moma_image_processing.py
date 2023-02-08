@@ -29,7 +29,7 @@ def is_debugging():
 class MomaImageProcessor(object):
     """ MomaImageProcessor encapsulates the processing of a Mothermachine image. """
 
-    def __init__(self):
+    def __init__(self, intensity_normalization_range_cutoffs=None):
         self.image = None
         self.rotated_image = None
         self.main_channel_angle = None
@@ -44,8 +44,13 @@ class MomaImageProcessor(object):
         self.gl_regions = None
         self._gl_region_indicator_images = []
         self._intensity_profiles = [[], []]  # we assume that at max. we will have two regions: one to each side of the main channel
-        self.image_save_fequency = 2
+        self.image_save_frequency = 2
         self.normalization_region_offset = 100  # offset to both sides of the actual region range; this reduces the range where we will calculate the averaged profile by 2*offset
+        self.interpeak_distance = 25  # TODO-MM-20230208: This needs to become a parameter!
+        if intensity_normalization_range_cutoffs:
+            self.intensity_normalization_range_cutoffs = intensity_normalization_range_cutoffs
+        else:
+            self.intensity_normalization_range_cutoffs = [-float('inf'), float('inf')]  # limits were NOT specified; thus setting min and max values to be unbounded
 
     def load_numpy_image_array(self, image):
         self.image = image
@@ -159,7 +164,8 @@ class MomaImageProcessor(object):
         intensity_profiles = []
         for region in self.gl_regions:
             intensity_profile_region = image_registered[:,
-                                       region.start + self.normalization_region_offset:region.end - self.normalization_region_offset]
+                                                        region.start + self.normalization_region_offset:
+                                                        region.end - self.normalization_region_offset]
             intensity_profile_unprocessed = np.mean(intensity_profile_region, axis=1)
             intensity_profiles_unprocessed.append(intensity_profile_unprocessed)
             intensity_profile_processed = self.smooth(intensity_profile_unprocessed, box_pts=box_pts)
@@ -241,7 +247,7 @@ class MomaImageProcessor(object):
             self._gl_region_indicator_images.append(result)
             plt.close(plt.gcf())
 
-            if frame_nr % self.image_save_fequency == 0:
+            if frame_nr % self.image_save_frequency == 0:
                 image_to_save = np.array(self._gl_region_indicator_images)
                 tff.imwrite(os.path.join(output_path, f'region_indicator_images__pos_{position_nr}.tif'), image_to_save)
 
@@ -257,8 +263,10 @@ class MomaImageProcessor(object):
 
             intensity_profile_unprocessed = intensity_profiles_unprocessed[region_ind]
             normalization_range = normalization_ranges[region_ind]
-            mean_peak_inds = find_peaks(intensity_profile, distance=25)[0]
+            mean_peak_inds = find_peaks(intensity_profile, distance=self.interpeak_distance)[0]
             mean_peak_vals = intensity_profile[mean_peak_inds]
+
+            mean_peak_inds, mean_peak_vals = self.remove_outlier_peaks(mean_peak_inds, mean_peak_vals)
 
             plt.plot(intensity_profile_unprocessed, 'gray', label='profile')
             plt.plot(intensity_profile, label='smoothed')
@@ -283,15 +291,31 @@ class MomaImageProcessor(object):
             self._intensity_profiles[region_ind].append(result)
             plt.close(plt.gcf())
 
-            if frame_nr % self.image_save_fequency == 0:
+            if frame_nr % self.image_save_frequency == 0:
                 image_to_save = np.array(self._intensity_profiles[region_ind])
                 path = os.path.join(output_path, f'intensity_profile__pos_{position_nr}__region_{region_ind}.tif')
                 tff.imwrite(path, image_to_save)
 
     def get_pdms_and_empty_channel_intensities(self, intensity_profile):
-        mean_peak_inds = find_peaks(intensity_profile, distance=25)[0]
+        mean_peak_inds = find_peaks(intensity_profile, distance=self.interpeak_distance)[0]
         mean_peak_vals = intensity_profile[mean_peak_inds]
+
+        mean_peak_inds, mean_peak_vals = self.remove_outlier_peaks(mean_peak_inds, mean_peak_vals)
+
+        if mean_peak_vals.shape[0] < 2:
+            raise RuntimeError("mean_peak_vals has less than two values, which is required to define the normalization\
+                                range as [mean_peak_vals.min(), mean_peak_vals.max()].")
+
         return mean_peak_vals.min(), mean_peak_vals.max()
+
+    def remove_outlier_peaks(self, mean_peak_inds, mean_peak_vals):
+        # remove outliers towards -infty
+        mean_peak_inds = mean_peak_inds[mean_peak_vals > self.intensity_normalization_range_cutoffs[0]]
+        mean_peak_vals = mean_peak_vals[mean_peak_vals > self.intensity_normalization_range_cutoffs[0]]
+        # remove outliers towards infty
+        mean_peak_inds = mean_peak_inds[mean_peak_vals < self.intensity_normalization_range_cutoffs[1]]
+        mean_peak_vals = mean_peak_vals[mean_peak_vals < self.intensity_normalization_range_cutoffs[1]]
+        return mean_peak_inds, mean_peak_vals
 
     def smooth(self, y, box_pts):
         box = np.ones(box_pts)/box_pts

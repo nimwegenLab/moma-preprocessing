@@ -10,7 +10,44 @@ class TestPreproc_fun(TestCase):
         dotenv.load_dotenv('.env_for_testing')
         self.test_data_base_path = os.getenv('PREPROCDATADIR')
 
-    def test__33__lis__20220320__repeat__manual_normalization_range(self):
+    def test__36__bor_20230130__normalization_range_cutoffs(self):
+        data_directory = self.test_data_base_path + '/36__bor_20230130/MMSTACK/'
+        directory_to_save = self.test_data_base_path + '/36__bor_20230130/result_with_normalization_ranged_cutoffs/'
+        gl_detection_template_path = self.test_data_base_path + '/36__bor_20230130/GL_DETECTION_TEMPLATE/template_config.json'
+        image_registration_method = 1
+        positions = [0]
+        # minframe = 0
+        maxframe = 1
+        dark_noise = 90
+        gaussian_sigma = 5
+        # main_channel_angle = -90.7
+        # main_channel_angle = 180
+        main_channel_angle = 90.1
+        normalization_config_path = 'True'
+        normalization_region_offset = 120
+        frames_to_ignore = []
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        runner = PreprocessingRunner()
+        runner.preproc_fun(data_directory, directory_to_save, positions,
+                           # minframe=minframe,
+                           maxframe=maxframe,
+                           dark_noise=dark_noise,
+                           gaussian_sigma=gaussian_sigma,
+                           main_channel_angle=main_channel_angle,
+                           gl_detection_template_path=gl_detection_template_path,
+                           normalization_config_path=normalization_config_path,
+                           image_registration_method=image_registration_method,
+                           normalization_region_offset=normalization_region_offset,
+                           frames_to_ignore=frames_to_ignore,
+                           intensity_normalization_range_cutoffs=[0, 10000])
+
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
+                                          title='test__dataset_21_no_flatfield')
+
+    def test__35__lis__20220320__repeat__manual_normalization_range(self):
         data_directory = self.test_data_base_path + '/35__lis__20220320__repeat/MMSTACK/20220320_VNG1040_AB2h_1_Frame0-478_resaved/'
         directory_to_save = self.test_data_base_path + '/35__lis__20220320__repeat/result_with_manual_normalization_range/'
         gl_detection_template_path = self.test_data_base_path + '/35__lis__20220320__repeat/TEMPLATE_MICHAEL_v002/template_config.json'

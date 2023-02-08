@@ -62,6 +62,7 @@ for (( I=0; I<N; I++ )); do
   if [ -n "$FRAMES_TO_IGNORE" ]; then CMD_STR="$CMD_STR --frames_to_ignore \"$FRAMES_TO_IGNORE\""; fi # append optional argument
   if [ -n "$IMAGE_REGISTRATION_METHOD" ]; then CMD_STR="$CMD_STR --image_registration_method \"$IMAGE_REGISTRATION_METHOD\""; fi # append optional argument
   if [ -n "$FORCED_INTENSITY_NORMALIZATION_RANGE" ]; then CMD_STR="$CMD_STR --forced_intensity_normalization_range \"$FORCED_INTENSITY_NORMALIZATION_RANGE\""; fi # append optional argument
+  if [ -n "$INTENSITY_NORMALIZATION_RANGE_CUTOFFS" ]; then CMD_STR="$CMD_STR --intensity_normalization_range_cutoffs \"$INTENSITY_NORMALIZATION_RANGE_CUTOFFS\""; fi # append optional argument
 
   CMD_STR="$CMD_STR -log \"$LOG\""
 
