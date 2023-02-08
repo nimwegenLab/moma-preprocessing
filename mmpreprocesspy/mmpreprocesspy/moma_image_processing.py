@@ -300,7 +300,7 @@ class MomaImageProcessor(object):
 
         mean_peak_vals = self.remove_outlier_peaks(mean_peak_vals)
 
-        if mean_peak_vals.shape < 2:
+        if mean_peak_vals.shape[0] < 2:
             raise RuntimeError("mean_peak_vals has less than two values, which is required to define the normalization\
                                 range as [mean_peak_vals.min(), mean_peak_vals.max()].")
 
