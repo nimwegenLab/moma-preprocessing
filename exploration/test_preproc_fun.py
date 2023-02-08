@@ -17,7 +17,7 @@ class TestPreproc_fun(TestCase):
         image_registration_method = 1
         positions = [0]
         # minframe = 0
-        maxframe = 5
+        maxframe = 1
         dark_noise = 90
         gaussian_sigma = 5
         # main_channel_angle = -90.7

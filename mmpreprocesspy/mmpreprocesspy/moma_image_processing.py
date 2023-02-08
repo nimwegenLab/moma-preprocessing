@@ -296,7 +296,7 @@ class MomaImageProcessor(object):
         mean_peak_inds = find_peaks(intensity_profile, distance=self.interpeak_distance)[0]
         mean_peak_vals = intensity_profile[mean_peak_inds]
 
-        mean_peak_vals = self.remove_outlier_peaks(intensity_profile, mean_peak_inds, mean_peak_vals)
+        mean_peak_vals = self.remove_outlier_peaks(mean_peak_vals)
 
         return mean_peak_vals.min(), mean_peak_vals.max()
 
