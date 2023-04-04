@@ -4,7 +4,7 @@ export MMPRE_HOME="/home/micha/Documents/01_work/git/mmpreprocesspy" # this will
 export MM_PYTHON_ENVIRONMENT_PATH=mmpreprocesspy
 
 # Create output folder
-DATASET_DIR="/media/micha/T7/data_michael_mell/preprocessing_test_data/MM_Testing/36__bor_20230130"
+DATASET_DIR="/media/micha/T7/data_michael_mell/preprocessing_test_data/MM_Testing/38__bor_20230401"
 OUTPUT_DIR="$DATASET_DIR/test_bash_run_output"
 mkdir -p $OUTPUT_DIR
 LOGFILE="$OUTPUT_DIR/output.log"
@@ -12,10 +12,10 @@ LOGFILE="$OUTPUT_DIR/output.log"
 printf "DATASET_DIR: $DATASET_DIR\n"
 printf "OUTPUT_DIR: $OUTPUT_DIR\n"
 
-RAW_PATH="$DATASET_DIR/MMSTACK/20230130_test_experiment_1_MMStack.ome.tif"
+RAW_PATH="$DATASET_DIR/MMSTACK/20230401_starvation_naturalisolates_med3/20230401_nat_iso_carbon_med3_1_MMStack.ome.tif"
+ FLATFIELD_PATH="$DATASET_DIR/MMSTACK/20230401_flatfield_1/20230401_flatfield_1_MMStack.ome.tif"
 PREPROC_DIR_TPL="$OUTPUT_DIR/mmpreproc_%s/"
-GL_DETECTION_TEMPLATE_PATH="$DATASET_DIR/GL_DETECTION_TEMPLATE/template_config.json"
-# FLATFIELD_PATH="/scicore/home/nimwegen/alabal0000/MM_Data/Lis/20210813/20210813_gfpflatfield/20210813_gfpflatfield_2_MMStack.ome.tif"
+GL_DETECTION_TEMPLATE_PATH="$DATASET_DIR/GL_DETECTION_TEMPLATE/template_20230401.json"
 POS_NAMES=(Pos0) # These are positions names
 #FRAMES_TO_IGNORE=(2,4)
 ROTATION=90.3
