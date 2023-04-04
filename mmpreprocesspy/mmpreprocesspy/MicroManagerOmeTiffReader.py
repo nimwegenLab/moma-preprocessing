@@ -35,6 +35,9 @@ class MicroManagerOmeTiffReader(object):
             if 'Label' in metadata['StagePositions'][0].keys():
                 self._position_names = [c['Label'] for c in
                                         metadata['StagePositions']]  # this is for TIFF format from MicroManager 2
+            elif 'label' in metadata['StagePositions'][0].keys():
+                self._position_names = [c['label'] for c in
+                                        metadata['StagePositions']]  # this is for TIFF format from MicroManager 2
             else:
                 raise LookupError(
                     "TIFF metadata['StagePositions'] contains no key 'Label' or 'label'")
@@ -186,6 +189,7 @@ class MicroManagerOmeTiffReader(object):
 
         :return: number of frames
         """
-
-        position_zarr = self.get_position_zarr(position_index = 0)
+        lut = self.generate_position_index_lut()
+        name_of_pos_1: str = list(lut.keys())[0]
+        position_zarr = self.get_position_zarr(position_name=name_of_pos_1)
         return position_zarr.shape[0]  # since all our our positions have the same number of frames, just return the number of frames for the first position.
