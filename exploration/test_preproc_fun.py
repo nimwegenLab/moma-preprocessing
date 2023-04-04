@@ -10,6 +10,45 @@ class TestPreproc_fun(TestCase):
         dotenv.load_dotenv('.env_for_testing')
         self.test_data_base_path = os.getenv('PREPROCDATADIR')
 
+    def test__38__bor_20230401_13_1(self):
+        data_directory = os.path.join(self.test_data_base_path, '38__bor_20230401_13/MMSTACK/20230401_starvation_naturalisolates_med3/')
+        flatfield_directory = os.path.join(self.test_data_base_path, '38__bor_20230401_13/MMSTACK/20230401_flatfield_1/')
+        gl_detection_template_path = os.path.join(self.test_data_base_path, '38__bor_20230401_13/GL_DETECTION_TEMPLATE/template_20230401.json')
+        directory_to_save = os.path.join(self.test_data_base_path, '38__bor_20230401_13/output__test__38__bor_20230401_13_1/')
+        image_registration_method = 1
+        positions = [0]
+        # minframe = 0
+        maxframe = 1
+        dark_noise = 90
+        gaussian_sigma = 5
+        # main_channel_angle = -90.7
+        # main_channel_angle = 180
+        main_channel_angle = 90.1
+        normalization_config_path = 'True'
+        normalization_region_offset = 120
+        frames_to_ignore = []
+
+        if os.path.isdir(directory_to_save):
+            shutil.rmtree(directory_to_save)
+
+        runner = PreprocessingRunner()
+        runner.preproc_fun(data_directory, directory_to_save, positions,
+                           flatfield_directory = flatfield_directory,
+                           # minframe=minframe,
+                           maxframe=maxframe,
+                           dark_noise=dark_noise,
+                           gaussian_sigma=gaussian_sigma,
+                           main_channel_angle=main_channel_angle,
+                           gl_detection_template_path=gl_detection_template_path,
+                           normalization_config_path=normalization_config_path,
+                           image_registration_method=image_registration_method,
+                           normalization_region_offset=normalization_region_offset,
+                           frames_to_ignore=frames_to_ignore,
+                           intensity_normalization_range_cutoffs=[0, 10000])
+
+        self.read_and_show_gl_index_image(os.path.join(directory_to_save, f'Pos{positions[0]}_GL_index_initial.tif'),
+                                          title='test__dataset_21_no_flatfield')
+
     def test__36__bor_20230130__normalization_range_cutoffs(self):
         data_directory = self.test_data_base_path + '/36__bor_20230130/MMSTACK/'
         directory_to_save = self.test_data_base_path + '/36__bor_20230130/result_with_normalization_ranged_cutoffs/'
