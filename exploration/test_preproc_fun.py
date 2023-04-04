@@ -16,7 +16,7 @@ class TestPreproc_fun(TestCase):
         gl_detection_template_path = os.path.join(self.test_data_base_path, '38__bor_20230401/GL_DETECTION_TEMPLATE/template_20230401.json')
         directory_to_save = os.path.join(self.test_data_base_path, '38__bor_20230401/output__test__38__bor_20230401_1/')
         image_registration_method = 1
-        positions = [0]
+        positions = ["1-Pos000"]
         # minframe = 0
         maxframe = 1
         dark_noise = 90

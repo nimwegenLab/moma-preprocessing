@@ -42,31 +42,23 @@ class MicroManagerOmeTiffReader(object):
             raise LookupError(
                 "TIFF metadata contains no entry for either 'InitialPositionList' or 'StagePositions'")
         self.number_of_positions = len(self._position_names)
-        self._position_index_lut = self.generate_position_index_lut()
 
     def __del__(self):
         del self.tiff
 
-    def generate_position_index_lut(self):
+    def get_position_series_lut(self) -> dict():
+        return dict((name, pos_series) for (name, pos_series) in zip(self._position_names, self._position_series))
+
+    def generate_position_index_lut(self) -> dict():
         """
-        Returns a look-up table (LUT) that maps the position-number as stored inside the
+        Returns a look-up table (LUT) that maps the position name as stored inside the
         MicroManager OME-TIFF to the corresponding index of the image stack in self._position_series
         and self._position_zarr.
 
         :return: LUT
         """
 
-        try:
-            self._position_numbers = []
-            for name in self._position_names:
-                self._position_numbers.append(int(re.match('Pos[0]*(\d+)', name)[1]))
-        except TypeError:  # TypeError is raised if the regex does not match, which happens for flat-fields.
-            self._position_numbers = list(range(len(self._position_names))) # In that case generate a one-to-one mapping
-
-        position_index_lut = dict()
-        for index_in_zarr_array, position_number in enumerate(self._position_numbers):
-            position_index_lut[position_number] = index_in_zarr_array
-        return position_index_lut
+        return dict((name, pos_zarr) for (name, pos_zarr) in zip(self._position_names, self._position_zarr))
 
     def get_first_tiff_in_path(self, dir_path):
         tiffs = self.get_all_tiffs(dir_path)
@@ -79,7 +71,7 @@ class MicroManagerOmeTiffReader(object):
                        re.search('.*(MMStack).*ome.tif', f)]
         return image_files
 
-    def get_image_stack(self, position_index, frame_index, z_slice):
+    def get_image_stack(self, position_name: str, frame_index, z_slice):
         """
         Get image stack containing the different channels for the specified position and frame.
         For frame indexes >0, we check if the image returned by `_get_image_stack_with_adapted_dimensions`
@@ -88,15 +80,15 @@ class MicroManagerOmeTiffReader(object):
         in the corresponding channel. This is because the tifffile package (that we use as backend)
         returns the closest existing previous frame for frames that were not recorded.
 
-        :param position_index:
+        :param position_name: name of the position as set in MicroManager
         :param frame_index:
         :return:
         """
         if frame_index == 0:
-            return self._get_image_stack_with_adapted_dimensions(position_index, frame_index, z_slice=z_slice)
+            return self._get_image_stack_with_adapted_dimensions(position_name, frame_index, z_slice=z_slice)
         elif frame_index > 0:
-            image_stack_current = self._get_image_stack_with_adapted_dimensions(position_index, frame_index, z_slice=z_slice)
-            image_stack_previous = self._get_image_stack_with_adapted_dimensions(position_index, frame_index - 1, z_slice=z_slice)
+            image_stack_current = self._get_image_stack_with_adapted_dimensions(position_name, frame_index, z_slice=z_slice)
+            image_stack_previous = self._get_image_stack_with_adapted_dimensions(position_name, frame_index - 1, z_slice=z_slice)
 
             for channel_index in range(image_stack_current.shape[2]):
                 if np.all(image_stack_current[:,:,channel_index] == image_stack_previous[:,:,channel_index]):
@@ -105,25 +97,30 @@ class MicroManagerOmeTiffReader(object):
         else:
             raise ValueError('frame_index cannot be negative')
 
-    def get_position_series(self, position_index):
-        index = self._position_index_lut[position_index]
-        return self._position_series[index]
+    def get_position_series(self, position_name):
+        position_series_lut = self.get_position_series_lut()
+        return position_series_lut[position_name]
+        # index = self._position_index_lut[position_name]
+        # return self._position_series[index]
 
-    def get_position_zarr(self, position_index):
-        index = self._position_index_lut[position_index]
-        return self._position_zarr[index]
+    def get_position_zarr(self, position_name: str):
+        zarr_lut = self.generate_position_index_lut()
+        return zarr_lut[position_name]
+        # zarr_lut = self.generate_position_index_lut()
+        # index = self._position_index_lut[position_name]
+        # return self._position_zarr[index]
 
-    def _get_image_stack_with_adapted_dimensions(self, position_index, frame_index, z_slice=0):
+    def _get_image_stack_with_adapted_dimensions(self, position_name: str, frame_index, z_slice=0):
         """
         Get image stack containing the different channels for the specified position and frame.
 
-        :param position_index:
+        :param position_name: position name as set in MicroManger
         :param frame_index:
         :return:
         """
 
-        position_series = self.get_position_series(position_index)
-        position_zarr = self.get_position_zarr(position_index)
+        position_series = self.get_position_series(position_name)
+        position_zarr = self.get_position_zarr(position_name)
 
         if position_series.axes == 'IYX':
             image_stack = position_zarr[frame_index, :].astype(dtype=float).copy()

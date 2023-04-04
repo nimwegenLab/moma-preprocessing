@@ -153,7 +153,7 @@ class PreprocessingRunner(object):
 
         # start measurement of processing time
         start1 = time.time()
-        for position_index in positions:  # MM: Currently proproc_fun.py in only run for a single position; so this loop is not needed
+        for position_name in positions:  # MM: Currently proproc_fun.py in only run for a single position; so this loop is not needed
             # load and use flatfield data, if provided
             preprocessor = None
             if flatfield_directory is not None:
@@ -165,11 +165,15 @@ class PreprocessingRunner(object):
                 colors_orig = colors.copy()
                 colors[1:] = [name + '_corrected' for name in colors[1:]]
                 colors = colors + colors_orig[1:]
-                position_folder = get_position_folder_path(folder_to_save, position_index)
+                position_folder = get_position_folder_path(folder_to_save, position_name)
                 preprocessor.save_flatfields(position_folder)
 
             # load first phase contrast image
-            color_image_stack = self.get_valid_image_stack(dataset, frame_index=minframe, position_index=position_index, z_slice=z_slice_index, frames_to_ignore=frames_to_ignore)
+            color_image_stack = self.get_valid_image_stack(dataset,
+                                                           frame_index=minframe,
+                                                           position_name=position_name,
+                                                           z_slice=z_slice_index,
+                                                           frames_to_ignore=frames_to_ignore)
             first_phc_image = color_image_stack[..., 0]
 
             # Process first image to find ROIs, etc.
@@ -190,7 +194,7 @@ class PreprocessingRunner(object):
             imageProcessor.process_image()
             imageProcessor.set_image_registration_template()
 
-            path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_initial.tif'
+            path = folder_to_save + '/' + 'Pos' + str(position_name) + '_GL_index_initial.tif'
             store_gl_index_image(imageProcessor.growthlane_rois, imageProcessor.image, path)
 
             # create empty kymographs to fill
@@ -199,15 +203,19 @@ class PreprocessingRunner(object):
             # initialize list of images to hold the final GL crop images
             nr_of_timesteps = maxframe - minframe
             nr_of_color_channels = len(colors)
-            gl_image_path_dict = get_gl_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
-            gl_csv_path_dict = get_gl_image_csv_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
+            gl_image_path_dict = get_gl_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_name)
+            gl_csv_path_dict = get_gl_image_csv_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_name)
             gl_image_dict = get_gl_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels, gl_image_path_dict)
-            kymo_image_path_dict = get_kymo_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_index)
+            kymo_image_path_dict = get_kymo_image_image_paths(imageProcessor.growthlane_rois, folder_to_save, base_name, position_name)
             kymo_image_dict = get_kymo_image_stacks(imageProcessor.growthlane_rois, nr_of_timesteps, nr_of_color_channels, kymo_image_path_dict)
 
             # go through time-lapse and cut out channels
             for frame_index, t in enumerate(range(minframe, maxframe)):
-                image = self.get_valid_image_stack(dataset, frame_index=t, position_index=position_index, z_slice=z_slice_index, frames_to_ignore=frames_to_ignore)[..., phase_channel_index]
+                image = self.get_valid_image_stack(dataset,
+                                                   frame_index=t,
+                                                   position_name=position_name,
+                                                   z_slice=z_slice_index,
+                                                   frames_to_ignore=frames_to_ignore)[..., phase_channel_index]
                 if image_registration_method == 1:
                     imageProcessor.determine_image_shift_1(image)
                 elif image_registration_method == 2:
@@ -221,7 +229,11 @@ class PreprocessingRunner(object):
 
                 growthlane_rois, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict = remove_gls_outside_of_image(image, growthlane_rois, imageProcessor, gl_image_dict, kymo_image_dict, gl_image_path_dict, gl_csv_path_dict)
 
-                color_image_stack = self.get_valid_image_stack(dataset, frame_index=t, position_index=position_index, z_slice=z_slice_index, frames_to_ignore=frames_to_ignore)
+                color_image_stack = self.get_valid_image_stack(dataset,
+                                                               frame_index=t,
+                                                               position_name=position_name,
+                                                               z_slice=z_slice_index,
+                                                               frames_to_ignore=frames_to_ignore)
 
                 # correct images and append corrected and non-corrected images
                 if preprocessor is not None:
@@ -237,8 +249,8 @@ class PreprocessingRunner(object):
                     for roi in growthlane_rois:
                         roi.normalization_range = forced_intensity_normalization_range
                 elif normalization_config_path:
-                    output_path = get_normalization_log_folder_path(folder_to_save, position_index)
-                    imageProcessor.set_normalization_ranges_and_save_log_data(growthlane_rois, phc_image, frame_index, position_index, output_path)
+                    output_path = get_normalization_log_folder_path(folder_to_save, position_name)
+                    imageProcessor.set_normalization_ranges_and_save_log_data(growthlane_rois, phc_image, frame_index, position_name, output_path)
 
                 append_gl_roi_images(frame_index, growthlane_rois, gl_image_dict, color_image_stack)
                 append_to_kymo_graph(frame_index, growthlane_rois, kymo_image_dict, color_image_stack)
@@ -247,7 +259,7 @@ class PreprocessingRunner(object):
             finalize_memmap_images(growthlane_rois, gl_image_dict)
             finalize_memmap_images(growthlane_rois, kymo_image_dict)
 
-            path = folder_to_save + '/' + 'Pos' + str(position_index) + '_GL_index_final.tif'
+            path = folder_to_save + '/' + 'Pos' + str(position_name) + '_GL_index_final.tif'
             store_gl_index_image(growthlane_rois, phc_image, path)
 
         # # finalize measurement of processing time
@@ -264,12 +276,12 @@ class PreprocessingRunner(object):
             version_file_path = os.path.join(version_file_source_path, version_filename)
             shutil.copyfile(version_file_path, version_file_target_path)
 
-    def get_valid_image_stack(self, dataset, frame_index, position_index, z_slice, frames_to_ignore):
+    def get_valid_image_stack(self, dataset, frame_index, position_name: str, z_slice, frames_to_ignore):
         if frame_index not in frames_to_ignore:
             self.last_valid_frame = frame_index
-            return dataset.get_image_stack(frame_index=frame_index, position_index=position_index, z_slice=z_slice)
+            return dataset.get_image_stack(frame_index=frame_index, position_name=position_name, z_slice=z_slice)
         else:
-            return dataset.get_image_stack(frame_index=self.last_valid_frame, position_index=position_index, z_slice=z_slice)
+            return dataset.get_image_stack(frame_index=self.last_valid_frame, position_name=position_name, z_slice=z_slice)
 
 def get_gl_image_stacks(growthlane_rois, nr_of_timesteps, nr_of_color_channels, gl_image_path_dict):
     gl_image_stacks = {}
