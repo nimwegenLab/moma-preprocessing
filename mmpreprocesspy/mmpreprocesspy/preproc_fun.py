@@ -9,11 +9,11 @@ import tifffile
 import skimage.filters
 import skimage.measure
 import skimage.transform
-from mmpreprocesspy.MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
-from mmpreprocesspy.image_preprocessing import ImagePreprocessor
-from mmpreprocesspy.moma_image_processing import MomaImageProcessor
-from mmpreprocesspy.GlDetectionTemplate import GlDetectionTemplate
-from mmpreprocesspy.support import saturate_image
+from .MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
+from .image_preprocessing import ImagePreprocessor
+from .moma_image_processing import MomaImageProcessor
+from .GlDetectionTemplate import GlDetectionTemplate
+from .support import saturate_image
 import cv2 as cv
 import csv
 
@@ -276,7 +276,7 @@ class PreprocessingRunner(object):
             version_file_path = os.path.join(version_file_source_path, version_filename)
             shutil.copyfile(version_file_path, version_file_target_path)
 
-    def get_valid_image_stack(self, dataset, frame_index, position_name: str, z_slice, frames_to_ignore):
+    def get_valid_image_stack(self, dataset: MicroManagerOmeTiffReader, frame_index, position_name: str, z_slice, frames_to_ignore):
         if frame_index not in frames_to_ignore:
             self.last_valid_frame = frame_index
             return dataset.get_image_stack(frame_index=frame_index, position_name=position_name, z_slice=z_slice)

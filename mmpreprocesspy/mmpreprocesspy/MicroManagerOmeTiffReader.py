@@ -97,18 +97,13 @@ class MicroManagerOmeTiffReader(object):
         else:
             raise ValueError('frame_index cannot be negative')
 
-    def get_position_series(self, position_name):
+    def get_position_series(self, position_name: str):
         position_series_lut = self.get_position_series_lut()
         return position_series_lut[position_name]
-        # index = self._position_index_lut[position_name]
-        # return self._position_series[index]
 
     def get_position_zarr(self, position_name: str):
         zarr_lut = self.generate_position_index_lut()
         return zarr_lut[position_name]
-        # zarr_lut = self.generate_position_index_lut()
-        # index = self._position_index_lut[position_name]
-        # return self._position_zarr[index]
 
     def _get_image_stack_with_adapted_dimensions(self, position_name: str, frame_index, z_slice=0):
         """
