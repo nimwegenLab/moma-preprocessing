@@ -11,10 +11,10 @@ class TestPreproc_fun(TestCase):
         self.test_data_base_path = os.getenv('PREPROCDATADIR')
 
     def test__38__bor_20230401_13_1(self):
-        data_directory = os.path.join(self.test_data_base_path, '38__bor_20230401_13/MMSTACK/20230401_starvation_naturalisolates_med3/')
-        flatfield_directory = os.path.join(self.test_data_base_path, '38__bor_20230401_13/MMSTACK/20230401_flatfield_1/')
-        gl_detection_template_path = os.path.join(self.test_data_base_path, '38__bor_20230401_13/GL_DETECTION_TEMPLATE/template_20230401.json')
-        directory_to_save = os.path.join(self.test_data_base_path, '38__bor_20230401_13/output__test__38__bor_20230401_13_1/')
+        data_directory = os.path.join(self.test_data_base_path, '38__bor_20230401/MMSTACK/20230401_starvation_naturalisolates_med3/')
+        flatfield_directory = os.path.join(self.test_data_base_path, '38__bor_20230401/MMSTACK/20230401_flatfield_1/')
+        gl_detection_template_path = os.path.join(self.test_data_base_path, '38__bor_20230401/GL_DETECTION_TEMPLATE/template_20230401.json')
+        directory_to_save = os.path.join(self.test_data_base_path, '38__bor_20230401/output__test__38__bor_20230401_1/')
         image_registration_method = 1
         positions = [0]
         # minframe = 0
