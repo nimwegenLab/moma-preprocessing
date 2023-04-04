@@ -1,17 +1,18 @@
 from unittest import TestCase
 
-import cv2
+import os
 import numpy as np
 from mmpreprocesspy.MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
 from mmpreprocesspy.image_preprocessing import ImagePreprocessor
 
 import mmpreprocesspy.dev_auxiliary_functions as aux
 
+test_data_base_path: str = '/media/micha/T7/data_michael_mell/preprocessing_test_data/MM_Testing'
 
 class TestImagePreprocessor(TestCase):
     def test__Process(self):
-        data_directory = '/home/micha/Documents/01_work/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement'
-        flatfield_directory = '/home/micha/Documents/01_work/git/MM_Testing/10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/flatfield'
+        data_directory = os.path.join(test_data_base_path, '10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement')
+        flatfield_directory = os.path.join(test_data_base_path, '10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/flatfield')
 
         dark_noise = 100
         gaussian_sigma = 10
@@ -27,7 +28,7 @@ class TestImagePreprocessor(TestCase):
         nr_of_colors = len(dataset.get_channels())
         image_stack = np.zeros((dataset.height, dataset.width, nr_of_colors))
         for color in range(1, nr_of_colors):
-            image_stack[:, :, color] = dataset.get_image_stack(frame_index=0, position_index=6, z_slice=0)[..., color]
+            image_stack[:, :, color] = dataset.get_image_stack(frame_index=0, position_name='Pos6', z_slice=0)[..., color]
 
         images_to_correct = image_stack[:, :, 1:]
         processed_stack = preprocessor.process_image_stack(images_to_correct)

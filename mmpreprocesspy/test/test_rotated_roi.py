@@ -9,7 +9,7 @@ import cv2
 
 
 class TestRoi(TestCase):
-    test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
+    test_data_base_path: str = '/media/micha/T7/data_michael_mell/preprocessing_test_data/MM_Testing'
 
     def test__get_roi_from_image(self):
         imdata = read_image('resources/data__test_rotated_roi_py/03_img_000000000_ DIA Ph3 (GFP)_000.tif')
