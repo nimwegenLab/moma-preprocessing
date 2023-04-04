@@ -202,7 +202,7 @@ class MomaImageProcessor(object):
                                             position_nr,
                                             frame_nr,
                                             output_path):
-        path = os.path.join(output_path, f'intensity_normalization_ranges_pos_{position_nr}.csv')
+        path = os.path.join(output_path, f'intensity_normalization_ranges__{position_nr}.csv')
 
         with open(path, mode='a') as normalization_ranges_file:
             csv_writer = csv.writer(normalization_ranges_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -249,7 +249,7 @@ class MomaImageProcessor(object):
 
             if frame_nr % self.image_save_frequency == 0:
                 image_to_save = np.array(self._gl_region_indicator_images)
-                tff.imwrite(os.path.join(output_path, f'region_indicator_images__pos_{position_nr}.tif'), image_to_save)
+                tff.imwrite(os.path.join(output_path, f'region_indicator_images__{position_nr}.tif'), image_to_save)
 
     def plot_and_save_intensity_profiles_with_peaks(self,
                                                     intensity_profiles,
@@ -283,7 +283,7 @@ class MomaImageProcessor(object):
             plt.ylabel('intensity [a.u.]')
             plt.xlabel('vertical position [px]')
             # plt.legend(loc='center right')
-            plt.title(f'intensity profile: pos {position_nr}, frame {frame_nr}, region {region_ind}')
+            plt.title(f'intensity profile: {position_nr}, frame {frame_nr}, region {region_ind}')
             # plt.show()
 
             figure_canvas_handle = plt.gcf().canvas
@@ -293,7 +293,7 @@ class MomaImageProcessor(object):
 
             if frame_nr % self.image_save_frequency == 0:
                 image_to_save = np.array(self._intensity_profiles[region_ind])
-                path = os.path.join(output_path, f'intensity_profile__pos_{position_nr}__region_{region_ind}.tif')
+                path = os.path.join(output_path, f'intensity_profile__{position_nr}__region_{region_ind}.tif')
                 tff.imwrite(path, image_to_save)
 
     def get_pdms_and_empty_channel_intensities(self, intensity_profile):

@@ -17,80 +17,80 @@ from .support import saturate_image
 import cv2 as cv
 import csv
 
-def get_position_folder_path(result_base_path, indp):
+def get_position_folder_path(result_base_path, position_name):
     """
     Return the path to the position folder containing the growthlane folders.
 
     :param result_base_path:
-    :param indp:
+    :param position_name:
     :return:
     """
-    return result_base_path + '/' + 'Pos' + str(indp) + '/'
+    return result_base_path + '/' + str(position_name) + '/'
 
-def get_normalization_log_folder_path(result_base_path, indp):
+def get_normalization_log_folder_path(result_base_path, position_name):
     """
     Return the path to the folder, where we will save log-data about how the
     was calcuatedd and performed normalization.
 
     :param result_base_path:
-    :param indp:
+    :param position_name:
     :return:
     """
-    folder_path = os.path.normpath(os.path.join(result_base_path, 'Pos' + str(indp) + '_normalization_log'))
+    folder_path = os.path.normpath(os.path.join(result_base_path, str(position_name) + '_normalization_log'))
     os.makedirs(folder_path, exist_ok=True)
     return folder_path
 
-def get_gl_folder_path(result_base_path, indp, gl_index):
+def get_gl_folder_path(result_base_path, position_name, gl_index):
     """
     Return path to the folder containing the growthlane and kymo image stacks.
 
     :param result_base_path:
-    :param indp:
+    :param position_name:
     :param gl_index:
     :return:
     """
-    return get_position_folder_path(result_base_path, indp) + '/Pos' + str(indp) + '_GL' + str(
+    return get_position_folder_path(result_base_path, position_name) + '/' + str(position_name) + '_GL' + str(
         gl_index)
 
-def get_gl_tiff_path(result_base_path, base_name, indp, gl_index):
+def get_gl_tiff_path(result_base_path, base_name, position_name, gl_index):
     """
     Return path to the growthlane image stack.
 
     :param result_base_path:
     :param base_name:
-    :param indp:
+    :param position_name:
     :param gl_index:
     :return:
     """
-    return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '.tif'
+    return get_gl_folder_path(result_base_path, position_name, gl_index) + '/' + base_name + '_' + str(position_name) + '_GL' + str(gl_index) + '.tif'
 
 
-def get_gl_csv_path(result_base_path, base_name, indp, gl_index):
+def get_gl_csv_path(result_base_path, base_name, position_name, gl_index):
     """
     Return path to the growthlane image stack.
 
     :param result_base_path:
     :param base_name:
-    :param indp:
+    :param position_name:
     :param gl_index:
     :return:
     """
-    return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '.csv'
+    return get_gl_folder_path(result_base_path, position_name, gl_index) + '/' + base_name + '_' + str(position_name) + '_GL' + str(gl_index) + '.csv'
 
 
-def get_kymo_tiff_path(result_base_path, base_name, indp, gl_index):
+def get_kymo_tiff_path(result_base_path, base_name, position_name, gl_index):
     """
     Return path to the kymo-graph image-stack.
 
     :param result_base_path:
     :param base_name:
-    :param indp:
+    :param position_name:
     :param gl_index:
     :param color_index:
     :return:
     """
 
-    return get_gl_folder_path(result_base_path, indp, gl_index) + '/' + base_name + '_Pos' + str(indp) + '_GL' + str(gl_index) + '_kymo.tif'
+    return get_gl_folder_path(result_base_path, position_name, gl_index) + '/' + base_name + '_' + str(position_name) + '_GL' + str(gl_index) + '_kymo.tif'
 
 class PreprocessingRunner(object):
 
@@ -194,7 +194,7 @@ class PreprocessingRunner(object):
             imageProcessor.process_image()
             imageProcessor.set_image_registration_template()
 
-            path = folder_to_save + '/' + 'Pos' + str(position_name) + '_GL_index_initial.tif'
+            path = folder_to_save + '/' + str(position_name) + '_GL_index_initial.tif'
             store_gl_index_image(imageProcessor.growthlane_rois, imageProcessor.image, path)
 
             # create empty kymographs to fill
@@ -259,7 +259,7 @@ class PreprocessingRunner(object):
             finalize_memmap_images(growthlane_rois, gl_image_dict)
             finalize_memmap_images(growthlane_rois, kymo_image_dict)
 
-            path = folder_to_save + '/' + 'Pos' + str(position_name) + '_GL_index_final.tif'
+            path = folder_to_save + '/' + str(position_name) + '_GL_index_final.tif'
             store_gl_index_image(growthlane_rois, phc_image, path)
 
         # # finalize measurement of processing time
