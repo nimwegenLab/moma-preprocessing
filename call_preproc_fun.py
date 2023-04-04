@@ -118,7 +118,7 @@ print(intensity_normalization_range_cutoffs)
 runner = PreprocessingRunner()
 runner.preproc_fun(args.input,
                    args.output,
-                   positions=args.positions,
+                   positions=[args.positions],
                    minframe=args.timeframeminimum,
                    maxframe=args.timeframemaximum,
                    flatfield_directory=args.flatfieldpath,
