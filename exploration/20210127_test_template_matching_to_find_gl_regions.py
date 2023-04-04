@@ -33,12 +33,11 @@ class TestPreproc_fun(TestCase):
                 print(f'path: {path}')
                 dataset = MicroManagerOmeTiffReader(path)
                 frame_index = 0  # work with first frame of each position
-                position_index = 0
-                pos_ind_range = range(0, 4)
+                position_names = ['Pos0', 'Pos1', 'Pos2', 'Pos3']
 
-                for position_index in pos_ind_range:
+                for position_name in position_names:
                     current_stack = dataset.get_image_stack(frame_index=frame_index,
-                                                            position_index=position_index,
+                                                            position_index=position_name,
                                                             z_slice=0)
                     imdata = current_stack[:, :, 0]
                     imdata = rotate(imdata, rotation_angle)
@@ -54,7 +53,7 @@ class TestPreproc_fun(TestCase):
 
                     self.show_gl_regions_on_image(gl_regions,
                                                   imdata,
-                                                  position_index,
+                                                  position_name,
                                                   test,
                                                   cmap='gray', vmin=0, vmax=1.0)
 
@@ -63,7 +62,7 @@ class TestPreproc_fun(TestCase):
 
                     # plt.imshow(min_max_normalize(imdata), cmap='gray')
                     plt.imshow(saturate(imdata, 0, 10000), cmap='gray')
-                    plt.title(f"{test['name']}, position: {position_index}")
+                    plt.title(f"{test['name']}, position: {position_name}")
                     plt.show()
 
                     template_image = tff.imread(template_config['template_path'])
@@ -72,7 +71,7 @@ class TestPreproc_fun(TestCase):
                     # plt.show()
 
                     plt.imshow(saturate(template_image, 0, 8000), cmap='gray')
-                    plt.title(f"{test['name']}, position: {position_index}")
+                    plt.title(f"{test['name']}, position: {position_name}")
                     plt.show()
 
 
@@ -93,19 +92,19 @@ class TestPreproc_fun(TestCase):
                     plt.show()
 
                     plt.imshow(normalized_cross_correlation)
-                    plt.title(f"{test['name']}, position: {position_index}")
+                    plt.title(f"{test['name']}, position: {position_name}")
                     plt.show()
 
                     plt.plot(np.mean(normalized_cross_correlation, axis=0), color='r', label='mean proj.')
                     plt.plot(np.max(normalized_cross_correlation, axis=0), color='g', label='max proj.')
                     plt.legend()
-                    plt.title(f"{test['name']}, position: {position_index}")
+                    plt.title(f"{test['name']}, position: {position_name}")
                     plt.show()
 
                     plt.plot(np.mean(normalized_cross_correlation, axis=1), color='r', label='mean proj.')
                     plt.plot(np.max(normalized_cross_correlation, axis=1), color='g', label='max proj.')
                     plt.legend()
-                    plt.title(f"{test['name']}, position: {position_index}")
+                    plt.title(f"{test['name']}, position: {position_name}")
                     plt.show()
 
                     print('stop')
