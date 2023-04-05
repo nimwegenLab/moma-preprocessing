@@ -18,7 +18,7 @@ import yaml
 from yaml.loader import SafeLoader
 
 
-batch_script_version = "0.2.0"
+batch_script_version = "0.3.0"
 program_name='moma_batch_run'
 
 def print_batch_version_to_log():
@@ -78,24 +78,28 @@ class StreamToLogger(object):
 def add_gl_path(gl_ind, gl_entry, pos_ind, pos_entry, config):
     input_path = config['preprocessing_path']
     gl_path=input_path
-    gl_path+=("/Pos"+str(pos_ind))
-    gl_path+="/Pos"+str(pos_ind)+"_"+"GL"+str(gl_ind)
+    if type(pos_ind) is int:
+        gl_path=os.path.join(gl_path,"Pos"+str(pos_ind),"Pos"+str(pos_ind)+"_"+"GL"+str(gl_ind))
+    elif type(pos_ind) is str:
+        gl_path = os.path.join(gl_path, pos_ind, str(pos_ind)+"_"+"GL"+str(gl_ind))
+    else:
+        raise RuntimeError(f"Unable to handle the dictionary-key for the position, which is of type (={str(type(pos_ind))}) and has value (={str(pos_ind)}).")
     gl_entry.update({'gl_path': gl_path})
     return gl_entry
 
 """
 This method caluclates the paths to the GL directories.
 """
-def get_gl_paths_for_position(input_path, positions, gl_paths, pos, config):
-    if positions[pos]: # GLs are defined for this position; iterate over them to generate list of paths
-        for gl in positions[pos]['gl']:
-            gl_path=input_path
-            gl_path+=("/Pos"+str(pos))
-            gl_path+="/Pos"+str(pos)+"_"+"GL"+str(gl)
-            gl_paths.append(gl_path)
-            if not config['pos'][pos]['gl'][gl]:
-                config['pos'][pos]['gl'][gl] = {}
-            config['pos'][pos]['gl'][gl].update({'gl_path': gl_path})
+# def get_gl_paths_for_position(input_path, positions, gl_paths, pos, config):
+#     if positions[pos]: # GLs are defined for this position; iterate over them to generate list of paths
+#         for gl in positions[pos]['gl']:
+#             gl_path=input_path
+#             gl_path+=("/Pos"+str(pos))
+#             gl_path+="/Pos"+str(pos)+"_"+"GL"+str(gl)
+#             gl_paths.append(gl_path)
+#             if not config['pos'][pos]['gl'][gl]:
+#                 config['pos'][pos]['gl'][gl] = {}
+#             config['pos'][pos]['gl'][gl].update({'gl_path': gl_path})
 
 def for_each_gl_in_config(config: dict, fnc):
     positions = config['pos']
@@ -194,7 +198,12 @@ class GlFileManager(object):
 
     def get_tiff_path(self) -> Path:
         gl_path = self.get_gl_directory_path()
-        return glob(str(gl_path)+'/*[0-9].tif')[0]
+        list_of_candidate_files = glob(os.path.join(str(gl_path),'*[0-9].tif'))
+        if not list_of_candidate_files:
+            raise RuntimeError(f"Could not find the ROI TIFF file in directory: {gl_path}")
+        elif len(list_of_candidate_files)>1:
+            raise RuntimeError(f"Could not uniqule determine correct ROI TIFF file. Found (={len(list_of_candidate_files)}) candidate files in directory: {gl_path}")
+        return list_of_candidate_files[0]
 
     def get_gl_directory_path(self) -> Path:
         return self.gl_directory_path
