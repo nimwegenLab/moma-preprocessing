@@ -62,7 +62,7 @@ def get_gl_tiff_path(result_base_path, base_name, position_name, gl_index):
     :param gl_index:
     :return:
     """
-    return get_gl_folder_path(result_base_path, position_name, gl_index) + '/' + base_name + '_' + str(position_name) + '_GL' + str(gl_index) + '.tif'
+    return get_gl_folder_path(result_base_path, position_name, gl_index) + '/' + base_name + '__' + str(position_name) + '_GL' + str(gl_index) + '.tif'
 
 
 def get_gl_csv_path(result_base_path, base_name, position_name, gl_index):
@@ -75,7 +75,7 @@ def get_gl_csv_path(result_base_path, base_name, position_name, gl_index):
     :param gl_index:
     :return:
     """
-    return get_gl_folder_path(result_base_path, position_name, gl_index) + '/' + base_name + '_' + str(position_name) + '_GL' + str(gl_index) + '.csv'
+    return get_gl_folder_path(result_base_path, position_name, gl_index) + '/' + base_name + '__' + str(position_name) + '_GL' + str(gl_index) + '.csv'
 
 
 def get_kymo_tiff_path(result_base_path, base_name, position_name, gl_index):
@@ -90,7 +90,7 @@ def get_kymo_tiff_path(result_base_path, base_name, position_name, gl_index):
     :return:
     """
 
-    return get_gl_folder_path(result_base_path, position_name, gl_index) + '/' + base_name + '_' + str(position_name) + '_GL' + str(gl_index) + '_kymo.tif'
+    return get_gl_folder_path(result_base_path, position_name, gl_index) + '/' + base_name + '__' + str(position_name) + '_GL' + str(gl_index) + '_kymo.tif'
 
 class PreprocessingRunner(object):
 
