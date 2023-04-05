@@ -2,40 +2,36 @@ from unittest import TestCase
 import os
 import numpy as np
 
+test_data_base_path: str = '/media/micha/T7/data_michael_mell/preprocessing_test_data/MM_Testing'
 
 class test_MicroManagerOmeTiffReader(TestCase):
 
     def test__get_image_stack__reads_dataset_22_correctly(self):
         from mmpreprocesspy.MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
+        position_name = 'Pos0'
 
-        test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
         path = os.path.join(test_data_base_path, '22__gwendolin__20170512_MM_recA_recN_lexA_high_8channels_design/MMStack/')
         dataset = MicroManagerOmeTiffReader(path)
         # dataset = MMData(path)
 
-        image_stack = dataset.get_image_stack(0, 0, z_slice=0)
+        image_stack = dataset.get_image_stack(position_name, 0, z_slice=0)
 
         # np.save('resources/data__test__MicroManagerOmeTiffReader/expected_002.npy', image_stack)
         expected = np.load('resources/data__test__MicroManagerOmeTiffReader/expected_002.npy')
-
         self.assertTrue(np.all(expected == image_stack), msg="result image does not match expected image")
-
 
     def test__get_image_stack(self):
         from mmpreprocesspy.MicroManagerOmeTiffReader import MicroManagerOmeTiffReader
 
-        test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
+        position_name = 'Pos0'
         path = os.path.join(test_data_base_path, '16_thomas_20201229_glc_lac_1/MMStack/')
         dataset = MicroManagerOmeTiffReader(path)
-        # dataset = MMData(path)
 
-        image_stack = dataset.get_image_stack(0, 0, z_slice=0)
+        image_stack = dataset.get_image_stack(position_name, 0, z_slice=0)
 
         # np.save('resources/data__test__MicroManagerOmeTiffReader/expected_001.npy', image_stack)
         expected = np.load('resources/data__test__MicroManagerOmeTiffReader/expected_001.npy')
-
         self.assertTrue(np.all(expected == image_stack), msg="result image does not match expected image")
-
 
     def test__get_image_stack__returns_zero_images_repeating_frames(self):
         """
@@ -53,7 +49,7 @@ class test_MicroManagerOmeTiffReader(TestCase):
 
         for test_config in test_configs:
             with self.subTest(test=test_config['name']):
-                position_index = test_config['position_index']
+                position_name = test_config['position_name']
                 min_frame = test_config['min_frame_index']
                 max_frame = test_config['max_frame_index']
                 path = test_config['path']
@@ -64,7 +60,7 @@ class test_MicroManagerOmeTiffReader(TestCase):
 
                 for frame_index in range(min_frame, max_frame):
                     current_frame = dataset.get_image_stack(frame_index=frame_index,
-                                                            position_index=position_index,
+                                                            position_name=position_name,
                                                             z_slice=0)
 
                     for ind, periodicity in enumerate(periodicty_of_nonzero_frame):
@@ -76,26 +72,25 @@ class test_MicroManagerOmeTiffReader(TestCase):
 
 
     def get_test_data___test__get_image_stack__returns_zero_images_repeating_frames(self):
-        test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
         test_configs = []
 
         test_configs.append({'name': 'dataset_18',
                              'path': os.path.join(test_data_base_path, '18__theo__20210112_ara-rha_glu-lac_1/MMStack/'),
-                             'position_index': 0,
+                             'position_name': 'Pos0',
                              'min_frame_index': 0,
                              'max_frame_index': 5,
                              'channel_inds_with_missing_frames': [1],
                              'periodicty_of_nonzero_frame': [3]})
         test_configs.append({'name': 'dataset_16',
                              'path': os.path.join(test_data_base_path, '16_thomas_20201229_glc_lac_1/MMStack/'),
-                             'position_index': 0,
+                             'position_name': 'Pos0',
                              'min_frame_index': 0,
                              'max_frame_index': 8,
                              'channel_inds_with_missing_frames': [1],
                              'periodicty_of_nonzero_frame': [3]})
         test_configs.append({'name': 'dataset_14',
                              'path': os.path.join(test_data_base_path, '14_thomas_20201228_glc_ara_1/MMStack/'),
-                             'position_index': 0,
+                             'position_name': 'Pos0',
                              'min_frame_index': 0,
                              'max_frame_index': 8,
                              'channel_inds_with_missing_frames': [1],
@@ -111,7 +106,7 @@ class test_MicroManagerOmeTiffReader(TestCase):
 
         for test_config in test_configs:
             with self.subTest(test=test_config['name']):
-                position_index = test_config['position_index']
+                position_name = test_config['position_name']
                 min_frame = test_config['min_frame_index']
                 max_frame = test_config['max_frame_index']
                 path = test_config['path']
@@ -120,10 +115,10 @@ class test_MicroManagerOmeTiffReader(TestCase):
 
                 for frame_index in range(min_frame, max_frame):
                     current_frame = dataset.get_image_stack(frame_index=frame_index,
-                                                            position_index=position_index,
+                                                            position_name=position_name,
                                                             z_slice=0)
                     next_frame = dataset.get_image_stack(frame_index=frame_index + 1,
-                                                         position_index=position_index,
+                                                         position_name=position_name,
                                                          z_slice=0)
 
                     # print('')
@@ -150,9 +145,6 @@ class test_MicroManagerOmeTiffReader(TestCase):
 
         for test_config in test_configs:
             with self.subTest(test=test_config['name']):
-                position_index = test_config['position_index']
-                min_frame = test_config['min_frame_index']
-                max_frame = test_config['max_frame_index']
                 path = test_config['path']
 
                 dataset = MicroManagerOmeTiffReader(path)
@@ -160,75 +152,74 @@ class test_MicroManagerOmeTiffReader(TestCase):
                 self.assertEqual(test_config['nr_of_frames'], nr_of_frames)
 
     def get_test_data___test__get_image_stack__returns_different_images_for_different_frame_indexes(self):
-        test_data_base_path = '/home/micha/Documents/01_work/git/MM_Testing'
         test_configs = []
 
         test_configs.append({'name': 'dataset_19',
                              'path': os.path.join(test_data_base_path, '19__dany__20201123_comlac_3conds_5/MMStack/'),
-                             'position_index': 0,
+                             'position_name': 'Pos0',
                              'min_frame_index': 0,
                              'max_frame_index': 8,
                              'nr_of_frames': 510})
         # test_configs.append({'name': 'dataset_18',
         #                      'path': os.path.join(test_data_base_path, '18__theo__20210112_ara-rha_glu-lac_1/MMStack/'),
-        #                      'position_index': 0,
+        #                      'position_name': 'Pos0',
         #                      'min_frame_index': 0,
         #                      'max_frame_index': 5})
         test_configs.append({'name': 'dataset_17',
                              'path': os.path.join(test_data_base_path, '17_lis_20201218_VNG40_AB6min_2h_1_1/MMStack/'),
-                             'position_index': 0,
+                             'position_name': 'Pos0',
                              'min_frame_index': 0,
                              'max_frame_index': 8,
                              'nr_of_frames': 810})
         # test_configs.append({'name': 'dataset_16',
         #                      'path': os.path.join(test_data_base_path, '16_thomas_20201229_glc_lac_1/MMStack/'),
-        #                      'position_index': 0,
+        #                      'position_name': 'Pos0',
         #                      'min_frame_index': 0,
         #                      'max_frame_index': 8})
         test_configs.append({'name': 'dataset_15',
                              'path': os.path.join(test_data_base_path, '15_lis_20201119_VNG1040_AB2h_2h_1/MMStack/'),
-                             'position_index': 0,
+                             'position_name': 'Pos0',
                              'min_frame_index': 0,
                              'max_frame_index': 8,
                              'nr_of_frames': 840})
         # test_configs.append({'name': 'dataset_14',
         #                      'path': os.path.join(test_data_base_path, '14_thomas_20201228_glc_ara_1/MMStack/'),
-        #                      'position_index': 0,
+        #                      'position_name': 'Pos0',
         #                      'min_frame_index': 0,
         #                      'max_frame_index': 8})
         test_configs.append({'name': 'dataset_13',
                              'path': os.path.join(test_data_base_path, '13_20200128_glcIPTG_glc_1/MMStack/RawData/measurement/'),
-                             'position_index': 0,
+                             'position_name': 'Pos0',
                              'min_frame_index': 0,
                              'max_frame_index': 8,
                              'nr_of_frames': 320})
         test_configs.append({'name': 'dataset_12',
                              'path': os.path.join(test_data_base_path, '12_20190816_Theo/MMStack/'),
-                             'position_index': 0,
+                             'position_name': 'Pos0',
                              'min_frame_index': 0,
                              'max_frame_index': 8,
                              'nr_of_frames': 606})
         test_configs.append({'name': 'dataset_11',
                              'path': os.path.join(test_data_base_path, '11_20190910_glc_spcm_1/MMStack/'),
-                             'position_index': 0,
+                             'position_name': 'Pos0',
                              'min_frame_index': 0,
                              'max_frame_index': 8,
                              'nr_of_frames': 606})
         test_configs.append({'name': 'dataset_10',
                              'path': os.path.join(test_data_base_path, '10_20190424_hi2_hi3_med2_rplN_glu_gly/MMStack/RawData/measurement/'),
-                             'position_index': 0,
+                             'position_name': 'Pos0',
                              'min_frame_index': 0,
                              'max_frame_index': 8,
                              'nr_of_frames': 882})
         test_configs.append({'name': 'dataset_8',
                              'path': os.path.join(test_data_base_path, '08_20190222_LB_SpentLB_TrisEDTA_LB_1/MMStack/'),
-                             'position_index': 0,
+                             'position_name': 'Pos0',
                              'min_frame_index': 0,
                              'max_frame_index': 8,
                              'nr_of_frames': 437})
         test_configs.append({'name': 'dataset_4',
                              'path': os.path.join(test_data_base_path, '04_20180531_gluIPTG5uM_lac_1/MMStack/'),
-                             'position_index': 0,
+                             'position_name': 'Pos0',
                              'min_frame_index': 0,
                              'max_frame_index': 8,
                              'nr_of_frames': 200})

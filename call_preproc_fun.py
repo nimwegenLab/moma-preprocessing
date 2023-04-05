@@ -115,14 +115,10 @@ print(intensity_normalization_range_cutoffs)
 
 
 # parse position argument; IMPORTANT: this only works for a single position argument
-res = re.match('Pos[0]*(\d+)', args.positions)
-posval = int(res.group(1))
-posval = [posval]
-
 runner = PreprocessingRunner()
 runner.preproc_fun(args.input,
                    args.output,
-                   positions=posval,
+                   positions=[args.positions],
                    minframe=args.timeframeminimum,
                    maxframe=args.timeframemaximum,
                    flatfield_directory=args.flatfieldpath,
