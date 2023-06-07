@@ -3,7 +3,7 @@
 eval $(conda shell.bash hook)
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-conda create --file $DIR/conda_package_list.txt -y --prefix mmpreprocesspy_conda_environment python=3.7
+conda create -y --file $DIR/conda_package_list.txt -n mmpreprocesspy_conda_environment python=3.7
 source activate mmpreprocesspy_conda_environment
 
 conda install -y pip
