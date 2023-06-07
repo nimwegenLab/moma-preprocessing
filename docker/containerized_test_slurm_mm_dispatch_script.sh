@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-export MMPRE_HOME="/home/micha/Documents/01_work/git/mmpreprocesspy" # this will have to be removed at some point; should be set by the 'module load command'
+MMPRE_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+#echo $DIR
+#export MMPRE_HOME="/home/micha/Documents/01_work/git/mmpreprocesspy" # this will have to be removed at some point; should be set by the 'module load command'
 export MM_PYTHON_ENVIRONMENT_PATH=mmpreprocesspy
 
 # Create output folder
@@ -34,5 +36,6 @@ do
         ROTATIONS[$f]=$ROTATION
 done
 
-source $MMPRE_HOME/mm_dispatch_preprocessing.sh
-mm_dispatch_preprocessing
+echo $MMPRE_HOME/mm_dispatch_preprocessing_container.sh
+source $MMPRE_HOME/mm_dispatch_preprocessing_container.sh
+#mm_dispatch_preprocessing
