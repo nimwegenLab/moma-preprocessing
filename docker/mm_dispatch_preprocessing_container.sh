@@ -5,7 +5,7 @@
 #
 
 
-mm_dispatch_preprocessing(){
+mm_dispatch_preprocessing_container(){
 
 #MMPRE_EXIST=$(module av MMPreproc 2>&1 | grep MMPreproc | wc -l)
 #if [ $MMPRE_EXIST -eq 0 ]; then printf "The module MMPreproc cannot be found. Aborting...\n" >&2; exit 1; fi
@@ -39,7 +39,8 @@ for (( I=0; I<N; I++ )); do
   mkdir -p $PREPROC_DIR # -p: no error if existing, make parent directories as needed
   mkdir -p $PREPROC_DIR/logs
   
-  CMD_STR="python \"$MMPRE_HOME/call_preproc_fun.py\" \
+#  CMD_STR="python \"$MMPRE_HOME/call_preproc_fun.py\" \
+  CMD_STR="${MMPRE_HOME}/moma_preprocess \
   -i \"$RAW_PATH\" \
   -o \"$PREPROC_DIR\""
   if [ -n "$POS_NAME" ]; then CMD_STR="$CMD_STR -p $POS_NAME"; fi # append optional argument
@@ -94,6 +95,8 @@ $CMD_STR
 \
 conda deactivate
 \n"
+
+printf "${CMD_SCRIPT}"
 
   if [[ "$running_on_laptop" = true ]]; then
     CMD_SBATCH=$SCRIPT

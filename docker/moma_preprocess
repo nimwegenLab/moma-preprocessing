@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+###
+# This script parses the command options for the preprocessing and calls the docker container for running the
+# containerized preprocessing instance.
+###
+
+echo "docker run"
