@@ -8,7 +8,7 @@
 echo "$@"
 
 SHORT=i:,o:,p:,r:
-LONG=tmax,roi_boundary_offset_at_mother_cell:,gl_detection_template_path:,normalization_config_path:,normalization_region_offset:,frames_to_ignore:,image_registration_method:,forced_intensity_normalization_range:,log:
+LONG=tmax:,roi_boundary_offset_at_mother_cell:,gl_detection_template_path:,normalization_config_path:,normalization_region_offset:,frames_to_ignore:,image_registration_method:,forced_intensity_normalization_range:,log:
 
 #moma_preprocess: unrecognized option '-p'
 #moma_preprocess: unrecognized option '-r'
@@ -39,6 +39,7 @@ do
 #    print "$2"
 #    shift 2
 #  fi
+  printf "next argument: %s\n" "$1"
   case "$1" in
     -i )
       input_path="$2"
@@ -50,14 +51,14 @@ do
       printf "output_path: %s\n" "${output_path}"
       shift 2
       ;;
+    -- )
+      shift;
+      break
+      ;;
     * )
       printf "OTHER_ARGUMENTS: %s\n" "${OTHER_ARGUMENTS}"
       OTHER_ARGUMENTS="${OTHER_ARGUMENTS} $1 $2"
       shift 2;
-      ;;
-    --)
-      shift;
-      break
       ;;
   esac
 done
