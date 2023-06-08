@@ -5,4 +5,61 @@
 # containerized preprocessing instance.
 ###
 
-echo "docker run"
+echo "$@"
+
+SHORT=i:,o:,p:,r:
+LONG=tmax,roi_boundary_offset_at_mother_cell:,gl_detection_template_path:,normalization_config_path:,normalization_region_offset:,frames_to_ignore:,image_registration_method:,forced_intensity_normalization_range:,log:
+
+#moma_preprocess: unrecognized option '-p'
+#moma_preprocess: unrecognized option '-r'
+#moma_preprocess: unrecognized option '-tmax'
+#moma_preprocess: unrecognized option '--roi_boundary_offset_at_mother_cell'
+#moma_preprocess: unrecognized option '--gl_detection_template_path'
+#moma_preprocess: unrecognized option '--normalization_config_path'
+#moma_preprocess: unrecognized option '--normalization_region_offset'
+#moma_preprocess: unrecognized option '--frames_to_ignore'
+#moma_preprocess: unrecognized option '--image_registration_method'
+#moma_preprocess: unrecognized option '--forced_intensity_normalization_range'
+#moma_preprocess: unrecognized option '-log'
+#Preprocessing queued... (use squeue to check th
+#
+
+OPTS=$(getopt --alternative --name moma_preprocess --options $SHORT --longoptions $LONG -- "$@")
+
+#echo "OPTS: ${OPTS}"
+
+eval set -- "$OPTS"
+
+OTHER_ARGUMENTS=""
+
+while :
+do
+#  printf "running for loop"
+#  if [[ "$1" == *"-i" ]]; then
+#    print "$2"
+#    shift 2
+#  fi
+  case "$1" in
+    -i )
+      input_path="$2"
+      printf "input_path: %s\n" "${input_path}"
+      shift 2
+      ;;
+    -o )
+      output_path="$2"
+      printf "output_path: %s\n" "${output_path}"
+      shift 2
+      ;;
+    * )
+      printf "OTHER_ARGUMENTS: %s\n" "${OTHER_ARGUMENTS}"
+      OTHER_ARGUMENTS="${OTHER_ARGUMENTS} $1 $2"
+      shift 2;
+      ;;
+    --)
+      shift;
+      break
+      ;;
+  esac
+done
+
+echo "docker run "
