@@ -6,10 +6,10 @@
 ###
 
 docker_image_name="mmpreprocesspy:v0.2.0"
-docker_container_name="${docker_image_name//\:/"__"}"
+#docker_container_name="${docker_image_name//\:/"__"}"
 
 echo $docker_image_name
-echo $docker_container_name
+#echo $docker_container_name
 
 container_input_path="/data/input_path"
 container_output_path="/data/output_path"
@@ -59,7 +59,8 @@ done
 
 #DOCKER_COMMAND="docker run --name ${docker_container_name} --mount type=bind,src=${input_path},target=${container_input_path} --mount type=bind,src=${output_path},${container_output_path} ${docker_image_name}"
 #docker run --name "${docker_container_name}" --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" -it "${docker_image_name}" /bin/bash
-docker run --rm --name "${docker_container_name}" --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" -it "${docker_image_name}" /bin/bash
+#docker run --rm --name "${docker_container_name}" --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" -it "${docker_image_name}" /bin/bash
+docker run --rm --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" -it "${docker_image_name}" /bin/bash
 
 #echo "$DOCKER_COMMAND"
 #eval "$DOCKER_COMMAND"
