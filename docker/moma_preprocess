@@ -5,50 +5,35 @@
 # containerized preprocessing instance.
 ###
 
-echo "$@"
+docker_image_name="mmpreprocesspy:v0.2.0"
+docker_container_name="${docker_image_name//\:/"__"}"
+
+echo $docker_image_name
+echo $docker_container_name
+
+container_input_path="/data/input_path"
+container_output_path="/data/output_path"
 
 SHORT=i:,o:,p:,r:
 LONG=tmax:,roi_boundary_offset_at_mother_cell:,gl_detection_template_path:,normalization_config_path:,normalization_region_offset:,frames_to_ignore:,image_registration_method:,forced_intensity_normalization_range:,log:
 
-#moma_preprocess: unrecognized option '-p'
-#moma_preprocess: unrecognized option '-r'
-#moma_preprocess: unrecognized option '-tmax'
-#moma_preprocess: unrecognized option '--roi_boundary_offset_at_mother_cell'
-#moma_preprocess: unrecognized option '--gl_detection_template_path'
-#moma_preprocess: unrecognized option '--normalization_config_path'
-#moma_preprocess: unrecognized option '--normalization_region_offset'
-#moma_preprocess: unrecognized option '--frames_to_ignore'
-#moma_preprocess: unrecognized option '--image_registration_method'
-#moma_preprocess: unrecognized option '--forced_intensity_normalization_range'
-#moma_preprocess: unrecognized option '-log'
-#Preprocessing queued... (use squeue to check th
-#
-
 OPTS=$(getopt --alternative --name moma_preprocess --options $SHORT --longoptions $LONG -- "$@")
-
-#echo "OPTS: ${OPTS}"
 
 eval set -- "$OPTS"
 
-OTHER_ARGUMENTS=""
+CMD_ARGUMENTS=""
 
+# This while loop captures paths that will be mount directories to the container.
+# Other arguments are appended to the variable CMD_ARGUMENTS, which is passed as command line argument to the container.
 while :
 do
-#  printf "running for loop"
-#  if [[ "$1" == *"-i" ]]; then
-#    print "$2"
-#    shift 2
-#  fi
-  printf "next argument: %s\n" "$1"
   case "$1" in
     -i )
       input_path="$2"
-      printf "input_path: %s\n" "${input_path}"
       shift 2
       ;;
     -o )
       output_path="$2"
-      printf "output_path: %s\n" "${output_path}"
       shift 2
       ;;
     -- )
@@ -56,11 +41,16 @@ do
       break
       ;;
     * )
-      printf "OTHER_ARGUMENTS: %s\n" "${OTHER_ARGUMENTS}"
-      OTHER_ARGUMENTS="${OTHER_ARGUMENTS} $1 $2"
+      CMD_ARGUMENTS="${CMD_ARGUMENTS} $1 $2"
       shift 2;
       ;;
   esac
 done
 
-echo "docker run "
+#echo "docker run --mount type=bind,src=${input_path},target=${container_input_path} --mount type=bind,src=${input_path},${container_output_path}"
+echo "docker create --name ${docker_container_name} ${docker_image_name}"
+docker container inspect ${docker_container_name} > /dev/null 2>&1
+container_exists=$?
+[ ${container_exists} -eq 0 ] || docker create --name ${docker_container_name} ${docker_image_name}
+echo "[ ${container_exists} -eq 0 ] || docker create --name ${docker_container_name} ${docker_image_name}"
+#echo "docker run --mount type=bind,src=${input_path},target=${container_input_path} --mount type=bind,src=${input_path},${container_output_path} ${docker_image_name}"
