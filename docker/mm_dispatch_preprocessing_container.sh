@@ -111,7 +111,7 @@ printf "${CMD_SCRIPT}"
   [ -f "$S_ERR" ] && rm $S_ERR
   printf "$CMD_SBATCH \n" > $LOG
   
-  $CMD_SBATCH >> $LOG
+  $CMD_SBATCH | tee -a $LOG
 done
 echo "Preprocessing queued... (use squeue to check the current status)"
 wait

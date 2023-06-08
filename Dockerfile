@@ -18,6 +18,7 @@ COPY conda/conda_package_setup.sh /$build_dir/conda_package_setup.sh
 RUN chmod +x /$build_dir/conda_package_setup.sh
 RUN /$build_dir/conda_package_setup.sh
 
+COPY call_preproc_fun.py /
 COPY docker/containerized_mm_dispatch_preprocessing.sh /$exec_dir/mm_dispatch_preprocessing.sh
 COPY docker/containerized_test_slurm_mm_dispatch_script.sh /$exec_dir/test_slurm_mm_dispatch_script.sh
 
