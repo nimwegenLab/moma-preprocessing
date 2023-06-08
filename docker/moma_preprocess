@@ -51,6 +51,16 @@ done
 echo "docker create --name ${docker_container_name} ${docker_image_name}"
 docker container inspect ${docker_container_name} > /dev/null 2>&1
 container_exists=$?
-[ ${container_exists} -eq 0 ] || docker create --name ${docker_container_name} ${docker_image_name}
-echo "[ ${container_exists} -eq 0 ] || docker create --name ${docker_container_name} ${docker_image_name}"
+if [ ${container_exists} == 0 ]; then
+  printf "Docker container (name=%s) exists. Removing it before starting new instance.\n" "${docker_container_name}"
+  docker rm ${docker_container_name}
+fi
+#echo "[ ${container_exists} -eq 0 ] || docker create --name ${docker_container_name} ${docker_image_name}"
+
+#DOCKER_COMMAND="docker run --name ${docker_container_name} --mount type=bind,src=${input_path},target=${container_input_path} --mount type=bind,src=${output_path},${container_output_path} ${docker_image_name}"
+docker run --name "${docker_container_name}" --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" -it "${docker_image_name}" /bin/bash
+
+#echo "$DOCKER_COMMAND"
+#eval "$DOCKER_COMMAND"
+
 #echo "docker run --mount type=bind,src=${input_path},target=${container_input_path} --mount type=bind,src=${input_path},${container_output_path} ${docker_image_name}"
