@@ -4,6 +4,8 @@ FROM continuumio/miniconda3:22.11.1
 ARG build_dir="/build_dir"
 ARG exec_dir="/preprocessing"
 
+RUN apt-get update && apt-get install -y ffmpeg libsm6 libxext6
+
 RUN mkdir -p $build_dir
 
 # setup conda environment
