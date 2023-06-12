@@ -8,10 +8,6 @@
 source helpers.sh
 
 docker_image_name=$(get_image_tag)
-#docker_container_name="${docker_image_name//\:/"__"}"
-
-#echo $docker_image_name
-#echo $docker_container_name
 
 container_input_path="/data/input_path"
 container_output_path="/data/output_path"
@@ -23,22 +19,17 @@ OPTS=$(getopt --alternative --name moma_preprocess --options $SHORT --longoption
 
 eval set -- "$OPTS"
 
-echo "Arguments to moma_preprocess: " "$@"
-echo ""
-
 CMD_ARGUMENTS=""
 
 function get_directory_path {
     # This function takes the path of a file or directory. If file-path is passed it returns the path to the parent
     # directory. If a directory is passed, it returns the path to the directory itself.
     local TARGET_PATH=$1
-#    echo "In get_directory_path: ${TARGET_PATH}"
     if [[ -d "$TARGET_PATH" ]]; then
       echo "$TARGET_PATH"
       return 0
     elif [[ -f "$TARGET_PATH" ]]; then
       RET=$(dirname "$TARGET_PATH")
-#      echo "RET: ${RET}"
       echo "$RET"
       return 0
     else
@@ -52,31 +43,23 @@ function get_directory_path {
 # Other arguments are appended to the variable CMD_ARGUMENTS, which is passed as command line argument to the container.
 while :
 do
-  echo "Argument $1: $2"
   case "$1" in
     -i )
-#      input_path="$2"
       input_path=$(get_directory_path "$2")
-      echo "input_path: ${input_path}"
       CMD_ARGUMENTS="${CMD_ARGUMENTS} $1 $2"
-#      get_directory_path "$2"
-#      echo
       shift 2
       ;;
     -o )
-#      output_path="$2"
       output_path=$(get_directory_path "$2")
       CMD_ARGUMENTS="${CMD_ARGUMENTS} $1 $2"
       shift 2
       ;;
     --log )
-#      log_path="$2"
       log_path=$(get_directory_path "$2")
       CMD_ARGUMENTS="${CMD_ARGUMENTS} $1 $2"
       shift 2
       ;;
     --gl_detection_template_path )
-#      log_path="$2"
       gl_detection_template_path=$(get_directory_path "$2")
       CMD_ARGUMENTS="${CMD_ARGUMENTS} $1 $2"
       shift 2
@@ -92,31 +75,4 @@ do
   esac
 done
 
-#echo "Option log_path: $log_path"
-
-#echo "docker run --mount type=bind,src=${input_path},target=${container_input_path} --mount type=bind,src=${input_path},${container_output_path}"
-#echo "docker create --name ${docker_container_name} ${docker_image_name}"
-#docker container inspect ${docker_container_name} > /dev/null 2>&1
-#container_exists=$?
-#if [ ${container_exists} == 0 ]; then
-#  printf "Docker container (name=%s) exists. Removing it before starting new instance.\n" "${docker_container_name}"
-#  docker rm ${docker_container_name}
-#fi
-#echo "[ ${container_exists} -eq 0 ] || docker create --name ${docker_container_name} ${docker_image_name}"
-
-#DOCKER_COMMAND="docker run --name ${docker_container_name} --mount type=bind,src=${input_path},target=${container_input_path} --mount type=bind,src=${output_path},${container_output_path} ${docker_image_name}"
-#docker run --name "${docker_container_name}" --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" -it "${docker_image_name}" /bin/bash
-#docker run --rm --name "${docker_container_name}" --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" -it "${docker_image_name}" /bin/bash
-
-#docker run --rm --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" "${docker_image_name}" "${CMD_ARGUMENTS}"
-#docker run -it --entrypoint /bin/bash --rm --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" "${docker_image_name}"
-
-#echo docker run -it --entrypoint /bin/bash --rm --mount type=bind,src="${input_path}",target="${input_path}" --mount type=bind,src="${output_path}",target="${output_path}" --mount type=bind,src="${log_path}",target="${log_path}" "${docker_image_name}"
-
 docker run --rm --mount type=bind,src="${input_path}",target="${input_path}" --mount type=bind,src="${gl_detection_template_path}",target="${gl_detection_template_path}" --mount type=bind,src="${output_path}",target="${output_path}" --mount type=bind,src="${log_path}",target="${log_path}" "${docker_image_name}" "${CMD_ARGUMENTS}"
-#docker run --rm --mount type=bind,src="${input_path}",target="${input_path}" --mount type=bind,src="${output_path}",target="${output_path}" --mount type=bind,src="${log_path}",target="${log_path}" -it --entrypoint /bin/bash "${docker_image_name}"
-
-#echo "$DOCKER_COMMAND"
-#eval "$DOCKER_COMMAND"
-
-#echo "docker run --mount type=bind,src=${input_path},target=${container_input_path} --mount type=bind,src=${input_path},${container_output_path} ${docker_image_name}"
