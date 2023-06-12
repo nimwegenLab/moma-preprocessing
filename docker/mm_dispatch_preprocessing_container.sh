@@ -40,9 +40,9 @@ for (( I=0; I<N; I++ )); do
   mkdir -p $PREPROC_DIR/logs
   
 #  CMD_STR="python \"$MMPRE_HOME/call_preproc_fun.py\" \
-  CMD_STR="${MMPRE_HOME}/moma_preprocess \
-  -i \"$RAW_PATH\" \
-  -o \"$PREPROC_DIR\""
+  CMD_STR="${MMPRE_HOME}/moma_preprocess\
+ -i \"$RAW_PATH\"\
+ -o \"$PREPROC_DIR\""
   if [ -n "$POS_NAME" ]; then CMD_STR="$CMD_STR -p $POS_NAME"; fi # append optional argument
   if [ -n "$ROTATION" ]; then CMD_STR="$CMD_STR -r $ROTATION"; fi # append optional argument
 #  if [ -n "$CAMERA_ROI_PATH" ]; then CMD_STR="$CMD_STR -j $CAMERA_ROI_PATH"; fi # append optional argument
