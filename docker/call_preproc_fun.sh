@@ -14,6 +14,14 @@ echo "/preprocessing/call_preproc_fun.sh" "$@"
 
 echo
 
-python /preprocessing/call_preproc_fun.py "$@"
+ARGS="$@"
+
+echo "ARGS: ${ARGS}"
+
+echo
+
+eval "python /preprocessing/call_preproc_fun.py" "$@"
+
+echo
 
 conda deactivate
