@@ -21,12 +21,16 @@ OPTS=$(getopt --alternative --name moma_preprocess --options $SHORT --longoption
 
 eval set -- "$OPTS"
 
+echo "Arguments to moma_preprocess: " "$@"
+echo ""
+
 CMD_ARGUMENTS=""
 
 # This while loop captures paths that will be mount directories to the container.
 # Other arguments are appended to the variable CMD_ARGUMENTS, which is passed as command line argument to the container.
 while :
 do
+  echo "Argument $1: $2"
   case "$1" in
     -i )
       input_path="$2"
@@ -34,6 +38,10 @@ do
       ;;
     -o )
       output_path="$2"
+      shift 2
+      ;;
+    --log )
+      log_path="$2"
       shift 2
       ;;
     -- )
@@ -46,6 +54,8 @@ do
       ;;
   esac
 done
+
+echo "Option log_path: $log_path"
 
 #echo "docker run --mount type=bind,src=${input_path},target=${container_input_path} --mount type=bind,src=${input_path},${container_output_path}"
 #echo "docker create --name ${docker_container_name} ${docker_image_name}"
@@ -62,7 +72,7 @@ done
 #docker run --rm --name "${docker_container_name}" --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" -it "${docker_image_name}" /bin/bash
 
 #docker run --rm --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" "${docker_image_name}" "${CMD_ARGUMENTS}"
-docker run -it --entrypoint /bin/bash --rm --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" "${docker_image_name}"
+#docker run -it --entrypoint /bin/bash --rm --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" "${docker_image_name}"
 
 #echo "$DOCKER_COMMAND"
 #eval "$DOCKER_COMMAND"
