@@ -4,8 +4,9 @@
 # This script builds the docker image to containerize the mmpreprocesspy package.
 ###
 
+source helpers.sh
 
-CONTAINER_TAG="mmpreprocesspy:v0.2.0"
+CONTAINER_TAG=$(get_image_tag)
 
 # Get previously existing image with same tag to remove it at end of script and avoid dangling images.
 PREV_IMAGE=$(docker images --filter=reference="${CONTAINER_TAG}" -q)
