@@ -23,9 +23,9 @@ parser.add_argument("-p", "--positions", type=str,
                     help="positions of the images")
 parser.add_argument("-r", "--rotation", type=float,
                     help="rotation of the images")
-parser.add_argument("-tmin", "--timeframeminimum", type=int,
+parser.add_argument("-tmin", "--tmin", type=int,
                     help="minimum time frame after which the data is processed")
-parser.add_argument("-tmax", "--timeframemaximum", type=int,
+parser.add_argument("-tmax", "--tmax", type=int,
                     help="maximum time frame upto which the data is processed")
 parser.add_argument("-ff", "--flatfieldpath", type=str,
                     help="path to the folder containing the flatfield OME-Tiff stack")
@@ -82,9 +82,9 @@ print(args.positions)
 print("Rotation:")
 print(args.rotation)
 print("Start frame (tmin):")
-print(args.timeframeminimum)
+print(args.tmin)
 print("End frame (tmax):")
-print(args.timeframemaximum)
+print(args.tmax)
 print("Growthlane length threshold (glt):")
 print(args.growthlanelengththreshold)
 print("roi_boundary_offset_at_mother_cell:")
@@ -114,8 +114,8 @@ runner = PreprocessingRunner()
 runner.preproc_fun(args.input,
                    args.output,
                    positions=posval,
-                   minframe=args.timeframeminimum,
-                   maxframe=args.timeframemaximum,
+                   minframe=args.tmin,
+                   maxframe=args.tmax,
                    flatfield_directory=args.flatfieldpath,
                    growthlane_length_threshold=args.growthlanelengththreshold,
                    main_channel_angle=args.rotation,

@@ -103,7 +103,10 @@ echo "Option log_path: $log_path"
 #docker run --rm --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" "${docker_image_name}" "${CMD_ARGUMENTS}"
 #docker run -it --entrypoint /bin/bash --rm --mount type=bind,src="${input_path}",target=${container_input_path} --mount type=bind,src="${output_path}",target="${container_output_path}" "${docker_image_name}"
 
-echo docker run -it --entrypoint /bin/bash --rm --mount type=bind,src="${input_path}",target="${input_path}" --mount type=bind,src="${output_path}",target="${output_path}" --mount type=bind,src="${log_path}",target="${log_path}" "${docker_image_name}"
+#echo docker run -it --entrypoint /bin/bash --rm --mount type=bind,src="${input_path}",target="${input_path}" --mount type=bind,src="${output_path}",target="${output_path}" --mount type=bind,src="${log_path}",target="${log_path}" "${docker_image_name}"
+
+#docker run --rm --mount type=bind,src="${input_path}",target="${input_path}" --mount type=bind,src="${output_path}",target="${output_path}" --mount type=bind,src="${log_path}",target="${log_path}" "${docker_image_name}" "${CMD_ARGUMENTS}"
+docker run --rm --mount type=bind,src="${input_path}",target="${input_path}" --mount type=bind,src="${output_path}",target="${output_path}" --mount type=bind,src="${log_path}",target="${log_path}" -it --entrypoint /bin/bash "${docker_image_name}"
 
 #echo "$DOCKER_COMMAND"
 #eval "$DOCKER_COMMAND"
