@@ -5,7 +5,7 @@
 #
 
 
-mm_dispatch_preprocessing_container(){
+mm_dispatch_preprocessing(){
 
 #MMPRE_EXIST=$(module av MMPreproc 2>&1 | grep MMPreproc | wc -l)
 #if [ $MMPRE_EXIST -eq 0 ]; then printf "The module MMPreproc cannot be found. Aborting...\n" >&2; exit 1; fi
@@ -87,13 +87,8 @@ for (( I=0; I<N; I++ )); do
 #SBATCH -o $S_OUT \n\
 #SBATCH -e $S_ERR \n\n\
 \
-$anaconda_module_load_string
-\
-source activate $MM_PYTHON_ENVIRONMENT_PATH\n\n\
-\
 $CMD_STR
 \
-conda deactivate
 \n"
 
 printf "${CMD_SCRIPT}"
