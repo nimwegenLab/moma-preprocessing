@@ -5,10 +5,12 @@
 # containerized preprocessing instance.
 ###
 
-docker_image_name="mmpreprocesspy:v0.2.0"
+source helpers.sh
+
+docker_image_name=$(get_image_tag)
 #docker_container_name="${docker_image_name//\:/"__"}"
 
-echo $docker_image_name
+#echo $docker_image_name
 #echo $docker_container_name
 
 container_input_path="/data/input_path"
