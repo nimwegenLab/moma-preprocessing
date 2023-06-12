@@ -73,6 +73,12 @@ do
       CMD_ARGUMENTS="${CMD_ARGUMENTS} $1 $2"
       shift 2
       ;;
+    --gl_detection_template_path )
+#      log_path="$2"
+      gl_detection_template_path=$(get_directory_path "$2")
+      CMD_ARGUMENTS="${CMD_ARGUMENTS} $1 $2"
+      shift 2
+      ;;
     -- )
       shift;
       break
@@ -105,7 +111,7 @@ done
 
 #echo docker run -it --entrypoint /bin/bash --rm --mount type=bind,src="${input_path}",target="${input_path}" --mount type=bind,src="${output_path}",target="${output_path}" --mount type=bind,src="${log_path}",target="${log_path}" "${docker_image_name}"
 
-docker run --rm --mount type=bind,src="${input_path}",target="${input_path}" --mount type=bind,src="${output_path}",target="${output_path}" --mount type=bind,src="${log_path}",target="${log_path}" "${docker_image_name}" "${CMD_ARGUMENTS}"
+docker run --rm --mount type=bind,src="${input_path}",target="${input_path}" --mount type=bind,src="${gl_detection_template_path}",target="${gl_detection_template_path}" --mount type=bind,src="${output_path}",target="${output_path}" --mount type=bind,src="${log_path}",target="${log_path}" "${docker_image_name}" "${CMD_ARGUMENTS}"
 #docker run --rm --mount type=bind,src="${input_path}",target="${input_path}" --mount type=bind,src="${output_path}",target="${output_path}" --mount type=bind,src="${log_path}",target="${log_path}" -it --entrypoint /bin/bash "${docker_image_name}"
 
 #echo "$DOCKER_COMMAND"
