@@ -6,14 +6,14 @@
 
 source helpers.sh
 
-PREV_IMAGE_TAG=$(get_image_tag)
+IMAGE_TAG=$(get_image_tag)
 
 # Get previously existing image with same tag to remove it at end of script and avoid dangling images.
-PREV_IMAGE=$(docker images --filter=reference="${PREV_IMAGE_TAG}" -q)
+PREV_IMAGES=$(docker images --filter=reference="${IMAGE_TAG}" -q)
 
-docker build .. -t "${PREV_IMAGE_TAG}"
+docker build .. -t "${IMAGE_TAG}"
 
 # Remove previous image with the same tag.
-if [[ -z "${PREV_IMAGE}" ]]; then
-  docker rmi "${PREV_IMAGE}"
+if [[ -z "${PREV_IMAGES}" ]]; then
+  docker rmi "${PREV_IMAGES}"
 fi
