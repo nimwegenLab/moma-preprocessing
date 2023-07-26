@@ -83,7 +83,7 @@ for (( I=0; I<N; I++ )); do
 #SBATCH --nodes=1 \n\
 #SBATCH --ntasks=2 \n\
 #SBATCH --mem-per-cpu=32G \n\
-#SBATCH --export=MODULEPATH=$MODULEPATH \n\
+#SBATCH --export=$MODULEPATH \n\
 #SBATCH -o $S_OUT \n\
 #SBATCH -e $S_ERR \n\n\
 \

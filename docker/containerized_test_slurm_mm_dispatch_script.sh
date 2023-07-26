@@ -8,7 +8,7 @@ export MM_PYTHON_ENVIRONMENT_PATH=mmpreprocesspy
 
 # Create output folder
 DATASET_DIR="/media/micha/T7/data_michael_mell/preprocessing_test_data/MM_Testing/35__lis__20220320__repeat"
-OUTPUT_DIR="$DATASET_DIR/test_bash_run_output"
+OUTPUT_DIR="$DATASET_DIR/containerized_test_run_output"
 mkdir -p $OUTPUT_DIR
 LOGFILE="$OUTPUT_DIR/output.log"
 
@@ -39,4 +39,4 @@ done
 
 echo $MMPRE_HOME/mm_dispatch_preprocessing_container.sh
 source $MMPRE_HOME/mm_dispatch_preprocessing_container.sh
-mm_dispatch_preprocessing_container
+mm_dispatch_preprocessing
