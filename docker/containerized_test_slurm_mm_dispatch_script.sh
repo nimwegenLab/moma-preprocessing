@@ -37,6 +37,6 @@ do
         ROTATIONS[$f]=$ROTATION
 done
 
-echo $MMPRE_HOME/mm_dispatch_preprocessing_container.sh
-source $MMPRE_HOME/mm_dispatch_preprocessing_container.sh
+echo $MMPRE_HOME/mm_dispatch_preprocessing.sh
+source $MMPRE_HOME/mm_dispatch_preprocessing.sh
 mm_dispatch_preprocessing
