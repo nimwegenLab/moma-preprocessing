@@ -3,7 +3,6 @@ FROM continuumio/miniconda3:22.11.1
 
 ARG build_dir="/build_dir"
 ARG exec_dir="/preprocessing"
-ARG scripts_dir="/scripts"
 
 RUN apt-get update && apt-get install -y ffmpeg libsm6 libxext6
 
@@ -25,9 +24,10 @@ COPY call_preproc_fun.py $exec_dir/call_preproc_fun.py
 COPY docker/call_preproc_fun.sh $exec_dir/call_preproc_fun.sh
 RUN chmod +x $exec_dir/call_preproc_fun.sh
 
-RUN mkdir $scripts_dir
-COPY docker/mm_dispatch_preprocessing.sh $scripts_dir/mm_dispatch_preprocessing.sh
-COPY docker/moma_preprocess $scripts_dir/moma_preprocess
+ARG host_scripts="/host_scripts"
+RUN mkdir $host_scripts
+COPY docker/mm_dispatch_preprocessing.sh $host_scripts/mm_dispatch_preprocessing.sh
+COPY docker/moma_preprocess $host_scripts/moma_preprocess
 #COPY docker/containerized_mm_dispatch_preprocessing.sh $exec_dir/mm_dispatch_preprocessing.sh
 #COPY docker/containerized_test_slurm_mm_dispatch_script.sh $exec_dir/test_slurm_mm_dispatch_script.sh
 
