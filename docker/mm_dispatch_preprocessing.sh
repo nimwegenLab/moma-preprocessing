@@ -40,7 +40,7 @@ for (( I=0; I<N; I++ )); do
   mkdir -p $PREPROC_DIR/logs
   
 #  CMD_STR="python \"$MMPRE_HOME/call_preproc_fun.py\" \
-  CMD_STR="${MMPRE_HOME}/moma_preprocess\
+  CMD_STR="moma_preprocess\
  -i \"$RAW_PATH\"\
  -o \"$PREPROC_DIR\""
   if [ -n "$POS_NAME" ]; then CMD_STR="$CMD_STR -p $POS_NAME"; fi # append optional argument

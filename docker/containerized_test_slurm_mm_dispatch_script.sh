@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 
-export MMPRE_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-echo "export MMPRE_HOME=${MMPRE_HOME}"
+####### START TEST SETUP ##########
+
+export PATH=$PATH:"$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export VERSION="v0.2.0"
+export CONTAINER_NAME="michaelmell/mmpreprocesspy"
+export CONTAINER_TAG="${CONTAINER_NAME}:${VERSION}"
+export SINGULARITY_CONTAINER_DIR="${DIR}"
+
+####### END TEST SETUP ##########
+
+#echo "export MMPRE_HOME=${MMPRE_HOME}"
 #echo $DIR
 #export MMPRE_HOME="/home/micha/Documents/01_work/git/mmpreprocesspy" # this will have to be removed at some point; should be set by the 'module load command'
 export MM_PYTHON_ENVIRONMENT_PATH=mmpreprocesspy
@@ -37,6 +46,6 @@ do
         ROTATIONS[$f]=$ROTATION
 done
 
-echo $MMPRE_HOME/mm_dispatch_preprocessing.sh
-source $MMPRE_HOME/mm_dispatch_preprocessing.sh
+echo mm_dispatch_preprocessing.sh
+source mm_dispatch_preprocessing.sh
 mm_dispatch_preprocessing
