@@ -1,4 +1,3 @@
-##### BASE IMAGE #####
 FROM continuumio/miniconda3:22.11.1
 
 ARG build_dir="/build_dir"
@@ -28,12 +27,5 @@ ARG host_scripts="/host_scripts"
 RUN mkdir $host_scripts
 COPY docker/mm_dispatch_preprocessing.sh $host_scripts/mm_dispatch_preprocessing.sh
 COPY docker/moma_preprocess $host_scripts/moma_preprocess
-#COPY docker/containerized_mm_dispatch_preprocessing.sh $exec_dir/mm_dispatch_preprocessing.sh
-#COPY docker/containerized_test_slurm_mm_dispatch_script.sh $exec_dir/test_slurm_mm_dispatch_script.sh
-
-#COPY conda_setup.sh $build_dir/conda_setup.sh
-#RUN chmod +x $build_dir/conda_setup.sh
-#RUN $build_dir/conda_setup.sh
 
 ENTRYPOINT ["/preprocessing/call_preproc_fun.sh"]
-#ENTRYPOINT ["echo", "hell world"]
