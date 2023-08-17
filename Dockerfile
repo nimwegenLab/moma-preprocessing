@@ -1,3 +1,26 @@
+FROM continuumio/miniconda3:22.11.1 as python_script_builder
+# build container for building stand-alone executable of moma_preprocess
+
+RUN apt-get update && \
+    apt-get install -y binutils
+
+WORKDIR /build_dir
+
+# REFs:
+# https://anaconda.org/conda-forge/pyinstaller
+RUN conda create -y -n moma-preprocess python=3.10 pyinstaller=5.6
+
+WORKDIR /build_dir/moma_preprocess
+# Use `conda run`, because `conda activate` fails in containers; see here: https://pythonspeed.com/articles/activate-conda-dockerfile/#working
+SHELL ["conda", "run", "--no-capture-output", "-n", "moma-preprocess", "/bin/bash", "-c"]
+
+# Build stand-alone `moma_preprocess` executable of `moma_preprocess` Python script
+# Output path is: /build_dir/moma/dist/moma_preprocess
+WORKDIR /build_dir/moma_preprocess
+COPY docker/moma_preprocess moma_preprocess
+RUN pyinstaller --onefile --name moma_preprocess moma_preprocess
+
+
 FROM continuumio/miniconda3:22.11.1
 
 ARG build_dir="/build_dir"
@@ -26,6 +49,7 @@ RUN chmod +x $exec_dir/call_preproc_fun.sh
 ARG host_scripts="/host_scripts"
 RUN mkdir $host_scripts
 COPY docker/mm_dispatch_preprocessing.sh $host_scripts/mm_dispatch_preprocessing.sh
-COPY docker/moma_preprocess $host_scripts/moma_preprocess
+COPY --from=python_script_builder /build_dir/moma_preprocess/dist/moma_preprocess $host_scripts/moma_preprocess
+
 
 ENTRYPOINT ["/preprocessing/call_preproc_fun.sh"]
