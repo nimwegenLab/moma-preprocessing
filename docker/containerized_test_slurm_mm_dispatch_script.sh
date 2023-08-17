@@ -4,7 +4,7 @@
 
 export PATH=$PATH:"$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export VERSION="v0.2.0"
-export CONTAINER_NAME="michaelmell/mmpreprocesspy"
+export CONTAINER_NAME="nimwegenlab/mmpreprocesspy"
 export CONTAINER_TAG="${CONTAINER_NAME}:${VERSION}"
 export SINGULARITY_CONTAINER_DIR="${DIR}"
 

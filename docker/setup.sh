@@ -19,7 +19,7 @@ function get_moma_bin_directory() {
 }
 
 function get_image_basename() {
-  echo "michaelmell/mmpreprocesspy"
+  echo "nimwegenlab/mmpreprocesspy"
 }
 
 function get_singularity_container_name() {
