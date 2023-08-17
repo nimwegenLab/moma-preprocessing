@@ -39,9 +39,10 @@ for (( I=0; I<N; I++ )); do
   mkdir -p $PREPROC_DIR # -p: no error if existing, make parent directories as needed
   mkdir -p $PREPROC_DIR/logs
   
-  CMD_STR="python \"$MMPRE_HOME/call_preproc_fun.py\" \
-  -i \"$RAW_PATH\" \
-  -o \"$PREPROC_DIR\""
+#  CMD_STR="python \"$MMPRE_HOME/call_preproc_fun.py\" \
+  CMD_STR="moma_preprocess\
+ -i \"$RAW_PATH\"\
+ -o \"$PREPROC_DIR\""
   if [ -n "$POS_NAME" ]; then CMD_STR="$CMD_STR -p $POS_NAME"; fi # append optional argument
   if [ -n "$ROTATION" ]; then CMD_STR="$CMD_STR -r $ROTATION"; fi # append optional argument
 #  if [ -n "$CAMERA_ROI_PATH" ]; then CMD_STR="$CMD_STR -j $CAMERA_ROI_PATH"; fi # append optional argument
@@ -62,7 +63,6 @@ for (( I=0; I<N; I++ )); do
   if [ -n "$FRAMES_TO_IGNORE" ]; then CMD_STR="$CMD_STR --frames_to_ignore \"$FRAMES_TO_IGNORE\""; fi # append optional argument
   if [ -n "$IMAGE_REGISTRATION_METHOD" ]; then CMD_STR="$CMD_STR --image_registration_method \"$IMAGE_REGISTRATION_METHOD\""; fi # append optional argument
   if [ -n "$FORCED_INTENSITY_NORMALIZATION_RANGE" ]; then CMD_STR="$CMD_STR --forced_intensity_normalization_range \"$FORCED_INTENSITY_NORMALIZATION_RANGE\""; fi # append optional argument
-  if [ -n "$INTENSITY_NORMALIZATION_RANGE_CUTOFFS" ]; then CMD_STR="$CMD_STR --intensity_normalization_range_cutoffs \"$INTENSITY_NORMALIZATION_RANGE_CUTOFFS\""; fi # append optional argument
 
   CMD_STR="$CMD_STR -log \"$LOG\""
 
@@ -87,14 +87,11 @@ for (( I=0; I<N; I++ )); do
 #SBATCH -o $S_OUT \n\
 #SBATCH -e $S_ERR \n\n\
 \
-$anaconda_module_load_string
-\
-source activate $MM_PYTHON_ENVIRONMENT_PATH\n\n\
-\
 $CMD_STR
 \
-conda deactivate
 \n"
+
+printf "${CMD_SCRIPT}"
 
   if [[ "$running_on_laptop" = true ]]; then
     CMD_SBATCH=$SCRIPT
@@ -109,7 +106,7 @@ conda deactivate
   [ -f "$S_ERR" ] && rm $S_ERR
   printf "$CMD_SBATCH \n" > $LOG
   
-  $CMD_SBATCH >> $LOG
+  $CMD_SBATCH | tee -a $LOG
 done
 echo "Preprocessing queued... (use squeue to check the current status)"
 wait
