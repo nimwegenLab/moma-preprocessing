@@ -1,100 +1,119 @@
-#!/usr/bin/env bash
+#! /usr/bin/env python3
 
-###
-# This script parses the command options for the preprocessing and calls the docker container for running the
-# containerized preprocessing instance. It support Docker and Singularity container engines. Singularity engine will be
-# preferred, if available.
-###
+import os
+import subprocess
+import sys
+from shutil import which
+from pathlib import Path
+from typing import List
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-#source "${DIR}/helpers.sh"
-#source "${DIR}/functions.sh"
+"""These are arguments to MoMA that defined a path. We need to mount them or their parent paths in the container."""
+path_args = ['-gldtp', '--gl_detection_template_path', '-i', '--input', '-o', '--output', '-log', '--logfile', '-ff', '--flatfieldpath']
 
-SHORT=i:,o:,p:,r:
-LONG=tmax:,roi_boundary_offset_at_mother_cell:,gl_detection_template_path:,normalization_config_path:,normalization_region_offset:,frames_to_ignore:,image_registration_method:,forced_intensity_normalization_range:,log:
 
-OPTS=$(getopt --alternative --name moma_preprocess --options $SHORT --longoptions $LONG -- "$@")
+def is_tool(name):
+    """Check whether `name` is on PATH and marked as executable."""
+    return which(name) is not None
 
-eval set -- "$OPTS"
 
-CMD_ARGUMENTS=""
+def get_bind_mount_arg(path, container_engine):
+    if container_engine == "singularity":
+        return f'--bind {get_directory_path(path)}'
+    elif container_engine == "docker":
+        return f'--mount type=bind,src={get_directory_path(path)},target={get_directory_path(path)}'
+    else:
+        raise ValueError(f"ERROR: Invalid containerization value: {container_engine}\n", file=sys.stderr)
 
-function get_directory_path {
-    # This function takes the path of a file or directory. If file-path is passed it returns the path to the parent
-    # directory. If a directory is passed, it returns the path to the directory itself.
-    local TARGET_PATH=$1
-    if [[ -d "$TARGET_PATH" ]]; then
-      echo "$TARGET_PATH"
-      return 0
-    elif [[ -f "$TARGET_PATH" ]]; then
-      RET=$(dirname "$TARGET_PATH")
-      echo "$RET"
-      return 0
-    else
-      # an invalid value was passed
-      echo "ERROR: Path does not exist: ${TARGET_PATH}"
-      exit 1
-    fi
-}
 
-# This while loop captures paths that will be mount directories to the container.
-# Other arguments are appended to the variable CMD_ARGUMENTS, which is passed as command line argument to the container.
-while :
-do
-  case "$1" in
-    -i )
-      input_path=$(get_directory_path "$2")
-      CMD_ARGUMENTS="${CMD_ARGUMENTS} $1 $2"
-      shift 2
-      ;;
-    -o )
-      output_path=$(get_directory_path "$2")
-      CMD_ARGUMENTS="${CMD_ARGUMENTS} $1 $2"
-      shift 2
-      ;;
-    --log )
-      log_path=$(get_directory_path "$2")
-      CMD_ARGUMENTS="${CMD_ARGUMENTS} $1 $2"
-      shift 2
-      ;;
-    --gl_detection_template_path )
-      gl_detection_template_path=$(get_directory_path "$2")
-      CMD_ARGUMENTS="${CMD_ARGUMENTS} $1 $2"
-      shift 2
-      ;;
-    -- )
-      shift;
-      break
-      ;;
-    * )
-      CMD_ARGUMENTS="${CMD_ARGUMENTS} $1 $2"
-      shift 2;
-      ;;
-  esac
-done
+def get_directory_path(target_path):
+    """This function takes the path of a file or directory. If file-path is passed it returns the path to the parent
+    directory. If a directory is passed, it returns the path to the directory itself."""
+    if not os.path.exists(target_path):
+        print(f"ERROR: Path does not exist: {target_path}", file=sys.stderr)
+        sys.exit(1)
+    if os.path.isdir(target_path):
+        return Path(target_path)
+    elif os.path.isfile(target_path):
+        return Path(os.path.dirname(target_path))
 
-if command -v singularity &> /dev/null
-then
-    SINGULARITY_CONTAINER_NAME="${CONTAINER_NAME//\//_}"
-    SINGULARITY_CONTAINER_FILENAME="${CONTAINER_NAME//\//_}_${VERSION}.sif"
-    SINGULARITY_CONTAINER_FILE_PATH="${SINGULARITY_CONTAINER_DIR}/${SINGULARITY_CONTAINER_FILENAME}"
 
-    if [[ ! -d ${SINGULARITY_CONTAINER_DIR} ]]; then
-      mkdir "${SINGULARITY_CONTAINER_DIR}"
-    fi
+def get_mount_paths_from_args(args):
+    mount_paths = []
+    for ind, arg in enumerate(args):
+        if arg in path_args:
+            mount_paths += [get_directory_path(args[ind+1])]
+    return mount_paths
 
-    if [[ ! -f "${SINGULARITY_CONTAINER_FILE_PATH}" ]]; then
-      singularity pull "${SINGULARITY_CONTAINER_FILE_PATH}" "docker://${CONTAINER_TAG}"
-    fi
-    singularity run --bind "${input_path}":"${input_path}" --bind "${gl_detection_template_path}":"${gl_detection_template_path}" --bind "${output_path}":"${output_path}" --bind "${log_path}":"${log_path}" "${SINGULARITY_CONTAINER_FILE_PATH}" "${CMD_ARGUMENTS}"
-elif command -v docker &> /dev/null
-then
-    docker pull "${CONTAINER_TAG}"
-    docker run --rm --mount type=bind,src="${input_path}",target="${input_path}" --mount type=bind,src="${gl_detection_template_path}",target="${gl_detection_template_path}" --mount type=bind,src="${output_path}",target="${output_path}" --mount type=bind,src="${log_path}",target="${log_path}" "${CONTAINER_TAG}" "${CMD_ARGUMENTS}"
-else
-    printf "ERROR: No container engine was found. Check that Singularity or Docker are correctly configured."
-    exit 1
-fi
 
-exit 0
+def is_parent_path(parent_path, child_path):
+    parent = Path(parent_path)
+    child = Path(child_path)
+    return child.is_relative_to(parent) and not child == parent
+
+
+def get_top_level_paths(paths: List[Path]):
+    top_level_paths = set(paths.copy())
+    for path1 in paths:
+        for path2 in paths:
+            if is_parent_path(path1, path2) and path2 in top_level_paths:
+                top_level_paths.remove(path2)
+    return list(top_level_paths)
+
+
+def build_mount_args(mount_paths: List[Path], container_engine: str):
+    mount_args = []
+    for path in mount_paths:
+        mount_args += [get_bind_mount_arg(path, container_engine)]
+    return mount_args
+
+
+def get_path_from_env_var(var_name: str):
+    fail_non_existing_env_var(var_name)
+    return get_directory_path(os.environ.get(var_name))
+
+
+def fail_non_existing_env_var(var_name: str):
+    if not os.environ.get(var_name):
+        print(f"ERROR: Environment variable '{var_name}' not set.", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+
+    if is_tool("singularity"):
+        container_engine = "singularity"
+    elif is_tool("docker"):
+        container_engine = "docker"
+    else:
+        print("ERROR: No supported containerization tool found. Please install Docker or Singularity.\n", file=sys.stderr)
+        sys.exit(1)
+
+    mount_paths = get_mount_paths_from_args(args)
+
+    # Add path from environment variables
+    mount_paths += [get_path_from_env_var("HOME")]
+
+    mount_paths = get_top_level_paths(mount_paths)
+
+    mount_args = build_mount_args(mount_paths, container_engine)
+    mount_args_string = " ".join(mount_args)
+
+    if container_engine == "singularity":
+        fail_non_existing_env_var('SINGULARITY_CONTAINER_FILE_PATH')
+        singularity_container_file_path = os.environ.get("SINGULARITY_CONTAINER_FILE_PATH")
+        subprocess.run(["singularity", "run",
+                        *mount_args_string.split(),
+                        singularity_container_file_path,
+                        *args])
+    elif container_engine == "docker":
+        fail_non_existing_env_var('CONTAINER_TAG')
+        container_tag = os.environ.get("CONTAINER_TAG")
+        print(f"CONTAINER_TAG: {container_tag}")
+        subprocess.run(["docker", "run", "-it", "--rm",
+                        f"--user={os.getuid()}:{os.getgid()}",
+                        "--env=HOME",
+                        *mount_args_string.split(),
+                        container_tag,
+                        *args])
